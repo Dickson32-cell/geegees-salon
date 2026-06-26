@@ -14,24 +14,20 @@ if (!process.env.DATABASE_URL) {
 
 const databaseUrl = process.env.DATABASE_URL;
 
-// Parse connection string to extract components
-const url = new URL(databaseUrl);
-const poolConfig = {
-  host: url.hostname,
-  port: parseInt(url.port || '5432'),
-  user: url.username,
-  password: decodeURIComponent(url.password),
-  database: url.pathname.slice(1),
+// Use connection pooler URL (port 6543 with pgbouncer) to avoid IPv6 issues
+// Supabase's connection pooler only uses IPv4
+const poolerUrl = databaseUrl.replace(':5432/', ':6543/').replace('postgres?', 'postgres?pgbouncer=true&');
+
+// Create connection pool using the pooler
+const pool = globalForPrisma.pool || new Pool({
+  connectionString: poolerUrl,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
   ssl: {
     rejectUnauthorized: false
   }
-};
-
-// Create connection pool
-const pool = globalForPrisma.pool || new Pool(poolConfig);
+});
 if (process.env.NODE_ENV !== 'production') globalForPrisma.pool = pool;
 
 // Create adapter
