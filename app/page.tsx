@@ -133,25 +133,16 @@ export default function Home() {
             </div>
           ) : !error && services.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {services.map((service, idx) => (
-                <div key={service.id} className="relative group overflow-hidden bg-primary-container rounded-lg">
-                  <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 opacity-60" style={{
-                    backgroundImage: `url('https://images.unsplash.com/photo-${
-                      idx === 0 ? '1562322140-8baeececf3df' :
-                      idx === 1 ? '1599351431202-1e0f0137899a' :
-                      idx === 2 ? '1621605815971-fbc98d665033' :
-                      '1570172619644-dfd03ed5d881'
-                    }?q=80&w=2670')`,
-                  }}>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent"></div>
-                  <div className="absolute bottom-0 p-6 w-full">
+              {services.map((service) => (
+                <div key={service.id} className="relative group overflow-hidden bg-gradient-to-br from-primary to-primary-container rounded-lg min-h-[280px] flex items-end">
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/50 to-transparent"></div>
+                  <div className="relative p-6 w-full">
                     <span className="font-label-caps text-label-caps text-secondary-fixed uppercase tracking-widest text-xs block mb-2">
                       {service.category}
                     </span>
                     <h4 className="font-headline-sm text-headline-sm text-white mb-2">{service.name}</h4>
                     {service.description && (
-                      <p className="text-on-primary-container text-sm mb-3">{service.description}</p>
+                      <p className="text-on-primary-container text-sm mb-3 line-clamp-2">{service.description}</p>
                     )}
                     <div className="flex justify-between items-center">
                       <span className="text-secondary-fixed font-bold">{service.price}</span>
@@ -173,67 +164,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Team Showcase Section */}
-      <section className="py-12 md:py-section-gap bg-surface overflow-hidden">
-        <div className="max-w-container-max mx-auto px-4 md:px-margin-desktop">
-          <div className="flex justify-between items-end mb-8 md:mb-16">
-            <div>
-              <div className="w-10 h-[1px] bg-secondary mb-4"></div>
-              <h3 className="font-display-lg text-display-lg">The Visionaries</h3>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {/* Team Member 1 */}
-            <div className="group">
-              <div className="overflow-hidden mb-6 aspect-[3/4] relative">
-                <div className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style={{
-                  backgroundImage: "url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=2574')",
-                }}>
-                </div>
-              </div>
-              <h4 className="font-headline-sm text-headline-sm mb-1">Julian Marc</h4>
-              <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Master Stylist</span>
-            </div>
-
-            {/* Team Member 2 */}
-            <div className="group">
-              <div className="overflow-hidden mb-6 aspect-[3/4] relative">
-                <div className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style={{
-                  backgroundImage: "url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=2574')",
-                }}>
-                </div>
-              </div>
-              <h4 className="font-headline-sm text-headline-sm mb-1">Elena Rossi</h4>
-              <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Artistic Director</span>
-            </div>
-
-            {/* Team Member 3 */}
-            <div className="group">
-              <div className="overflow-hidden mb-6 aspect-[3/4] relative">
-                <div className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style={{
-                  backgroundImage: "url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=2574')",
-                }}>
-                </div>
-              </div>
-              <h4 className="font-headline-sm text-headline-sm mb-1">Marcus Thorne</h4>
-              <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Lead Barber</span>
-            </div>
-
-            {/* Team Member 4 */}
-            <div className="group">
-              <div className="overflow-hidden mb-6 aspect-[3/4] relative">
-                <div className="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style={{
-                  backgroundImage: "url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=2564')",
-                }}>
-                </div>
-              </div>
-              <h4 className="font-headline-sm text-headline-sm mb-1">Sophia Chen</h4>
-              <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Dermal Expert</span>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Team Showcase Section - Will be managed through admin */}
+      {/* Team members will be added through the admin panel */}
 
       {/* Booking CTA Section */}
       <section className="relative py-12 md:py-section-gap">

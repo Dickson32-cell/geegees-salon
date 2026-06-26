@@ -7,11 +7,20 @@ const globalForPrisma = global as unknown as {
   pool: Pool | undefined;
 };
 
-// Use a placeholder URL during build if DATABASE_URL is not set
-const databaseUrl = process.env.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/placeholder';
+// Require DATABASE_URL to be set
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL environment variable is not set');
+}
+
+const databaseUrl = process.env.DATABASE_URL;
 
 // Create connection pool
-const pool = globalForPrisma.pool || new Pool({ connectionString: databaseUrl });
+const pool = globalForPrisma.pool || new Pool({
+  connectionString: databaseUrl,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
 if (process.env.NODE_ENV !== 'production') globalForPrisma.pool = pool;
 
 // Create adapter
@@ -22,7 +31,7 @@ export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === 'development' ? ['query'] : [],
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
