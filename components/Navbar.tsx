@@ -16,19 +16,26 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className={`fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-md border-b border-secondary/20 transition-shadow duration-300 ${isScrolled ? 'shadow-lg' : ''}`}>
-      <div className="flex justify-between items-center px-margin-mobile md:px-margin-desktop h-20 max-w-container-max mx-auto">
-        <div className="flex items-center gap-4">
+    <header className={`fixed top-0 w-full z-50 bg-surface/95 backdrop-blur-md border-b border-secondary/20 transition-shadow duration-300 ${isScrolled ? 'shadow-lg' : ''}`}>
+      <div className="flex justify-between items-center px-4 md:px-margin-desktop h-16 md:h-20 max-w-container-max mx-auto">
+        <div className="flex items-center gap-3">
           <button
-            className="md:hidden text-secondary cursor-pointer"
+            className="md:hidden text-secondary cursor-pointer z-50 p-2 hover:bg-secondary/10 rounded-lg transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Toggle menu"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            {isMobileMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
           </button>
           <Link href="/">
-            <h1 className="font-display-lg text-headline-sm uppercase tracking-widest text-primary">
+            <h1 className="font-display-lg text-lg md:text-2xl uppercase tracking-widest text-primary">
               GeeGees
             </h1>
           </Link>
@@ -61,23 +68,26 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        <Link href="/booking">
-          <button className="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-caps text-label-caps uppercase tracking-widest hover:bg-secondary transition-all active:scale-95 duration-200">
+        <Link href="/booking" className="shrink-0">
+          <button className="bg-primary text-on-primary px-4 md:px-6 py-2 rounded-lg font-label-caps text-xs md:text-sm uppercase tracking-widest hover:bg-secondary transition-all active:scale-95 duration-200">
             Book Now
           </button>
         </Link>
       </div>
 
       {/* Mobile Menu Drawer */}
-      {isMobileMenuOpen && (
+      <div
+        className={`fixed inset-0 bg-black/60 z-[100] md:hidden transition-opacity duration-300 ${
+          isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setIsMobileMenuOpen(false)}
+      >
         <div
-          className="fixed inset-0 bg-black/60 z-[60] md:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
+          className={`absolute left-0 top-0 h-full w-4/5 max-w-sm bg-surface shadow-2xl p-6 overflow-y-auto transition-transform duration-300 ${
+            isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+          onClick={(e) => e.stopPropagation()}
         >
-          <div
-            className="absolute left-0 top-0 h-full w-80 bg-surface shadow-2xl p-8 overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
             <div className="flex justify-between items-center mb-8">
               <h1 className="font-display-lg text-headline-sm uppercase tracking-widest text-primary">
                 GeeGees
@@ -131,7 +141,7 @@ export default function Navbar() {
             </nav>
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

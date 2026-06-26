@@ -21,6 +21,11 @@ export const metadata: Metadata = {
   title: "GeeGees Luxury Salon - Opulence & Grace",
   description: "Experience luxury hair and beauty services with our expert stylists. Premium unisex salon offering editorial styling, color, grooming and more.",
   keywords: "luxury salon, hair salon, beauty salon, unisex salon, editorial styling, balayage, spa, grooming",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  },
 };
 
 export default function RootLayout({
