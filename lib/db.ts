@@ -12,8 +12,9 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
 
-// Use Supabase connection pooler (port 6543) - it only supports IPv4
-const databaseUrl = process.env.DATABASE_URL.replace(':5432/', ':6543/');
+// Use direct connection (port 5432) - Render is NOT serverless, so direct connection is better
+// The pooler (6543) is only for serverless/edge functions
+const databaseUrl = process.env.DATABASE_URL;
 
 // Create connection pool with IPv4 forced
 const pool = globalForPrisma.pool || new Pool({
