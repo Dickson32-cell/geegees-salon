@@ -10,18 +10,14 @@ if (!process.env.DATABASE_URL) {
 }
 
 // Use Supabase connection pooler (port 6543) for better compatibility with serverless
-const databaseUrl = process.env.DATABASE_URL.replace(':5432/', ':6543/');
+// Replace the port in the DATABASE_URL before Prisma uses it
+process.env.DATABASE_URL = process.env.DATABASE_URL.replace(':5432/', ':6543/');
 
 // Create Prisma Client with native connection (no adapter)
 // This avoids IPv6 issues that occur with the pg adapter
 export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
-    datasources: {
-      db: {
-        url: databaseUrl,
-      },
-    },
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 
