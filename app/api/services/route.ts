@@ -3,13 +3,22 @@ import { prisma } from '@/lib/db';
 
 export async function GET() {
   try {
+    console.log('[API] Fetching services...');
+    console.log('[API] DATABASE_URL set:', !!process.env.DATABASE_URL);
+
     const services = await prisma.service.findMany({
       orderBy: { id: 'asc' }
     });
+
+    console.log('[API] Found services:', services.length);
     return NextResponse.json(services);
   } catch (error) {
-    console.error('Database error:', error);
-    return NextResponse.json({ error: 'Failed to fetch services' }, { status: 500 });
+    console.error('[API] Database error:', error);
+    console.error('[API] Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
+    return NextResponse.json({
+      error: 'Failed to fetch services',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
