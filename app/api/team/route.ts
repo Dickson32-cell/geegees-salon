@@ -1,16 +1,28 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function GET() {
   try {
-    const team = await prisma.teamMember.findMany({
-      orderBy: [
-        { displayOrder: 'asc' },
-        { name: 'asc' }
-      ]
-    });
+    const { data: team, error } = await supabase
+      .from('team_members')
+      .select('*')
+      .order('display_order', { ascending: true })
+      .order('name', { ascending: true });
 
-    return NextResponse.json(team);
+    if (error) {
+      console.error('[API] Team error:', error);
+      return NextResponse.json({
+        error: 'Failed to fetch team members',
+        details: error.message
+      }, { status: 500 });
+    }
+
+    return NextResponse.json(team || []);
   } catch (error) {
     console.error('[API] Team error:', error);
     return NextResponse.json({
@@ -23,17 +35,26 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const newMember = await prisma.teamMember.create({
-      data: {
+
+    const { data: newMember, error } = await supabase
+      .from('team_members')
+      .insert([{
         name: body.name,
         title: body.title,
         bio: body.bio,
-        imageUrl: body.imageUrl,
+        image_url: body.imageUrl,
         specialties: body.specialties || [],
         active: body.active !== undefined ? body.active : true,
-        displayOrder: body.displayOrder,
-      }
-    });
+        display_order: body.displayOrder,
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Database error:', error);
+      return NextResponse.json({ error: 'Failed to create team member' }, { status: 500 });
+    }
+
     return NextResponse.json(newMember, { status: 201 });
   } catch (error) {
     console.error('Database error:', error);
@@ -46,10 +67,28 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, ...updates } = body;
 
-    const updatedMember = await prisma.teamMember.update({
-      where: { id: parseInt(id) },
-      data: updates
-    });
+    // Convert camelCase to snake_case for Supabase
+    const dbUpdates: any = {};
+    if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
+    if (updates.displayOrder !== undefined) dbUpdates.display_order = updates.displayOrder;
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.title !== undefined) dbUpdates.title = updates.title;
+    if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
+    if (updates.specialties !== undefined) dbUpdates.specialties = updates.specialties;
+    if (updates.active !== undefined) dbUpdates.active = updates.active;
+
+    const { data: updatedMember, error } = await supabase
+      .from('team_members')
+      .update(dbUpdates)
+      .eq('id', parseInt(id))
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Database error:', error);
+      return NextResponse.json({ error: 'Failed to update team member' }, { status: 500 });
+    }
+
     return NextResponse.json(updatedMember);
   } catch (error) {
     console.error('Database error:', error);
@@ -62,9 +101,16 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = parseInt(searchParams.get('id') || '0');
 
-    await prisma.teamMember.delete({
-      where: { id: id }
-    });
+    const { error } = await supabase
+      .from('team_members')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Database error:', error);
+      return NextResponse.json({ error: 'Failed to delete team member' }, { status: 500 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Database error:', error);

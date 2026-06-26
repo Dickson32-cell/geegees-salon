@@ -1,16 +1,28 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/db';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function GET() {
   try {
-    const images = await prisma.galleryImage.findMany({
-      orderBy: [
-        { displayOrder: 'asc' },
-        { createdAt: 'desc' }
-      ]
-    });
+    const { data: images, error } = await supabase
+      .from('gallery_images')
+      .select('*')
+      .order('display_order', { ascending: true })
+      .order('created_at', { ascending: false });
 
-    return NextResponse.json(images);
+    if (error) {
+      console.error('[API] Gallery error:', error);
+      return NextResponse.json({
+        error: 'Failed to fetch gallery images',
+        details: error.message
+      }, { status: 500 });
+    }
+
+    return NextResponse.json(images || []);
   } catch (error) {
     console.error('[API] Gallery error:', error);
     return NextResponse.json({
@@ -23,15 +35,24 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const newImage = await prisma.galleryImage.create({
-      data: {
+
+    const { data: newImage, error } = await supabase
+      .from('gallery_images')
+      .insert([{
         title: body.title,
-        imageUrl: body.imageUrl,
+        image_url: body.imageUrl,
         category: body.category,
         description: body.description,
-        displayOrder: body.displayOrder,
-      }
-    });
+        display_order: body.displayOrder,
+      }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Database error:', error);
+      return NextResponse.json({ error: 'Failed to create gallery image' }, { status: 500 });
+    }
+
     return NextResponse.json(newImage, { status: 201 });
   } catch (error) {
     console.error('Database error:', error);
@@ -44,10 +65,26 @@ export async function PUT(request: Request) {
     const body = await request.json();
     const { id, ...updates } = body;
 
-    const updatedImage = await prisma.galleryImage.update({
-      where: { id: parseInt(id) },
-      data: updates
-    });
+    // Convert camelCase to snake_case for Supabase
+    const dbUpdates: any = {};
+    if (updates.title !== undefined) dbUpdates.title = updates.title;
+    if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
+    if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.description !== undefined) dbUpdates.description = updates.description;
+    if (updates.displayOrder !== undefined) dbUpdates.display_order = updates.displayOrder;
+
+    const { data: updatedImage, error } = await supabase
+      .from('gallery_images')
+      .update(dbUpdates)
+      .eq('id', parseInt(id))
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Database error:', error);
+      return NextResponse.json({ error: 'Failed to update gallery image' }, { status: 500 });
+    }
+
     return NextResponse.json(updatedImage);
   } catch (error) {
     console.error('Database error:', error);
@@ -60,9 +97,16 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = parseInt(searchParams.get('id') || '0');
 
-    await prisma.galleryImage.delete({
-      where: { id: id }
-    });
+    const { error } = await supabase
+      .from('gallery_images')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Database error:', error);
+      return NextResponse.json({ error: 'Failed to delete gallery image' }, { status: 500 });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Database error:', error);
