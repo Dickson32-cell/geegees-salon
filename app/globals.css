@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary hover:bg-secondary text-on-primary font-semibold py-3 px-8 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-surface-container text-primary font-semibold py-3 px-8 rounded-lg transition-all duration-300 border-2 border-secondary shadow-lg hover:shadow-xl transform hover:-translate-y-0.5;
+  }
+
+  .section-title {
+    @apply text-4xl md:text-5xl font-bold text-primary text-center mb-4;
+  }
+
+  .section-subtitle {
+    @apply text-lg text-on-surface-variant text-center max-w-2xl mx-auto mb-12;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 1s ease-in;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 1s ease-in;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-secondary to-secondary-container;
+  }
+
+  /* Smooth scroll padding for fixed navbar */
+  section[id] {
+    scroll-margin-top: 100px;
+  }
+}

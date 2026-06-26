@@ -1,0 +1,96 @@
+// This is your Prisma schema file
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Services Model
+model Service {
+  id          Int      @id @default(autoincrement())
+  name        String
+  category    String
+  price       String
+  duration    String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("services")
+}
+
+// Website Content Model
+model WebsiteContent {
+  id        Int      @id @default(autoincrement())
+  page      String   @unique
+  section   String
+  content   Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("website_content")
+}
+
+// Appointments Model
+model Appointment {
+  id              Int      @id @default(autoincrement())
+  service         String
+  stylist         String
+  appointmentDate DateTime @map("appointment_date")
+  appointmentTime String   @map("appointment_time")
+  customerName    String   @map("customer_name")
+  customerEmail   String   @map("customer_email")
+  customerPhone   String   @map("customer_phone")
+  notes           String?
+  status          String   @default("pending")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@map("appointments")
+}
+
+// Team Members Model (Optional - for future use)
+model TeamMember {
+  id          Int      @id @default(autoincrement())
+  name        String
+  title       String
+  bio         String?
+  imageUrl    String?  @map("image_url")
+  specialties String[]
+  active      Boolean  @default(true)
+  displayOrder Int?    @map("display_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("team_members")
+}
+
+// Gallery Images Model (Optional - for future use)
+model GalleryImage {
+  id          Int      @id @default(autoincrement())
+  title       String?
+  imageUrl    String   @map("image_url")
+  category    String?
+  description String?
+  displayOrder Int?    @map("display_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("gallery_images")
+}
+
+// Admin Users Model (Optional - for secure admin authentication)
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String   // Should be hashed
+  email     String   @unique
+  role      String   @default("admin")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
