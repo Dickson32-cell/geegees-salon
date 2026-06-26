@@ -14,13 +14,24 @@ if (!process.env.DATABASE_URL) {
 
 const databaseUrl = process.env.DATABASE_URL;
 
-// Create connection pool
-const pool = globalForPrisma.pool || new Pool({
-  connectionString: databaseUrl,
+// Parse connection string to extract components
+const url = new URL(databaseUrl);
+const poolConfig = {
+  host: url.hostname,
+  port: parseInt(url.port || '5432'),
+  user: url.username,
+  password: decodeURIComponent(url.password),
+  database: url.pathname.slice(1),
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
-});
+  ssl: {
+    rejectUnauthorized: false
+  }
+};
+
+// Create connection pool
+const pool = globalForPrisma.pool || new Pool(poolConfig);
 if (process.env.NODE_ENV !== 'production') globalForPrisma.pool = pool;
 
 // Create adapter
