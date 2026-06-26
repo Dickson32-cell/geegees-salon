@@ -16,11 +16,12 @@ export default function Navbar() {
   }, []);
 
   return (
+    <>
     <header className={`fixed top-0 w-full z-50 bg-surface/95 backdrop-blur-md border-b border-secondary/20 transition-shadow duration-300 ${isScrolled ? 'shadow-lg' : ''}`}>
       <div className="flex justify-between items-center px-4 md:px-margin-desktop h-16 md:h-20 max-w-container-max mx-auto">
         <div className="flex items-center gap-3">
           <button
-            className="md:hidden text-secondary cursor-pointer z-50 p-2 hover:bg-secondary/10 rounded-lg transition-colors"
+            className="md:hidden text-secondary cursor-pointer relative z-[60] p-2 hover:bg-secondary/10 rounded-lg transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle menu"
           >
@@ -75,9 +76,11 @@ export default function Navbar() {
         </Link>
       </div>
 
+    </header>
+
       {/* Mobile Menu Drawer */}
       <div
-        className={`fixed inset-0 bg-black/60 z-[100] md:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/60 z-[55] md:hidden transition-opacity duration-300 ${
           isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
@@ -141,6 +144,6 @@ export default function Navbar() {
             </nav>
           </div>
         </div>
-    </header>
+    </>
   );
 }

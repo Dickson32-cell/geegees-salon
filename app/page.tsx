@@ -39,7 +39,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <div className="w-full h-full bg-cover bg-center scale-105" style={{
             backgroundImage: "url('https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=2574')",
@@ -48,15 +48,15 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/80 to-primary/90"></div>
         </div>
 
-        <div className="relative z-10 text-center px-margin-mobile max-w-4xl">
-          <span className="font-label-caps text-label-caps text-secondary-fixed-dim uppercase tracking-[0.3em] mb-4 block animate-fade-in-up">
+        <div className="relative z-10 text-center px-4 md:px-margin-mobile max-w-4xl">
+          <span className="font-label-caps text-xs md:text-label-caps text-secondary-fixed-dim uppercase tracking-[0.2em] md:tracking-[0.3em] mb-3 md:mb-4 block animate-fade-in-up">
             The Editorial Experience
           </span>
-          <h2 className="font-display-lg text-display-lg text-white mb-8 leading-tight">
+          <h2 className="font-display-lg text-3xl md:text-5xl lg:text-display-lg text-white mb-6 md:mb-8 leading-tight">
             Mastering the Art of <br/>
             <span className="italic font-normal">Opulence & Grace</span>
           </h2>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
             <Link href="/services">
               <button className="w-full md:w-auto bg-primary border border-secondary text-white px-10 py-4 font-label-caps text-label-caps uppercase tracking-widest hover:bg-secondary transition-colors">
                 Explore Services
@@ -70,8 +70,8 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section className="py-section-gap px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
-        <div className="grid md:grid-cols-2 gap-16 items-center">
+      <section className="py-12 md:py-section-gap px-4 md:px-margin-desktop max-w-container-max mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
           <div className="relative group">
             <div className="absolute -inset-4 border border-secondary/20 translate-x-4 translate-y-4 group-hover:translate-x-2 group-hover:translate-y-2 transition-transform duration-500"></div>
             <div className="aspect-[4/5] bg-cover bg-center relative z-10" style={{
@@ -106,9 +106,9 @@ export default function Home() {
       </section>
 
       {/* Services Teaser Section - DYNAMIC FROM ADMIN */}
-      <section className="bg-primary py-section-gap px-margin-mobile md:px-margin-desktop">
+      <section className="bg-primary py-12 md:py-section-gap px-4 md:px-margin-desktop">
         <div className="max-w-container-max mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-8 md:mb-16">
             <span className="font-label-caps text-label-caps text-secondary-fixed-dim uppercase tracking-widest">Exquisite Selection</span>
             <h3 className="font-display-lg text-display-lg text-white mt-4">Curated Services</h3>
           </div>
@@ -126,13 +126,13 @@ export default function Home() {
           )}
 
           {!error && services.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {Array.from({ length: 4 }).map((_, idx) => (
                 <HomeServiceCardSkeleton key={idx} />
               ))}
             </div>
           ) : !error && services.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {services.map((service, idx) => (
                 <div key={service.id} className="relative group overflow-hidden bg-primary-container rounded-lg">
                   <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700 opacity-60" style={{
@@ -174,16 +174,16 @@ export default function Home() {
       </section>
 
       {/* Team Showcase Section */}
-      <section className="py-section-gap bg-surface overflow-hidden">
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
-          <div className="flex justify-between items-end mb-16">
+      <section className="py-12 md:py-section-gap bg-surface overflow-hidden">
+        <div className="max-w-container-max mx-auto px-4 md:px-margin-desktop">
+          <div className="flex justify-between items-end mb-8 md:mb-16">
             <div>
               <div className="w-10 h-[1px] bg-secondary mb-4"></div>
               <h3 className="font-display-lg text-display-lg">The Visionaries</h3>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {/* Team Member 1 */}
             <div className="group">
               <div className="overflow-hidden mb-6 aspect-[3/4] relative">
@@ -236,11 +236,11 @@ export default function Home() {
       </section>
 
       {/* Booking CTA Section */}
-      <section className="relative py-section-gap">
+      <section className="relative py-12 md:py-section-gap">
         <div className="absolute inset-0 bg-primary-container -z-10"></div>
-        <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop text-center">
-          <h2 className="font-display-lg text-display-lg text-white mb-4">Secure Your Moment</h2>
-          <p className="font-body-lg text-on-primary-container max-w-lg mx-auto mb-8">
+        <div className="max-w-container-max mx-auto px-4 md:px-margin-desktop text-center">
+          <h2 className="font-display-lg text-3xl md:text-display-lg text-white mb-4">Secure Your Moment</h2>
+          <p className="font-body-lg text-sm md:text-base text-on-primary-container max-w-lg mx-auto mb-6 md:mb-8">
             Experience the pinnacle of editorial grooming. Our schedule fills quickly—reserve your appointment today.
           </p>
           <Link href="/booking">

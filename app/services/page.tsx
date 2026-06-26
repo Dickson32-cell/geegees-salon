@@ -49,10 +49,10 @@ export default function ServicesPage() {
   });
 
   return (
-    <main className="pt-24 pb-section-gap">
+    <main className="pt-16 md:pt-24 pb-section-gap">
       {/* Hero Section */}
-      <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mb-stack-lg">
-        <div className="relative overflow-hidden h-[400px] flex items-center justify-center text-center rounded-lg">
+      <section className="max-w-container-max mx-auto px-4 md:px-margin-desktop mb-8 md:mb-stack-lg">
+        <div className="relative overflow-hidden h-[300px] md:h-[400px] flex items-center justify-center text-center rounded-lg">
           <div className="absolute inset-0 bg-primary/40 z-10"></div>
           <div
             className="absolute inset-0 w-full h-full bg-cover bg-center"
@@ -60,13 +60,13 @@ export default function ServicesPage() {
               backgroundImage: "url('https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=2669')",
             }}
           />
-          <div className="relative z-20 max-w-3xl">
-            <span className="font-label-caps text-label-caps text-secondary-fixed uppercase tracking-[0.2em] mb-4 block">
+          <div className="relative z-20 max-w-3xl px-4">
+            <span className="font-label-caps text-xs md:text-label-caps text-secondary-fixed uppercase tracking-[0.2em] mb-3 md:mb-4 block">
               The Art of Refinement
             </span>
-            <h2 className="font-display-lg text-display-lg text-white mb-6">Menu of Excellence</h2>
-            <div className="w-10 h-px bg-secondary-fixed mx-auto mb-6"></div>
-            <p className="font-body-lg text-body-lg text-white/90 leading-relaxed px-6">
+            <h2 className="font-display-lg text-3xl md:text-display-lg text-white mb-4 md:mb-6">Menu of Excellence</h2>
+            <div className="w-10 h-px bg-secondary-fixed mx-auto mb-4 md:mb-6"></div>
+            <p className="font-body-lg text-sm md:text-body-lg text-white/90 leading-relaxed px-4 md:px-6">
               Explore our curated selection of bespoke grooming and beauty experiences, where precision meets artistry in every detail.
             </p>
           </div>
@@ -74,7 +74,7 @@ export default function ServicesPage() {
       </section>
 
       {/* Services Catalog Section - DYNAMIC FROM ADMIN */}
-      <section className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop mt-section-gap">
+      <section className="max-w-container-max mx-auto px-4 md:px-margin-desktop mt-8 md:mt-section-gap">
         {error && (
           <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-lg flex items-start gap-4">
             <svg className="w-6 h-6 text-red-600 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
@@ -106,19 +106,19 @@ export default function ServicesPage() {
             <p className="text-on-surface-variant text-lg">No services available yet. Please check back later!</p>
           </div>
         ) : !error ? (
-          <div className="space-y-section-gap">
+          <div className="space-y-12 md:space-y-section-gap">
             {Object.entries(groupedServices).map(([category, categoryServices]) => (
               <div key={category} className="scroll-mt-24" id={category.toLowerCase()}>
-                <div className="text-center mb-12">
-                  <h3 className="font-headline-md text-headline-md text-primary">{category}</h3>
+                <div className="text-center mb-8 md:mb-12">
+                  <h3 className="font-headline-md text-2xl md:text-headline-md text-primary">{category}</h3>
                   <div className="w-10 h-[1px] bg-secondary mx-auto mt-2"></div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-gutter">
                   {categoryServices.map((service) => (
-                    <div key={service.id} className="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow border-t-2 border-secondary">
+                    <div key={service.id} className="bg-white p-6 md:p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow border-t-2 border-secondary">
                       <div className="mb-4">
-                        <h4 className="font-headline-sm text-headline-sm text-primary mb-2">{service.name}</h4>
+                        <h4 className="font-headline-sm text-xl md:text-headline-sm text-primary mb-2">{service.name}</h4>
                         <span className="inline-block px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
                           {service.category}
                         </span>
@@ -153,12 +153,12 @@ export default function ServicesPage() {
         ) : null}
 
         {/* Call to Action */}
-        <div className="mt-section-gap text-center bg-secondary-container/10 py-16 rounded-lg">
-          <h3 className="font-display-lg text-headline-md text-primary mb-6">Ready for your transformation?</h3>
-          <p className="max-w-xl mx-auto font-body-lg text-on-surface-variant mb-10">
+        <div className="mt-12 md:mt-section-gap text-center bg-secondary-container/10 py-12 md:py-16 rounded-lg px-4">
+          <h3 className="font-display-lg text-2xl md:text-headline-md text-primary mb-4 md:mb-6">Ready for your transformation?</h3>
+          <p className="max-w-xl mx-auto font-body-lg text-sm md:text-base text-on-surface-variant mb-8 md:mb-10">
             Appointments are limited. Secure your editorial experience with GeeGees today and indulge in the luxury you deserve.
           </p>
-          <div className="flex flex-col md:flex-row justify-center gap-stack-md">
+          <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-stack-md">
             <Link href="/booking">
               <button className="bg-primary text-white px-10 py-4 rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-all active:scale-95 shadow-lg">
                 Schedule Appointment
