@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import { URL } from 'url';
 
 const globalForPrisma = global as unknown as {
   prisma: PrismaClient | undefined;
@@ -12,17 +13,22 @@ if (!process.env.DATABASE_URL) {
   throw new Error('DATABASE_URL environment variable is not set');
 }
 
-// Use direct connection (port 5432) - Render is NOT serverless, so direct connection is better
-// The pooler (6543) is only for serverless/edge functions
-const databaseUrl = process.env.DATABASE_URL;
+// Parse DATABASE_URL to extract components
+const dbUrl = new URL(process.env.DATABASE_URL);
 
-// Create connection pool with IPv4 forced
+// Create connection pool with explicit host/port to force IPv4
+// Using separate host/port/database options instead of connectionString
+// This gives us better control over IPv4 forcing
 const pool = globalForPrisma.pool || new Pool({
-  connectionString: databaseUrl,
+  host: dbUrl.hostname,
+  port: parseInt(dbUrl.port || '5432'),
+  database: dbUrl.pathname.slice(1), // Remove leading /
+  user: dbUrl.username,
+  password: dbUrl.password,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
-  // Force IPv4 - this is the key to fixing the ENETUNREACH error on Render
+  // Force IPv4 - CRITICAL for Render which doesn't support IPv6
   family: 4,
   ssl: {
     rejectUnauthorized: false
