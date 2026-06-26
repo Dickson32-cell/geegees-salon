@@ -141,7 +141,6 @@ export default function Navbar() {
             </nav>
           </div>
         </div>
-      </div>
     </header>
   );
 }
