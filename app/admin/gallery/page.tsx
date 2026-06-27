@@ -29,6 +29,12 @@ export default function AdminGallery() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
 
+  // Helper function to check if URL is a video
+  const isVideo = (url: string): boolean => {
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogg', '.m4v'];
+    return videoExtensions.some(ext => url.toLowerCase().includes(ext));
+  };
+
   useEffect(() => {
     fetchImages();
   }, []);
@@ -77,7 +83,7 @@ export default function AdminGallery() {
 
   const handleAdd = async () => {
     if (!selectedFile) {
-      setError("Please select an image to upload");
+      setError("Please select an image or video to upload");
       return;
     }
 
@@ -106,7 +112,7 @@ export default function AdminGallery() {
 
       const newImage = await response.json();
       setImages([...images, newImage]);
-      setSuccessMessage("Image uploaded successfully!");
+      setSuccessMessage("Media uploaded successfully!");
       resetForm();
     } catch (error: any) {
       console.error('Error adding image:', error);
@@ -148,7 +154,7 @@ export default function AdminGallery() {
 
       const updatedImage = await response.json();
       setImages(images.map(img => img.id === updatedImage.id ? updatedImage : img));
-      setSuccessMessage("Image updated successfully!");
+      setSuccessMessage("Media updated successfully!");
       resetForm();
     } catch (error: any) {
       console.error('Error updating image:', error);
@@ -159,7 +165,7 @@ export default function AdminGallery() {
   };
 
   const handleDelete = async (id: number, imageUrl: string) => {
-    if (!confirm('Are you sure you want to delete this image?')) return;
+    if (!confirm('Are you sure you want to delete this media?')) return;
 
     try {
       setError("");
@@ -167,7 +173,7 @@ export default function AdminGallery() {
       if (!response.ok) throw new Error('Failed to delete image');
 
       setImages(images.filter(img => img.id !== id));
-      setSuccessMessage("Image deleted successfully!");
+      setSuccessMessage("Media deleted successfully!");
     } catch (error: any) {
       console.error('Error deleting image:', error);
       setError('Failed to delete image');
@@ -256,21 +262,30 @@ export default function AdminGallery() {
       {/* Upload Form */}
       {isAdding && (
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <h3 className="text-xl font-bold mb-4">{editingImage ? 'Edit Image' : 'Upload New Image'}</h3>
+          <h3 className="text-xl font-bold mb-4">{editingImage ? 'Edit Media' : 'Upload New Media (Image/Video)'}</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* File Upload */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Image File</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Image or Video File</label>
               <input
                 type="file"
                 accept="image/*,video/*"
                 onChange={handleFileSelect}
                 className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
-              {previewUrl && (
+              <p className="text-xs text-slate-500 mt-1">
+                Supported: Images (JPG, PNG, WEBP) and Videos (MP4, WEBM, MOV)
+              </p>
+              {previewUrl && selectedFile && (
                 <div className="mt-4">
-                  <img src={previewUrl} alt="Preview" className="max-h-64 rounded-lg border" />
+                  {selectedFile.type.startsWith('video/') ? (
+                    <video src={previewUrl} controls className="max-h-64 rounded-lg border">
+                      Your browser does not support video preview.
+                    </video>
+                  ) : (
+                    <img src={previewUrl} alt="Preview" className="max-h-64 rounded-lg border" />
+                  )}
                 </div>
               )}
             </div>
@@ -292,7 +307,8 @@ export default function AdminGallery() {
                 <option value="grooming">Gallery - Grooming</option>
               </select>
               <p className="text-xs text-slate-500 mt-1">
-                Hero images will appear as slideshow backgrounds. Gallery images appear in the gallery page.
+                <strong>Hero media:</strong> Auto-play slideshows as page backgrounds (images fade, videos loop continuously).
+                <strong>Gallery:</strong> Appear in the gallery page.
               </p>
             </div>
 
@@ -327,7 +343,7 @@ export default function AdminGallery() {
               disabled={uploading}
               className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm disabled:opacity-50"
             >
-              {uploading ? 'Uploading...' : editingImage ? 'Update Image' : 'Upload Image'}
+              {uploading ? 'Uploading...' : editingImage ? 'Update Media' : 'Upload Media'}
             </button>
             <button
               onClick={resetForm}
@@ -358,35 +374,56 @@ export default function AdminGallery() {
                 <span className="text-sm font-normal text-slate-500">({categoryImages.length})</span>
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {categoryImages.map((image) => (
-                  <div key={image.id} className="group relative bg-slate-50 rounded-lg overflow-hidden border border-slate-200">
-                    <div className="aspect-video relative">
-                      <img
-                        src={image.image_url}
-                        alt={image.title || 'Gallery image'}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-3">
-                      {image.title && <p className="font-semibold text-sm text-slate-900 truncate">{image.title}</p>}
-                      {image.description && <p className="text-xs text-slate-600 truncate mt-1">{image.description}</p>}
-                      <div className="flex gap-2 mt-3">
-                        <button
-                          onClick={() => startEdit(image)}
-                          className="flex-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(image.id, image.image_url)}
-                          className="flex-1 px-3 py-1.5 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
-                        >
-                          Delete
-                        </button>
+                {categoryImages.map((image) => {
+                  const isVideoFile = isVideo(image.image_url);
+                  return (
+                    <div key={image.id} className="group relative bg-slate-50 rounded-lg overflow-hidden border border-slate-200">
+                      <div className="aspect-video relative">
+                        {isVideoFile ? (
+                          <>
+                            <video
+                              src={image.image_url}
+                              className="w-full h-full object-cover"
+                              muted
+                              loop
+                              playsInline
+                            />
+                            <div className="absolute top-2 right-2 bg-purple-600 text-white px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                              </svg>
+                              VIDEO
+                            </div>
+                          </>
+                        ) : (
+                          <img
+                            src={image.image_url}
+                            alt={image.title || 'Gallery image'}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div className="p-3">
+                        {image.title && <p className="font-semibold text-sm text-slate-900 truncate">{image.title}</p>}
+                        {image.description && <p className="text-xs text-slate-600 truncate mt-1">{image.description}</p>}
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={() => startEdit(image)}
+                            className="flex-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(image.id, image.image_url)}
+                            className="flex-1 px-3 py-1.5 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
