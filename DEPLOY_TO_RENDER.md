@@ -63,9 +63,10 @@ You should see: `total_services: 10` ✅
 ### Variable 1: DATABASE_URL
 ```
 Key: DATABASE_URL
-Value: postgresql://geegees_salon_user:BrZaI0QX8Dml94XNt0gGchxVRakAxt2v@dpg-d8vfhjtaeets73d0630g-a.oregon-postgres.render.com:5432/geegees_salon
+Value: postgresql://geegees_salon_user:BrZaI0QX8Dml94XNt0gGchxVRakAxt2v@dpg-d8vfhjtaeets73d0630g-a/geegees_salon
 ```
-*(Get from: Database → Connections → External Database URL)*
+**IMPORTANT:** Use the **INTERNAL Database URL** (not External!)
+*(Get from: Database → Connections → Internal Database URL)*
 
 ### Variable 2: NEXT_PUBLIC_SUPABASE_URL
 ```
@@ -133,13 +134,14 @@ Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impx
 
 ### Build failing?
 1. Check all 3 environment variables are set
-2. Make sure DATABASE_URL ends with `.oregon-postgres.render.com`
+2. Make sure you're using the **Internal** Database URL (simpler format without region)
 3. Check for any missing dependencies
 
 ### Database connection errors?
-1. Use the **External Database URL** (not Internal) for Render web service
-2. Make sure database and web service are both running
-3. Verify the database is in "Available" status
+1. Use the **Internal Database URL** (not External) for Render web service
+2. Internal URL format: `postgresql://user:pass@dpg-xxxxx/database` (no region, no port)
+3. Make sure database and web service are both running
+4. Verify the database is in "Available" status
 
 ---
 

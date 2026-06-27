@@ -1,70 +1,65 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { createClient } from '@supabase/supabase-js';
 
-// Create Prisma client singleton
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: ['error', 'warn'],
-});
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export async function GET() {
   try {
-    console.log('[API] Fetching services via Prisma/Render PostgreSQL...');
-    console.log('[API] Environment check:', {
-      hasDbUrl: !!process.env.DATABASE_URL,
-      nodeEnv: process.env.NODE_ENV
-    });
+    console.log('[API] Fetching services via Supabase client...');
+    
+    const { data: services, error } = await supabase
+      .from('services')
+      .select('*')
+      .order('id', { ascending: true });
 
-    const services = await prisma.service.findMany({
-      orderBy: {
-        id: 'asc'
-      }
-    });
-
-    console.log('[API] Successfully fetched services:', services.length);
-    return NextResponse.json(services);
-  } catch (error: any) {
-    console.error('[API] Database error:', error);
-    return NextResponse.json(
-      {
+    if (error) {
+      console.error('[API] Services fetch error:', error);
+      return NextResponse.json({
         error: 'Failed to fetch services',
-        details: error.message,
-        hint: 'Make sure DATABASE_URL is set and database migrations have been run'
-      },
-      { status: 500 }
-    );
+        details: error.message
+      }, { status: 500 });
+    }
+
+    console.log('[API] Successfully fetched services:', services?.length || 0);
+    return NextResponse.json(services || []);
+  } catch (error) {
+    console.error('[API] Services catch error:', error);
+    return NextResponse.json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-
     console.log('[API] Creating service:', body.name);
 
-    const newService = await prisma.service.create({
-      data: {
+    const { data: newService, error } = await supabase
+      .from('services')
+      .insert([{
         name: body.name,
         category: body.category,
         price: body.price,
         duration: body.duration,
         description: body.description || null,
-      }
-    });
+      }])
+      .select()
+      .single();
 
-    console.log('[API] Service created successfully:', newService.id);
+    if (error) {
+      console.error('[API] Service creation error:', error);
+      return NextResponse.json({ error: 'Failed to create service', details: error.message }, { status: 500 });
+    }
+
     return NextResponse.json(newService, { status: 201 });
-  } catch (error: any) {
-    console.error('[API] Database error creating service:', error);
-    return NextResponse.json({
-      error: 'Failed to create service',
-      details: error.message
-    }, { status: 500 });
+  } catch (error) {
+    console.error('[API] Service creation catch error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -75,19 +70,22 @@ export async function PUT(request: Request) {
 
     console.log('[API] Updating service:', id);
 
-    const updatedService = await prisma.service.update({
-      where: { id: parseInt(id) },
-      data: updates
-    });
+    const { data: updatedService, error } = await supabase
+      .from('services')
+      .update(updates)
+      .eq('id', parseInt(id))
+      .select()
+      .single();
 
-    console.log('[API] Service updated successfully:', id);
+    if (error) {
+      console.error('[API] Service update error:', error);
+      return NextResponse.json({ error: 'Failed to update service', details: error.message }, { status: 500 });
+    }
+
     return NextResponse.json(updatedService);
-  } catch (error: any) {
-    console.error('[API] Database error updating service:', error);
-    return NextResponse.json({
-      error: 'Failed to update service',
-      details: error.message
-    }, { status: 500 });
+  } catch (error) {
+    console.error('[API] Service update catch error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
@@ -98,17 +96,19 @@ export async function DELETE(request: Request) {
 
     console.log('[API] Deleting service:', id);
 
-    await prisma.service.delete({
-      where: { id }
-    });
+    const { error } = await supabase
+      .from('services')
+      .delete()
+      .eq('id', id);
 
-    console.log('[API] Service deleted successfully:', id);
+    if (error) {
+      console.error('[API] Service deletion error:', error);
+      return NextResponse.json({ error: 'Failed to delete service', details: error.message }, { status: 500 });
+    }
+
     return NextResponse.json({ success: true });
-  } catch (error: any) {
-    console.error('[API] Database error deleting service:', error);
-    return NextResponse.json({
-      error: 'Failed to delete service',
-      details: error.message
-    }, { status: 500 });
+  } catch (error) {
+    console.error('[API] Service deletion catch error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
