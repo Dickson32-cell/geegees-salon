@@ -1,114 +1,109 @@
-# Supabase Setup Guide
+# Supabase Setup Guide - GeeGees Salon
 
-## Step 1: Get Your Supabase Credentials
+## Complete Setup in 3 Steps
 
-1. Go to your Supabase project: https://supabase.com/dashboard
-2. Select your project: `geegees-salon`
+---
 
-### Database Connection String (REQUIRED)
+## Step 1: Create Services Table in Supabase
 
-1. Go to **Project Settings** > **Database**
-2. Find **Connection string** section
-3. Select **URI** tab
-4. **IMPORTANT**: Use the dropdown to select **Connection pooling** = **OFF** (Session mode)
-5. Copy the connection string - it should look like:
+1. **Go to Supabase Dashboard**
+   - Visit: https://supabase.com/dashboard
+   - Click on your project: **jqxpqrjykxmrzgtgfxpi**
+
+2. **Open SQL Editor**
+   - Click **"SQL Editor"** in the left sidebar (looks like a code/document icon)
+   - Click **"New Query"** button
+
+3. **Paste This SQL Code**
+
+Copy and paste this entire block:
+
+```sql
+-- Create services table
+CREATE TABLE IF NOT EXISTS services (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    category TEXT NOT NULL,
+    price TEXT NOT NULL,
+    duration TEXT NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Add 10 sample services
+INSERT INTO services (name, category, price, duration, description, updated_at) VALUES
+('Premium Haircut & Styling', 'Hair', '₵80', '60 min', 'Professional haircut with consultation and styling', CURRENT_TIMESTAMP),
+('Color Treatment', 'Hair', '₵150', '120 min', 'Full color treatment with premium products', CURRENT_TIMESTAMP),
+('Balayage Highlights', 'Hair', '₵200', '180 min', 'Hand-painted highlights for natural dimension', CURRENT_TIMESTAMP),
+('Keratin Treatment', 'Hair', '₵180', '150 min', 'Smoothing treatment for frizz-free hair', CURRENT_TIMESTAMP),
+('Deep Tissue Massage', 'Spa', '₵120', '90 min', 'Therapeutic massage for muscle tension relief', CURRENT_TIMESTAMP),
+('Facial Treatment', 'Skincare', '₵90', '60 min', 'Deep cleansing and hydrating facial', CURRENT_TIMESTAMP),
+('Bridal Makeup', 'Makeup', '₵250', '120 min', 'Complete bridal makeup with trial session', CURRENT_TIMESTAMP),
+('Gel Manicure', 'Nails', '₵60', '45 min', 'Long-lasting gel polish with nail art', CURRENT_TIMESTAMP),
+('Box Braids', 'Braids', '₵150', '240 min', 'Protective styling with premium extensions', CURRENT_TIMESTAMP),
+('Pedicure & Spa', 'Nails', '₵70', '60 min', 'Relaxing pedicure with foot massage', CURRENT_TIMESTAMP);
+
+-- Verify services were added
+SELECT COUNT(*) as total_services FROM services;
+SELECT * FROM services ORDER BY id;
+```
+
+4. **Run the Query**
+   - Click **"Run"** button (or press Ctrl + Enter)
+   - You should see: **total_services: 10**
+   - Then a list of all 10 services
+
+---
+
+## Step 2: Add Environment Variables to Render
+
+1. **Go to Render Dashboard**: https://dashboard.render.com
+2. Click your **Web Service** (geegees-salon)
+3. Click **"Environment"** in left sidebar
+4. Add or update these 3 variables:
+
+### Variable 1: DATABASE_URL
+```
+Key: DATABASE_URL
+Value: postgresql://postgres:K0248847819o%40%2E%2E@db.jqxpqrjykxmrzgtgfxpi.supabase.co:5432/postgres
+```
+
+### Variable 2: NEXT_PUBLIC_SUPABASE_URL
+```
+Key: NEXT_PUBLIC_SUPABASE_URL
+Value: https://jqxpqrjykxmrzgtgfxpi.supabase.co
+```
+
+### Variable 3: NEXT_PUBLIC_SUPABASE_ANON_KEY
+```
+Key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxeHBxcmp5a3htcnpndGdmeHBpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0MjA0NzQsImV4cCI6MjA5Nzk5NjQ3NH0.geJL2H29wpU1473nCsHo0q7og9EtUl8-vvlBLv0HAts
+```
+
+5. **Click "Save Changes"**
+6. Wait for Render to redeploy (2-3 minutes)
+
+---
+
+## Step 3: Verify Everything Works
+
+After deployment completes:
+
+1. **Visit Services Admin**
    ```
-   postgresql://postgres:[YOUR-PASSWORD]@db.jqxpqrjykxmrzgtgfxpi.supabase.co:5432/postgres
+   https://geegees-salon.onrender.com/admin/services
    ```
-6. Replace `[YOUR-PASSWORD]` with your actual database password
-7. **URL Encode Special Characters in Password:**
-   - `@` → `%40`
-   - `!` → `%21`
-   - `#` → `%23`
-   - `$` → `%24`
-   - `%` → `%25`
-   - `^` → `%5E`
-   - `&` → `%26`
-   - `*` → `%2A`
-   - `.` → `%2E` (if at end of password)
+   You should see all 10 services!
 
-### Storage API Credentials (For Image Uploads)
+2. **Visit Public Services Page**
+   ```
+   https://geegees-salon.onrender.com/services
+   ```
+   Services displayed for customers!
 
-1. Go to **Project Settings** > **API**
-2. Copy these values:
-   - **Project URL**: `https://jqxpqrjykxmrzgtgfxpi.supabase.co`
-   - **Project API keys** > **anon public**: Copy this key
-
-## Step 2: Update Your .env File
-
-```env
-# Direct connection (port 5432, NOT 6543)
-DATABASE_URL="postgresql://postgres:YOUR_ENCODED_PASSWORD@db.jqxpqrjykxmrzgtgfxpi.supabase.co:5432/postgres"
-
-# Supabase API for storage
-NEXT_PUBLIC_SUPABASE_URL="https://jqxpqrjykxmrzgtgfxpi.supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key-here"
-```
-
-## Step 3: Create Storage Bucket for Images
-
-1. Go to **Storage** in Supabase dashboard
-2. Click **New bucket**
-3. Create bucket named: `salon-images`
-4. Make it **Public** (check the public checkbox)
-5. Click **Create bucket**
-
-## Step 4: Set Storage Policies
-
-1. Select the `salon-images` bucket
-2. Go to **Policies** tab
-3. Click **New Policy** > **For full customization**
-4. Add these policies:
-
-### Policy 1: Allow Public Read
-```sql
-CREATE POLICY "Allow public read access"
-ON storage.objects FOR SELECT
-TO public
-USING (bucket_id = 'salon-images');
-```
-
-### Policy 2: Allow Authenticated Upload
-```sql
-CREATE POLICY "Allow authenticated upload"
-ON storage.objects FOR INSERT
-TO authenticated
-WITH CHECK (bucket_id = 'salon-images');
-```
-
-### Policy 3: Allow Authenticated Delete
-```sql
-CREATE POLICY "Allow authenticated delete"
-ON storage.objects FOR DELETE
-TO authenticated
-USING (bucket_id = 'salon-images');
-```
-
-## Step 5: Deploy to Render
-
-1. Go to your Render dashboard
-2. Select your web service
-3. Go to **Environment** tab
-4. Add these environment variables:
-   - `DATABASE_URL`: Your encoded connection string
-   - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your anon key
-5. Click **Save Changes**
-6. Render will automatically redeploy
-
-## Common Issues
-
-### "Can't reach database server"
-- Make sure you're using port **5432** (NOT 6543)
-- Verify your password is properly URL-encoded
-- Check that your IP is not blocked (Supabase allows all by default)
-
-### "Authentication failed"
-- Double-check your password encoding
-- Make sure you copied the full connection string
-- Verify the database password in Supabase settings
-
-### Services not showing
-- Run migrations: `npx prisma migrate deploy`
-- Check that tables exist in Supabase **Table Editor**
-- Verify data exists in the `services` table
+3. **Visit Homepage**
+   ```
+   https://geegees-salon.onrender.com
+   ```
+   Everything working!
