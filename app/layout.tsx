@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Nunito_Sans } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -36,9 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`scroll-smooth ${playfair.variable} ${nunito.variable}`}>
       <body className="bg-surface text-on-surface font-body-md overflow-x-hidden">
-        <Navbar />
         {children}
-        <Footer />
       </body>
     </html>
   );
