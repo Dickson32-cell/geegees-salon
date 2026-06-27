@@ -36,27 +36,44 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    console.log('[API] Inserting gallery item:', {
+      title: body.title,
+      imageUrl: body.imageUrl,
+      category: body.category,
+      description: body.description,
+      displayOrder: body.displayOrder,
+    });
+
     const { data: newImage, error } = await supabase
       .from('gallery_images')
       .insert([{
-        title: body.title,
+        title: body.title || null,
         image_url: body.imageUrl,
-        category: body.category,
-        description: body.description,
-        display_order: body.displayOrder,
+        category: body.category || null,
+        description: body.description || null,
+        display_order: body.displayOrder || null,
       }])
       .select()
       .single();
 
     if (error) {
-      console.error('Database error:', error);
-      return NextResponse.json({ error: 'Failed to create gallery image' }, { status: 500 });
+      console.error('[API] Database insert error:', error);
+      return NextResponse.json({
+        error: 'Failed to create gallery image',
+        details: error.message,
+        hint: error.hint,
+        code: error.code
+      }, { status: 500 });
     }
 
+    console.log('[API] Successfully created gallery item:', newImage);
     return NextResponse.json(newImage, { status: 201 });
   } catch (error) {
-    console.error('Database error:', error);
-    return NextResponse.json({ error: 'Failed to create gallery image' }, { status: 500 });
+    console.error('[API] Exception:', error);
+    return NextResponse.json({
+      error: 'Failed to create gallery image',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
   }
 }
 

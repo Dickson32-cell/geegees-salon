@@ -108,7 +108,11 @@ export default function AdminGallery() {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to save image');
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API error response:', errorData);
+        throw new Error(errorData.details || errorData.error || 'Failed to save media');
+      }
 
       const newImage = await response.json();
       setImages([...images, newImage]);
@@ -116,7 +120,7 @@ export default function AdminGallery() {
       resetForm();
     } catch (error: any) {
       console.error('Error adding image:', error);
-      setError(error.message || 'Failed to upload image');
+      setError(error.message || 'Failed to upload media');
     } finally {
       setUploading(false);
     }
@@ -150,7 +154,11 @@ export default function AdminGallery() {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to update image');
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('API error response:', errorData);
+        throw new Error(errorData.details || errorData.error || 'Failed to update media');
+      }
 
       const updatedImage = await response.json();
       setImages(images.map(img => img.id === updatedImage.id ? updatedImage : img));
@@ -158,7 +166,7 @@ export default function AdminGallery() {
       resetForm();
     } catch (error: any) {
       console.error('Error updating image:', error);
-      setError(error.message || 'Failed to update image');
+      setError(error.message || 'Failed to update media');
     } finally {
       setUploading(false);
     }
