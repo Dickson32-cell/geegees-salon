@@ -10,6 +10,7 @@ interface Service {
   price: string;
   duration: string;
   description?: string;
+  status: 'draft' | 'published' | 'inactive';
 }
 
 export default function ServicesManagement() {
@@ -25,6 +26,7 @@ export default function ServicesManagement() {
     price: "",
     duration: "",
     description: "",
+    status: "draft" as 'draft' | 'published' | 'inactive',
   });
 
   // Fetch services on mount
@@ -152,12 +154,13 @@ export default function ServicesManagement() {
       price: service.price,
       duration: service.duration,
       description: service.description || "",
+      status: service.status || "draft",
     });
     setIsAdding(true);
   };
 
   const resetForm = () => {
-    setFormData({ name: "", category: "Hair", price: "", duration: "", description: "" });
+    setFormData({ name: "", category: "Hair", price: "", duration: "", description: "", status: "draft" });
     setIsAdding(false);
     setEditingService(null);
   };
@@ -286,6 +289,20 @@ export default function ServicesManagement() {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary md:col-span-2"
               rows={3}
             />
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Status (Controls visibility on main website)
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as 'draft' | 'published' | 'inactive' })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+              >
+                <option value="draft">Draft (Hidden from website)</option>
+                <option value="published">Published (Visible on website)</option>
+                <option value="inactive">Inactive (Hidden from website)</option>
+              </select>
+            </div>
           </div>
           <div className="flex space-x-3 mt-4">
             <button
@@ -312,9 +329,18 @@ export default function ServicesManagement() {
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
                 <h3 className="text-lg font-bold text-slate-900 mb-2">{service.name}</h3>
-                <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold uppercase">
-                  {service.category}
-                </span>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold uppercase">
+                    {service.category}
+                  </span>
+                  <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-semibold uppercase ${
+                    service.status === 'published' ? 'bg-green-100 text-green-700' :
+                    service.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>
+                    {service.status}
+                  </span>
+                </div>
               </div>
             </div>
 

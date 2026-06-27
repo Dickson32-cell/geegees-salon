@@ -18,6 +18,7 @@ model Service {
   price       String
   duration    String
   description String?
+  status      String   @default("draft") // draft, published, inactive
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 

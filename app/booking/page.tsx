@@ -35,7 +35,8 @@ export default function BookingPage() {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('/api/services');
+      // Only fetch published services for booking
+      const response = await fetch('/api/services?status=published');
       if (!response.ok) {
         throw new Error('Failed to fetch services');
       }

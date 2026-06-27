@@ -6,14 +6,24 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     console.log('[API] Fetching services via Supabase client...');
-    
-    const { data: services, error } = await supabase
+
+    // Get status filter from query params
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status');
+
+    let query = supabase
       .from('services')
-      .select('*')
-      .order('id', { ascending: true });
+      .select('*');
+
+    // Filter by status if provided
+    if (status) {
+      query = query.eq('status', status);
+    }
+
+    const { data: services, error } = await query.order('id', { ascending: true });
 
     if (error) {
       console.error('[API] Services fetch error:', error);
@@ -47,6 +57,7 @@ export async function POST(request: Request) {
         price: body.price,
         duration: body.duration,
         description: body.description || null,
+        status: body.status || 'draft',
       }])
       .select()
       .single();

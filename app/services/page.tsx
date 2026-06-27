@@ -24,7 +24,8 @@ export default function ServicesPage() {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('/api/services');
+      // Only fetch published services for the public website
+      const response = await fetch('/api/services?status=published');
       if (!response.ok) {
         throw new Error('Failed to fetch services');
       }
