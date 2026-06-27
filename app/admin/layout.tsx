@@ -10,16 +10,19 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
 
-  // If on login page, don't show sidebar
+  // If on admin home page, don't show sidebar
   if (pathname === "/admin") {
     return <>{children}</>;
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-100">
       <AdminSidebar />
-      <main className="flex-1 ml-0 md:ml-64 p-4 md:p-8">
-        {children}
+      {/* Desktop: margin-left for sidebar, Mobile: margin-top for navbar */}
+      <main className="lg:ml-64 pt-16 lg:pt-0 p-4 md:p-8">
+        <div className="max-w-7xl mx-auto">
+          {children}
+        </div>
       </main>
     </div>
   );

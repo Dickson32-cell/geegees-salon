@@ -164,29 +164,32 @@ export default function ServicesManagement() {
 
   return (
     <div>
-      <div className="mb-8 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Services Management</h1>
-          <p className="text-gray-600">Manage your salon services and pricing (synced with main website)</p>
-        </div>
-        <div className="flex gap-3">
-          <Link href="/admin/test">
-            <button className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2">
+      {/* Page Header */}
+      <div className="mb-8">
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4 mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Services Management</h1>
+            <p className="text-slate-600">Manage your salon services and pricing (synced with main website)</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/admin/test">
+              <button className="px-4 py-2.5 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors flex items-center gap-2 shadow-sm">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-medium">Diagnostics</span>
+              </button>
+            </Link>
+            <button
+              onClick={() => setIsAdding(true)}
+              className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm font-medium"
+            >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Diagnostics
+              <span>Add Service</span>
             </button>
-          </Link>
-          <button
-            onClick={() => setIsAdding(true)}
-            className="btn-primary flex items-center space-x-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Add Service</span>
-          </button>
+          </div>
         </div>
       </div>
 
@@ -287,13 +290,13 @@ export default function ServicesManagement() {
           <div className="flex space-x-3 mt-4">
             <button
               onClick={editingService ? handleUpdate : handleAdd}
-              className="btn-primary"
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
             >
               {editingService ? 'Update Service' : 'Add Service'}
             </button>
             <button
               onClick={resetForm}
-              className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              className="px-6 py-2.5 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
             >
               Cancel
             </button>
@@ -303,47 +306,47 @@ export default function ServicesManagement() {
 
       {/* Services Grid */}
       {!loading && (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {services.map((service) => (
-          <div key={service.id} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <div key={service.id} className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 hover:shadow-md transition-all hover:border-blue-300">
             <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">{service.name}</h3>
-                <span className="inline-block px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-semibold uppercase">
+              <div className="flex-1">
+                <h3 className="text-lg font-bold text-slate-900 mb-2">{service.name}</h3>
+                <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold uppercase">
                   {service.category}
                 </span>
               </div>
             </div>
 
             {service.description && (
-              <p className="text-gray-600 text-sm mb-3">{service.description}</p>
+              <p className="text-slate-600 text-sm mb-4 line-clamp-2">{service.description}</p>
             )}
 
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center text-gray-600">
-                <svg className="w-5 h-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="space-y-2 mb-5 pb-5 border-b border-slate-100">
+              <div className="flex items-center text-slate-700">
+                <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span className="font-semibold">{service.price}</span>
+                <span className="font-semibold text-sm">{service.price}</span>
               </div>
-              <div className="flex items-center text-gray-600">
-                <svg className="w-5 h-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-center text-slate-700">
+                <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span>{service.duration}</span>
+                <span className="text-sm">{service.duration}</span>
               </div>
             </div>
 
-            <div className="flex space-x-2">
+            <div className="flex gap-2">
               <button
                 onClick={() => startEdit(service)}
-                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
               >
                 Edit
               </button>
               <button
                 onClick={() => handleDelete(service.id)}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
               >
                 Delete
               </button>
@@ -354,15 +357,21 @@ export default function ServicesManagement() {
       )}
 
       {!loading && services.length === 0 && !error && (
-        <div className="text-center py-12 bg-white rounded-lg shadow">
-          <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
-          <p className="text-gray-500 text-lg mb-4">No services yet. Add your first service!</p>
+        <div className="text-center py-16 bg-white rounded-lg border border-slate-200">
+          <div className="w-20 h-20 mx-auto bg-slate-100 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">No services yet</h3>
+          <p className="text-slate-600 mb-6 max-w-md mx-auto">Get started by creating your first service. Your services will appear on the main website automatically.</p>
           <button
             onClick={() => setIsAdding(true)}
-            className="btn-primary"
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm inline-flex items-center gap-2"
           >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
             Add Your First Service
           </button>
         </div>
