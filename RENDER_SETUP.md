@@ -27,15 +27,24 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpxeHBxcmp
 
 Once deployment completes:
 
-1. Visit: `https://geegees-salon.onrender.com/admin/services`
-2. Click **"Add Service"** button
+1. Visit the admin panel: `https://geegees-salon.onrender.com/admin`
+   - You'll see a dashboard with all admin options
+   - Click on the **"Services"** card
+
+2. On the Services page, click **"Add Service"** button
+
 3. Fill in service details:
-   - Service Name (e.g., "Premium Haircut & Styling")
-   - Category (Hair, Spa, Makeup, Skincare, Nails, Braids)
-   - Price (e.g., "₵50-80" or "$85")
-   - Duration (e.g., "60 min")
-   - Description (optional)
+   - **Service Name** (e.g., "Premium Haircut & Styling")
+   - **Category** - Choose from: Hair, Spa, Makeup, Skincare, Nails, Braids
+   - **Price** (e.g., "₵50-80" or "$85")
+   - **Duration** (e.g., "60 min")
+   - **Description** (optional)
+
 4. Click **"Add Service"**
+
+5. Repeat for all your services
+
+**Direct link to Services admin:** `https://geegees-salon.onrender.com/admin/services`
 
 ### Step 3: Verify Services Appear
 
@@ -77,6 +86,14 @@ Once deployment completes:
 
 ## Admin Access
 
-Admin panel: `https://geegees-salon.onrender.com/admin/services`
+**Admin Panel Homepage:** `https://geegees-salon.onrender.com/admin`
 
-**Note:** Currently no authentication - add auth before making site public!
+From there you can access:
+- **Services Management:** `/admin/services` - Add, edit, delete services
+- **Dashboard:** `/admin/dashboard` - Overview and analytics
+- **Team Management:** `/admin/team` - Manage staff profiles
+- **Appointments:** `/admin/appointments` - View bookings
+- **Content Management:** `/admin/content` - Update website content
+- **Inquiries:** `/admin/inquiries` - View customer messages
+
+**Note:** Currently **NO authentication required** - Anyone can access the admin panel. Add proper authentication before making the site public!
