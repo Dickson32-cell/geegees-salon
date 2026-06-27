@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { HomeServiceCardSkeleton } from "@/components/LoadingSkeleton";
+import HeroSlideshow from "@/components/HeroSlideshow";
 
 interface Service {
   id: number;
@@ -38,17 +39,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <div className="w-full h-full bg-cover bg-center scale-105" style={{
-            backgroundImage: "url('https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=2574')",
-          }}>
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/40 via-primary/80 to-primary/90"></div>
-        </div>
-
-        <div className="relative z-10 text-center px-4 md:px-margin-mobile max-w-4xl">
+      {/* Hero Section with Slideshow */}
+      <HeroSlideshow category="hero-home" className="min-h-screen flex items-center justify-center">
+        <div className="text-center px-4 md:px-margin-mobile max-w-4xl">
           <span className="font-label-caps text-xs md:text-label-caps text-secondary-fixed-dim uppercase tracking-[0.2em] md:tracking-[0.3em] mb-3 md:mb-4 block animate-fade-in-up">
             The Editorial Experience
           </span>
@@ -67,7 +60,7 @@ export default function Home() {
             </Link>
           </div>
         </div>
-      </section>
+      </HeroSlideshow>
 
       {/* About Section */}
       <section className="py-12 md:py-section-gap px-4 md:px-margin-desktop max-w-container-max mx-auto">
