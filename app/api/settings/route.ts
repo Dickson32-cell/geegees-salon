@@ -5,8 +5,13 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     // Try to get settings from website_content table
-    const settings = await prisma.websiteContent.findFirst({
-      where: { page: 'settings' }
+    const settings = await prisma.websiteContent.findUnique({
+      where: {
+        page_section: {
+          page: 'settings',
+          section: 'system'
+        }
+      }
     });
 
     if (settings && settings.content) {
@@ -33,7 +38,12 @@ export async function POST(request: Request) {
 
     // Upsert settings in website_content table
     const settings = await prisma.websiteContent.upsert({
-      where: { page: 'settings' },
+      where: {
+        page_section: {
+          page: 'settings',
+          section: 'system'
+        }
+      },
       update: {
         content: {
           whatsappNumber,
