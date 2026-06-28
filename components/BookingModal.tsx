@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import html2pdf from 'html2pdf.js';
 
 interface Service {
   id: number;
@@ -31,6 +32,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [bookingId, setBookingId] = useState<number | null>(null);
+  const receiptRef = useRef<HTMLDivElement>(null);
 
   const stylists = ['Any Available', 'Sarah Johnson', 'Michael Chen', 'Emma Williams', 'David Martinez'];
 
@@ -130,6 +132,20 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     setError('');
     setBookingId(null);
     onClose();
+  };
+
+  const downloadPDF = () => {
+    if (!receiptRef.current) return;
+
+    const opt = {
+      margin: 10,
+      filename: `GeeGees-Booking-${bookingId?.toString().padStart(6, '0')}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(receiptRef.current).save();
   };
 
   if (!isOpen) return null;
@@ -397,7 +413,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
           {/* Step 6: Booking Receipt/Confirmation */}
           {step === 6 && (
-            <div className="space-y-6">
+            <div className="space-y-6" ref={receiptRef}>
               {/* Success Icon */}
               <div className="text-center">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -472,13 +488,13 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={() => window.print()}
-                  className="flex-1 px-4 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  onClick={downloadPDF}
+                  className="flex-1 px-4 py-3 bg-white border-2 border-secondary text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Print Receipt
+                  Download PDF Receipt
                 </button>
                 <button
                   onClick={handleClose}

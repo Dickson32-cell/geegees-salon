@@ -22,6 +22,7 @@
     "@types/react-dom": "^19.0.0",
     "autoprefixer": "^10.5.2",
     "dotenv": "^17.4.2",
+    "html2pdf.js": "^0.14.0",
     "next": "^15.1.0",
     "pg": "^8.13.1",
     "postcss": "^8.5.15",
