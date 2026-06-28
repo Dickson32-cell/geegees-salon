@@ -26,8 +26,12 @@ export default function HeroSlideshow({ category, children, className = "" }: He
 
   // Helper function to check if URL is a video
   const isVideo = (url: string): boolean => {
-    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogg', '.m4v'];
-    return videoExtensions.some(ext => url.toLowerCase().includes(ext));
+    if (!url) return false;
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogg', '.m4v', 'video'];
+    const lowerUrl = url.toLowerCase();
+    const isVideoFile = videoExtensions.some(ext => lowerUrl.includes(ext));
+    console.log('🎥 Video detection for:', url, '| Is Video:', isVideoFile);
+    return isVideoFile;
   };
 
   useEffect(() => {
@@ -88,6 +92,9 @@ export default function HeroSlideshow({ category, children, className = "" }: He
         .filter(img => img.category === category)
         .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
 
+      console.log('📸 Fetched images for category:', category, '| Count:', categoryImages.length);
+      console.log('📋 Images:', categoryImages.map(img => ({ url: img.image_url, category: img.category })));
+
       setImages(categoryImages);
     } catch (error) {
       console.error('Error fetching hero images:', error);
@@ -105,6 +112,8 @@ export default function HeroSlideshow({ category, children, className = "" }: He
 
   const currentMedia = images.length > 0 ? images[currentIndex].image_url : defaultImage;
   const isCurrentMediaVideo = currentMedia && isVideo(currentMedia);
+
+  console.log('🎬 Current media:', currentMedia, '| Is video:', isCurrentMediaVideo, '| Index:', currentIndex);
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
