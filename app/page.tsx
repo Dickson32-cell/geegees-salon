@@ -140,8 +140,23 @@ export default function Home() {
       </section>
 
       {/* Services Teaser Section - DYNAMIC FROM ADMIN */}
-      <section className="bg-primary py-12 md:py-section-gap px-4 md:px-margin-desktop">
-        <div className="max-w-container-max mx-auto">
+      <section className="relative py-12 md:py-section-gap px-4 md:px-margin-desktop overflow-hidden">
+        {/* Background Video */}
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+        >
+          <source src="https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-services/be4p0vs2t1f_1782596442744.mp4" type="video/mp4" />
+        </video>
+
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-primary/80"></div>
+
+        <div className="max-w-container-max mx-auto relative z-10">
           <div className="text-center mb-8 md:mb-16">
             <span className="font-label-caps text-label-caps text-secondary-fixed-dim uppercase tracking-widest">Exquisite Selection</span>
             <h3 className="font-display-lg text-display-lg text-white mt-4">Curated Services</h3>
