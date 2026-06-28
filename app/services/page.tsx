@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { ServiceGridSkeleton } from "@/components/LoadingSkeleton";
+import { useBooking } from "@/contexts/BookingContext";
 
 interface Service {
   id: number;
@@ -18,6 +19,7 @@ export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
+  const { openBookingModal } = useBooking();
 
   useEffect(() => {
     fetchServices();
@@ -161,11 +163,12 @@ export default function ServicesPage() {
                           </div>
                         </div>
 
-                        <Link href="/booking" className="block mt-6">
-                          <button className="w-full bg-primary text-white py-3 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-colors">
-                            Book Now
-                          </button>
-                        </Link>
+                        <button
+                          onClick={openBookingModal}
+                          className="w-full bg-primary text-white py-3 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-colors mt-6"
+                        >
+                          Book Now
+                        </button>
                       </div>
                     </div>
                   ))}
@@ -182,11 +185,12 @@ export default function ServicesPage() {
             Appointments are limited. Secure your editorial experience with GeeGees today and indulge in the luxury you deserve.
           </p>
           <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-stack-md">
-            <Link href="/booking">
-              <button className="bg-primary text-white px-10 py-4 rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-all active:scale-95 shadow-lg">
-                Schedule Appointment
-              </button>
-            </Link>
+            <button
+              onClick={openBookingModal}
+              className="bg-primary text-white px-10 py-4 rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-all active:scale-95 shadow-lg"
+            >
+              Schedule Appointment
+            </button>
             <button className="border border-secondary text-secondary px-10 py-4 rounded-lg font-label-caps text-label-caps hover:bg-secondary hover:text-white transition-all active:scale-95">
               Gift a Signature Session
             </button>

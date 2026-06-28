@@ -41,6 +41,7 @@ model WebsiteContent {
 model Appointment {
   id              Int      @id @default(autoincrement())
   service         String
+  serviceId       Int?     @map("service_id") // Optional foreign key to Service
   stylist         String
   appointmentDate DateTime @map("appointment_date")
   appointmentTime String   @map("appointment_time")
@@ -48,8 +49,11 @@ model Appointment {
   customerEmail   String   @map("customer_email")
   customerPhone   String   @map("customer_phone")
   notes           String?
-  status          String   @default("pending")
+  status          String   @default("pending") // pending, accepted, confirmed, completed, rejected, cancelled
+  finalPrice      String?  @map("final_price") // Actual price charged (for tracking revenue)
+  revenue         Decimal? @db.Decimal(10, 2) // Revenue amount when status is completed
   createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
 
   @@map("appointments")
 }
