@@ -187,46 +187,65 @@ export default function Home() {
             </div>
           ) : !error && services.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {services.map((service) => (
-                <div key={service.id} className="relative group overflow-hidden rounded-lg min-h-[280px] flex items-end">
-                  {/* Background Image or Gradient */}
-                  {service.image_url ? (
-                    <>
-                      <img
-                        src={service.image_url}
-                        alt={service.name}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        loading="lazy"
-                        onError={(e) => {
-                          console.error('Service image load error:', service.image_url);
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/20"></div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary-container"></div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/50 to-transparent"></div>
-                    </>
-                  )}
+              {services.map((service) => {
+                const isVideo = service.image_url && /\.(mp4|webm|mov|avi|ogg|m4v)$/i.test(service.image_url);
 
-                  {/* Service Details Overlay */}
-                  <div className="relative p-6 w-full z-10">
-                    <span className="font-label-caps text-label-caps text-secondary-fixed uppercase tracking-widest text-xs block mb-2">
-                      {service.category}
-                    </span>
-                    <h4 className="font-headline-sm text-headline-sm text-white mb-2">{service.name}</h4>
-                    {service.description && (
-                      <p className="text-white/90 text-sm mb-3 line-clamp-2">{service.description}</p>
+                return (
+                  <div key={service.id} className="relative group overflow-hidden rounded-lg min-h-[280px] flex items-end">
+                    {/* Background Image/Video or Gradient */}
+                    {service.image_url ? (
+                      <>
+                        {isVideo ? (
+                          <video
+                            src={service.image_url}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            onError={(e) => {
+                              console.error('Service video load error:', service.image_url);
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <img
+                            src={service.image_url}
+                            alt={service.name}
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                            onError={(e) => {
+                              console.error('Service image load error:', service.image_url);
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/20"></div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary-container"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/50 to-transparent"></div>
+                      </>
                     )}
-                    <div className="flex justify-between items-center">
-                      <span className="text-secondary-fixed font-bold">{service.price}</span>
-                      <span className="text-white/90 text-sm">{service.duration}</span>
+
+                    {/* Service Details Overlay */}
+                    <div className="relative p-6 w-full z-10">
+                      <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest text-xs block mb-2">
+                        {service.category}
+                      </span>
+                      <h4 className="font-headline-sm text-headline-sm text-white mb-2">{service.name}</h4>
+                      {service.description && (
+                        <p className="text-white/90 text-sm mb-3 line-clamp-2">{service.description}</p>
+                      )}
+                      <div className="flex justify-between items-center">
+                        <span className="text-secondary font-bold">{service.price}</span>
+                        <span className="text-white/90 text-sm">{service.duration}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : null}
 
