@@ -62,22 +62,60 @@ export default function HeroSlideshow({ category, children, className = "" }: He
     return () => clearInterval(interval);
   }, [images.length]);
 
-  // Simple video autoplay - works with ALL formats
+  // Aggressive video autoplay - works with ALL formats including Supabase videos
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
+    console.log('🎬 Setting up video playback...');
+
     const playVideo = () => {
+      console.log('▶️ Attempting to play video...');
       video.muted = true;
-      video.play().catch(() => {
-        // If autoplay fails, try again after user interaction
-        document.addEventListener('click', () => {
-          video.play().catch(() => {});
-        }, { once: true });
-      });
+      video.volume = 0;
+
+      // Multiple play attempts
+      const tryPlay = () => {
+        video.play()
+          .then(() => {
+            console.log('✅ SUCCESS! Video is playing!');
+          })
+          .catch((error) => {
+            console.log('⚠️ Autoplay blocked:', error.message);
+            console.log('💡 Click anywhere on the page to start video');
+
+            // Retry on any user interaction
+            const userInteraction = () => {
+              video.play()
+                .then(() => console.log('✅ Playing after user interaction'))
+                .catch(() => {});
+              document.removeEventListener('click', userInteraction);
+              document.removeEventListener('touchstart', userInteraction);
+            };
+
+            document.addEventListener('click', userInteraction, { once: true });
+            document.addEventListener('touchstart', userInteraction, { once: true });
+          });
+      };
+
+      tryPlay();
+      setTimeout(tryPlay, 100);
+      setTimeout(tryPlay, 300);
+      setTimeout(tryPlay, 500);
     };
 
-    playVideo();
+    // Wait for video to be ready
+    if (video.readyState >= 3) {
+      playVideo();
+    } else {
+      video.addEventListener('loadeddata', playVideo);
+      video.addEventListener('canplay', playVideo);
+    }
+
+    return () => {
+      video.removeEventListener('loadeddata', playVideo);
+      video.removeEventListener('canplay', playVideo);
+    };
   }, [currentIndex]);
 
   const fetchImages = async () => {
@@ -118,26 +156,47 @@ export default function HeroSlideshow({ category, children, className = "" }: He
     <div className={`relative overflow-hidden ${className}`}>
       {/* Background Media (Video or Image) with Fade Transition */}
       {isCurrentMediaVideo ? (
-        // Video Background - Supports ALL video formats (MP4, WebM, OGG, MOV, AVI, etc.)
+        // Video Background - Supports ALL video formats including Supabase MP4 files
         <video
           ref={videoRef}
           key={currentMedia}
-          src={currentMedia}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 z-0 ${fadeClass}`}
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
+          crossOrigin="anonymous"
           onError={(e) => {
-            console.error('❌ Video error:', e);
-            console.error('Failed video URL:', currentMedia);
+            const videoElement = e.currentTarget;
+            console.error('❌ VIDEO ERROR:');
+            console.error('   URL:', currentMedia);
+            console.error('   Error code:', videoElement.error?.code);
+            console.error('   Error message:', videoElement.error?.message);
+            console.error('   Network state:', videoElement.networkState);
+            console.error('   Ready state:', videoElement.readyState);
+          }}
+          onLoadedMetadata={() => {
+            console.log('📹 Video metadata loaded');
+            console.log('   Duration:', videoRef.current?.duration, 'seconds');
+            console.log('   Dimensions:', videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
           }}
           onLoadedData={() => {
-            console.log('✅ Video loaded successfully');
-            videoRef.current?.play().catch(err => console.log('Play error:', err));
+            console.log('✅ Video data loaded successfully');
+            console.log('   URL:', currentMedia);
           }}
-        />
+          onPlaying={() => {
+            console.log('🎥 Video is now PLAYING!');
+          }}
+          onPause={() => {
+            console.log('⏸️ Video paused - attempting to resume...');
+            videoRef.current?.play().catch(() => {});
+          }}
+        >
+          <source src={currentMedia} type="video/mp4" />
+          <source src={currentMedia} type="video/webm" />
+          Your browser does not support the video tag.
+        </video>
       ) : (
         // Image Background
         <div
