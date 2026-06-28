@@ -70,9 +70,9 @@ export default function GalleryPage() {
       </section>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap justify-center gap-stack-lg mb-12 border-b border-secondary/10 pb-4">
+      <div className="flex flex-wrap justify-center gap-3 md:gap-stack-lg mb-12 border-b border-secondary/10 pb-4">
         <button
-          className={`font-label-caps uppercase tracking-widest transition-colors duration-300 px-4 py-2 ${
+          className={`font-label-caps uppercase tracking-widest transition-colors duration-300 px-3 md:px-4 py-2 text-xs md:text-sm ${
             activeFilter === "all" ? "text-secondary border-b-2 border-secondary" : "text-on-surface-variant hover:text-secondary"
           }`}
           onClick={() => setActiveFilter("all")}
@@ -80,7 +80,7 @@ export default function GalleryPage() {
           All Works
         </button>
         <button
-          className={`font-label-caps uppercase tracking-widest transition-colors duration-300 px-4 py-2 ${
+          className={`font-label-caps uppercase tracking-widest transition-colors duration-300 px-3 md:px-4 py-2 text-xs md:text-sm ${
             activeFilter === "cut" ? "text-secondary border-b-2 border-secondary" : "text-on-surface-variant hover:text-secondary"
           }`}
           onClick={() => setActiveFilter("cut")}
@@ -88,7 +88,7 @@ export default function GalleryPage() {
           Precision Cut
         </button>
         <button
-          className={`font-label-caps uppercase tracking-widest transition-colors duration-300 px-4 py-2 ${
+          className={`font-label-caps uppercase tracking-widest transition-colors duration-300 px-3 md:px-4 py-2 text-xs md:text-sm ${
             activeFilter === "color" ? "text-secondary border-b-2 border-secondary" : "text-on-surface-variant hover:text-secondary"
           }`}
           onClick={() => setActiveFilter("color")}
@@ -96,7 +96,7 @@ export default function GalleryPage() {
           Editorial Color
         </button>
         <button
-          className={`font-label-caps uppercase tracking-widest transition-colors duration-300 px-4 py-2 ${
+          className={`font-label-caps uppercase tracking-widest transition-colors duration-300 px-3 md:px-4 py-2 text-xs md:text-sm ${
             activeFilter === "style" ? "text-secondary border-b-2 border-secondary" : "text-on-surface-variant hover:text-secondary"
           }`}
           onClick={() => setActiveFilter("style")}
@@ -104,7 +104,7 @@ export default function GalleryPage() {
           Styling
         </button>
         <button
-          className={`font-label-caps uppercase tracking-widest transition-colors duration-300 px-4 py-2 ${
+          className={`font-label-caps uppercase tracking-widest transition-colors duration-300 px-3 md:px-4 py-2 text-xs md:text-sm ${
             activeFilter === "grooming" ? "text-secondary border-b-2 border-secondary" : "text-on-surface-variant hover:text-secondary"
           }`}
           onClick={() => setActiveFilter("grooming")}

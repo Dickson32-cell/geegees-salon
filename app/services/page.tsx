@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ServiceGridSkeleton } from "@/components/LoadingSkeleton";
 import { useBooking } from "@/contexts/BookingContext";
 
@@ -13,6 +13,104 @@ interface Service {
   duration: string;
   description?: string;
   image_url?: string; // Optional service image from Supabase
+}
+
+interface GalleryVideo {
+  id: number;
+  image_url: string;
+  title: string | null;
+}
+
+// Gallery Video Background Component
+function GalleryVideoBackground() {
+  const [videos, setVideos] = useState<GalleryVideo[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
+
+  const fetchVideos = async () => {
+    try {
+      const response = await fetch('/api/gallery');
+      if (!response.ok) return;
+
+      const data = await response.json();
+      // Filter for ALL videos (no category filter)
+      const allVideos = data.filter((item: GalleryVideo) =>
+        item.image_url &&
+        /\.(mp4|webm|mov|avi|ogg|m4v)$/i.test(item.image_url)
+      );
+
+      if (allVideos.length > 0) {
+        setVideos(allVideos);
+      }
+    } catch (error) {
+      console.error('Error fetching videos:', error);
+    }
+  };
+
+  // Auto-advance to next video every 8 seconds
+  useEffect(() => {
+    if (videos.length === 0) return;
+
+    const timer = setInterval(() => {
+      setIsTransitioning(true);
+
+      setTimeout(() => {
+        setCurrentIndex((prev) => (prev + 1) % videos.length);
+        setIsTransitioning(false);
+      }, 500); // Fade duration
+    }, 8000); // 8 seconds per video
+
+    return () => clearInterval(timer);
+  }, [videos.length]);
+
+  // Auto-play current video
+  useEffect(() => {
+    const currentVideo = videoRefs.current[currentIndex];
+    if (currentVideo) {
+      currentVideo.play().catch(() => {
+        console.log('Video autoplay failed');
+      });
+    }
+  }, [currentIndex]);
+
+  if (videos.length === 0) {
+    // Fallback gradient if no videos
+    return (
+      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-container to-primary"></div>
+    );
+  }
+
+  return (
+    <>
+      {videos.map((video, index) => (
+        <video
+          key={video.id}
+          ref={(el) => { videoRefs.current[index] = el; }}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+            index === currentIndex && !isTransitioning ? 'opacity-100' : 'opacity-0'
+          }`}
+          loop
+          muted
+          playsInline
+          preload="auto"
+        >
+          <source src={video.image_url} type="video/mp4" />
+        </video>
+      ))}
+
+      {/* Video counter indicator */}
+      {videos.length > 1 && (
+        <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
+          {currentIndex + 1} / {videos.length}
+        </div>
+      )}
+    </>
+  );
 }
 
 export default function ServicesPage() {
@@ -57,8 +155,11 @@ export default function ServicesPage() {
       {/* Hero Section */}
       <section className="max-w-container-max mx-auto px-4 md:px-margin-desktop mb-8 md:mb-stack-lg">
         <div className="bg-primary h-[300px] md:h-[400px] flex items-center justify-center text-center rounded-lg relative overflow-hidden">
-          {/* Background Pattern/Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-container to-primary opacity-90"></div>
+          {/* Gallery Video Slideshow Background */}
+          <GalleryVideoBackground />
+
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black/50"></div>
 
           {/* Content */}
           <div className="relative z-10 max-w-3xl px-4">

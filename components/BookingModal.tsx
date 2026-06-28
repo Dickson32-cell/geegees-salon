@@ -134,12 +134,12 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const selectedService = services.find(s => s.id === parseInt(formData.service));
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-2xl w-full my-8 shadow-2xl">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded-xl sm:rounded-2xl max-w-2xl w-full my-4 sm:my-8 shadow-2xl">
         {/* Header */}
-        <div className="bg-primary text-white p-6 rounded-t-2xl">
+        <div className="bg-primary text-white p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Book Your Appointment</h2>
+            <h2 className="text-xl sm:text-2xl font-bold">Book Your Appointment</h2>
             <button onClick={handleClose} className="text-white/80 hover:text-white text-3xl leading-none">×</button>
           </div>
 
@@ -171,7 +171,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6 min-h-[400px]">
+        <div className="p-4 sm:p-6 min-h-[300px] sm:min-h-[400px]">
           {error && (
             <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
               {error}
@@ -261,13 +261,13 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Select Time</label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[280px] overflow-y-auto">
                   {timeSlots.map((time) => (
                     <button
                       key={time}
                       type="button"
                       onClick={() => setFormData({ ...formData, appointmentTime: time })}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                         formData.appointmentTime === time
                           ? 'bg-secondary text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -393,11 +393,11 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="p-6 bg-gray-50 rounded-b-2xl flex justify-between gap-3">
+        <div className="p-4 sm:p-6 bg-gray-50 rounded-b-xl sm:rounded-b-2xl flex justify-between gap-3">
           {step > 1 && (
             <button
               onClick={handleBack}
-              className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+              className="px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium text-sm sm:text-base hover:bg-gray-100 transition-colors"
             >
               Back
             </button>
@@ -406,7 +406,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
           {step < 5 ? (
             <button
               onClick={handleNext}
-              className="flex-1 px-6 py-3 bg-secondary text-white rounded-lg font-medium hover:bg-secondary/90 transition-colors ml-auto"
+              className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-secondary text-white rounded-lg font-medium text-sm sm:text-base hover:bg-secondary/90 transition-colors ml-auto"
             >
               Next
             </button>
@@ -414,7 +414,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="flex-1 px-6 py-3 bg-secondary text-white rounded-lg font-medium hover:bg-secondary/90 transition-colors disabled:opacity-50 ml-auto"
+              className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-secondary text-white rounded-lg font-medium text-sm sm:text-base hover:bg-secondary/90 transition-colors disabled:opacity-50 ml-auto"
             >
               {loading ? 'Submitting...' : 'Confirm Booking'}
             </button>

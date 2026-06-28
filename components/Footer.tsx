@@ -135,10 +135,10 @@ export default function Footer() {
       </div>
 
       <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
-        <p className="text-on-primary-container/60 text-xs font-label-caps uppercase tracking-widest">
+        <p className="text-on-primary-container/60 text-xs font-label-caps uppercase tracking-widest text-center md:text-left">
           © {currentYear} GeeGees Luxury Salon. All Rights Reserved.
         </p>
-        <div className="flex gap-8">
+        <div className="flex flex-wrap justify-center gap-4 md:gap-8">
           <Link href="/privacy" className="text-on-primary-container/60 hover:text-white text-xs font-label-caps uppercase tracking-widest">
             Privacy Policy
           </Link>
