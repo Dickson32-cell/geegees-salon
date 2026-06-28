@@ -132,8 +132,13 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, data: result.content });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error saving content:', error);
-    return NextResponse.json({ error: 'Failed to save content' }, { status: 500 });
+    // Return detailed error for debugging
+    return NextResponse.json({
+      error: 'Failed to save content',
+      details: error.message || String(error),
+      code: error.code
+    }, { status: 500 });
   }
 }
