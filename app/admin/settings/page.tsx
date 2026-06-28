@@ -54,23 +54,52 @@ export default function SettingsPage() {
     setMessage({ type: '', text: '' });
 
     try {
-      // Convert to base64
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setSettings({ ...settings, logoUrl: base64String });
-        setUploading(false);
-        setMessage({ type: 'success', text: 'Logo uploaded! Click "Save Settings" to apply.' });
-      };
-      reader.onerror = () => {
-        setUploading(false);
-        setMessage({ type: 'error', text: 'Failed to upload logo' });
-      };
-      reader.readAsDataURL(file);
+      // Compress and convert to base64
+      const compressed = await compressImage(file);
+      setSettings({ ...settings, logoUrl: compressed });
+      setUploading(false);
+      setMessage({ type: 'success', text: 'Logo uploaded! Click "Save Settings" to apply.' });
     } catch (error) {
       setUploading(false);
       setMessage({ type: 'error', text: 'An error occurred while uploading' });
     }
+  };
+
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          // Calculate new dimensions (max width 400px, maintain aspect ratio)
+          const maxWidth = 400;
+          const scaleSize = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scaleSize;
+
+          // Draw and compress
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          // Convert to base64 with 0.8 quality (PNG will be converted to JPEG for compression)
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+          // Check if compressed size is still too large (> 100KB base64)
+          if (compressedBase64.length > 100000) {
+            // Further compress
+            resolve(canvas.toDataURL('image/jpeg', 0.6));
+          } else {
+            resolve(compressedBase64);
+          }
+        };
+        img.onerror = reject;
+      };
+      reader.onerror = reject;
+    });
   };
 
   const handleSave = async () => {
@@ -78,22 +107,28 @@ export default function SettingsPage() {
     setMessage({ type: '', text: '' });
 
     try {
+      console.log('Saving settings, payload size:', JSON.stringify(settings).length);
+
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings)
       });
 
+      console.log('Response status:', response.status);
+
       if (response.ok) {
         setMessage({ type: 'success', text: 'Settings saved successfully!' });
       } else {
         const errorData = await response.json();
+        console.error('Error response:', errorData);
         setMessage({
           type: 'error',
           text: `Failed to save settings: ${errorData.details || errorData.error}`
         });
       }
     } catch (error: any) {
+      console.error('Caught error:', error);
       setMessage({
         type: 'error',
         text: `An error occurred: ${error.message || 'Unknown error'}`
