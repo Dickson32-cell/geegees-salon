@@ -24,12 +24,21 @@ export default function HeroSlideshow({ category, children, className = "" }: He
   const [fadeClass, setFadeClass] = useState('opacity-100');
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Helper function to check if URL is a video
+  // Helper function to check if URL is a video (supports MP4, MP3, and other video formats)
   const isVideo = (url: string): boolean => {
     if (!url) return false;
-    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogg', '.m4v', 'video'];
-    const lowerUrl = url.toLowerCase();
-    const isVideoFile = videoExtensions.some(ext => lowerUrl.includes(ext));
+    // Remove query parameters to check the actual file extension
+    const urlWithoutParams = url.split('?')[0];
+    const lowerUrl = urlWithoutParams.toLowerCase();
+
+    // Check for video and audio extensions
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogg', '.m4v', '.mp3', '.wav', '.m4a'];
+    const hasVideoExtension = videoExtensions.some(ext => lowerUrl.endsWith(ext));
+
+    // Also check if URL path contains 'video' or common video MIME types
+    const hasVideoInPath = lowerUrl.includes('video') || lowerUrl.includes('/videos/');
+
+    const isVideoFile = hasVideoExtension || hasVideoInPath;
     console.log('🎥 Video detection for:', url, '| Is Video:', isVideoFile);
     return isVideoFile;
   };
@@ -53,7 +62,7 @@ export default function HeroSlideshow({ category, children, className = "" }: He
     return () => clearInterval(interval);
   }, [images.length]);
 
-  // Auto-play video when it becomes visible or loads
+  // Auto-play video when it becomes visible or loads (supports MP4, MP3, and all video formats)
   useEffect(() => {
     const video = videoRef.current;
     if (!video || images.length === 0) return;
@@ -62,22 +71,33 @@ export default function HeroSlideshow({ category, children, className = "" }: He
     const mediaUrl = images[currentIndex]?.image_url;
     if (!mediaUrl || !isVideo(mediaUrl)) return;
 
+    console.log('🎬 Attempting to play video:', mediaUrl);
+
     const playVideo = () => {
-      video.play().catch(err => {
-        console.log('Video autoplay prevented:', err);
+      // Force the video to play
+      video.muted = true; // Ensure muted for autoplay
+      video.play().then(() => {
+        console.log('✅ Video is now playing!');
+      }).catch(err => {
+        console.log('⚠️ Video autoplay prevented:', err);
+        // Try again after a short delay
+        setTimeout(() => {
+          video.play().catch(e => console.log('Retry failed:', e));
+        }, 500);
       });
     };
 
-    // Play immediately if video is ready
+    // Multiple attempts to ensure video plays
     if (video.readyState >= 2) {
       playVideo();
     } else {
-      // Wait for video to load enough data before playing
       video.addEventListener('loadeddata', playVideo);
+      video.addEventListener('canplay', playVideo);
     }
 
     return () => {
       video.removeEventListener('loadeddata', playVideo);
+      video.removeEventListener('canplay', playVideo);
     };
   }, [currentIndex, images]);
 
@@ -119,7 +139,7 @@ export default function HeroSlideshow({ category, children, className = "" }: He
     <div className={`relative overflow-hidden ${className}`}>
       {/* Background Media (Video or Image) with Fade Transition */}
       {isCurrentMediaVideo ? (
-        // Video Background
+        // Video Background - Autoplays MP4, MP3 and other video formats
         <video
           ref={videoRef}
           key={currentMedia} // Force re-mount when video changes
@@ -129,9 +149,21 @@ export default function HeroSlideshow({ category, children, className = "" }: He
           muted
           playsInline
           preload="auto"
+          controls={false}
+          onLoadedMetadata={(e) => {
+            // Force play when video metadata is loaded
+            const video = e.currentTarget;
+            video.play().catch(err => console.log('Video play prevented:', err));
+          }}
+          onCanPlay={(e) => {
+            // Force play when video can play
+            const video = e.currentTarget;
+            video.play().catch(err => console.log('Video play prevented:', err));
+          }}
         >
           <source src={currentMedia} type="video/mp4" />
           <source src={currentMedia} type="video/webm" />
+          <source src={currentMedia} type="video/ogg" />
           Your browser does not support the video tag.
         </video>
       ) : (
