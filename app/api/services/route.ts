@@ -57,6 +57,7 @@ export async function POST(request: Request) {
         price: body.price,
         duration: body.duration,
         description: body.description || null,
+        image_url: body.imageUrl || null, // Convert camelCase to snake_case for DB
         status: body.status || 'draft',
       }])
       .select()

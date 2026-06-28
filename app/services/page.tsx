@@ -11,6 +11,7 @@ interface Service {
   price: string;
   duration: string;
   description?: string;
+  image_url?: string; // Optional service image from Supabase
 }
 
 export default function ServicesPage() {
@@ -114,34 +115,58 @@ export default function ServicesPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-gutter">
                   {categoryServices.map((service) => (
-                    <div key={service.id} className="bg-white p-6 md:p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow border-t-2 border-secondary">
-                      <div className="mb-4">
-                        <h4 className="font-headline-sm text-xl md:text-headline-sm text-primary mb-2">{service.name}</h4>
-                        <span className="inline-block px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
-                          {service.category}
-                        </span>
+                    <div key={service.id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow border-t-2 border-secondary overflow-hidden">
+                      {/* Service Image */}
+                      <div className="relative h-48 bg-gradient-to-br from-primary to-primary-container overflow-hidden">
+                        {service.image_url ? (
+                          <img
+                            src={service.image_url}
+                            alt={service.name}
+                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                            loading="lazy"
+                            onError={(e) => {
+                              console.error('Service image load error:', service.image_url);
+                              // Replace with gradient background on error
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-white/40 text-4xl font-light italic">GG</span>
+                          </div>
+                        )}
                       </div>
 
-                      {service.description && (
-                        <p className="font-body-md text-on-surface-variant mb-4">{service.description}</p>
-                      )}
+                      {/* Service Details */}
+                      <div className="p-6 md:p-8">
+                        <div className="mb-4">
+                          <h4 className="font-headline-sm text-xl md:text-headline-sm text-primary mb-2">{service.name}</h4>
+                          <span className="inline-block px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
+                            {service.category}
+                          </span>
+                        </div>
 
-                      <div className="flex justify-between items-center pt-4 border-t border-secondary/10">
-                        <div>
-                          <p className="text-xs text-on-surface-variant uppercase tracking-wide">Price</p>
-                          <p className="font-headline-sm text-primary">{service.price}</p>
+                        {service.description && (
+                          <p className="font-body-md text-on-surface-variant mb-4 line-clamp-3">{service.description}</p>
+                        )}
+
+                        <div className="flex justify-between items-center pt-4 border-t border-secondary/10">
+                          <div>
+                            <p className="text-xs text-on-surface-variant uppercase tracking-wide">Price</p>
+                            <p className="font-headline-sm text-primary">{service.price}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-on-surface-variant uppercase tracking-wide">Duration</p>
+                            <p className="font-body-md text-on-surface">{service.duration}</p>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-on-surface-variant uppercase tracking-wide">Duration</p>
-                          <p className="font-body-md text-on-surface">{service.duration}</p>
-                        </div>
+
+                        <Link href="/booking" className="block mt-6">
+                          <button className="w-full bg-primary text-white py-3 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-colors">
+                            Book Now
+                          </button>
+                        </Link>
                       </div>
-
-                      <Link href="/booking" className="block mt-6">
-                        <button className="w-full bg-primary text-white py-3 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-colors">
-                          Book Now
-                        </button>
-                      </Link>
                     </div>
                   ))}
                 </div>

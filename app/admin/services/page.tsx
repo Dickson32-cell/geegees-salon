@@ -10,6 +10,7 @@ interface Service {
   price: string;
   duration: string;
   description?: string;
+  imageUrl?: string; // Optional service image
   status: 'draft' | 'published' | 'inactive';
 }
 
@@ -18,14 +19,18 @@ export default function ServicesManagement() {
   const [isAdding, setIsAdding] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
     category: "Hair",
     price: "",
     duration: "",
     description: "",
+    imageUrl: "",
     status: "draft" as 'draft' | 'published' | 'inactive',
   });
 
@@ -57,6 +62,35 @@ export default function ServicesManagement() {
     }
   };
 
+  // Handle file selection and preview
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  // Upload image to Supabase Storage
+  const uploadImage = async (file: File): Promise<string> => {
+    const uploadFormData = new FormData();
+    uploadFormData.append('file', file);
+    uploadFormData.append('folder', 'services');
+
+    const response = await fetch('/api/upload', {
+      method: 'POST',
+      body: uploadFormData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url;
+  };
+
   const handleAdd = async () => {
     if (!formData.name || !formData.price || !formData.duration) {
       setError("Please fill in all required fields (Name, Price, Duration)");
@@ -66,11 +100,18 @@ export default function ServicesManagement() {
     try {
       setError("");
       setSuccessMessage("");
+      setUploading(true);
+
+      // Upload image if selected
+      let imageUrl = formData.imageUrl;
+      if (selectedFile) {
+        imageUrl = await uploadImage(selectedFile);
+      }
 
       const response = await fetch('/api/services', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, imageUrl }),
       });
 
       if (!response.ok) {
@@ -85,6 +126,8 @@ export default function ServicesManagement() {
     } catch (error: any) {
       console.error('Error adding service:', error);
       setError(`Failed to add service: ${error.message}`);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -99,11 +142,18 @@ export default function ServicesManagement() {
     try {
       setError("");
       setSuccessMessage("");
+      setUploading(true);
+
+      // Upload new image if selected
+      let imageUrl = formData.imageUrl;
+      if (selectedFile) {
+        imageUrl = await uploadImage(selectedFile);
+      }
 
       const response = await fetch('/api/services', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: editingService.id, ...formData }),
+        body: JSON.stringify({ id: editingService.id, ...formData, imageUrl }),
       });
 
       if (!response.ok) {
@@ -118,6 +168,8 @@ export default function ServicesManagement() {
     } catch (error: any) {
       console.error('Error updating service:', error);
       setError(`Failed to update service: ${error.message}`);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -154,13 +206,18 @@ export default function ServicesManagement() {
       price: service.price,
       duration: service.duration,
       description: service.description || "",
+      imageUrl: service.imageUrl || "",
       status: service.status || "draft",
     });
+    setPreviewUrl(service.imageUrl || "");
+    setSelectedFile(null);
     setIsAdding(true);
   };
 
   const resetForm = () => {
-    setFormData({ name: "", category: "Hair", price: "", duration: "", description: "", status: "draft" });
+    setFormData({ name: "", category: "Hair", price: "", duration: "", description: "", imageUrl: "", status: "draft" });
+    setPreviewUrl("");
+    setSelectedFile(null);
     setIsAdding(false);
     setEditingService(null);
   };
@@ -289,6 +346,33 @@ export default function ServicesManagement() {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary md:col-span-2"
               rows={3}
             />
+
+            {/* Image Upload Field */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Service Image (Optional)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                Supported: JPG, PNG, WEBP. Image will be displayed on service cards.
+              </p>
+              {previewUrl && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-slate-700 mb-2">Preview:</p>
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="max-h-48 rounded-lg border border-gray-300 object-cover"
+                  />
+                </div>
+              )}
+            </div>
+
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Status (Controls visibility on main website)
@@ -307,9 +391,10 @@ export default function ServicesManagement() {
           <div className="flex space-x-3 mt-4">
             <button
               onClick={editingService ? handleUpdate : handleAdd}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm"
+              disabled={uploading}
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingService ? 'Update Service' : 'Add Service'}
+              {uploading ? 'Uploading...' : (editingService ? 'Update Service' : 'Add Service')}
             </button>
             <button
               onClick={resetForm}
