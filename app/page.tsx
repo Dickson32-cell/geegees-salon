@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { HomeServiceCardSkeleton } from "@/components/LoadingSkeleton";
 import HeroVideo from "@/components/HeroVideo";
+import VideoSlideshow from "@/components/VideoSlideshow";
 
 interface Service {
   id: number;
@@ -74,10 +75,7 @@ export default function Home() {
         <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
           <div className="relative group">
             <div className="absolute -inset-4 border border-secondary/20 translate-x-4 translate-y-4 group-hover:translate-x-2 group-hover:translate-y-2 transition-transform duration-500"></div>
-            <div className="aspect-[4/5] bg-cover bg-center relative z-10" style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1595475207225-428b62bda831?q=80&w=2574')",
-            }}>
-            </div>
+            <VideoSlideshow category="home-showcase" interval={8000} />
           </div>
 
           <div>
