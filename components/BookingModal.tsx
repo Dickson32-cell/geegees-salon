@@ -30,6 +30,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [bookingId, setBookingId] = useState<number | null>(null);
 
   const stylists = ['Any Available', 'Sarah Johnson', 'Michael Chen', 'Emma Williams', 'David Martinez'];
 
@@ -100,8 +101,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       });
 
       if (response.ok) {
-        alert('Booking submitted successfully! We will contact you shortly to confirm.');
-        handleClose();
+        const data = await response.json();
+        setBookingId(data.id);
+        setStep(6); // Move to receipt step
       } else {
         const data = await response.json();
         setError(data.error || 'Failed to submit booking');
@@ -126,6 +128,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       notes: ''
     });
     setError('');
+    setBookingId(null);
     onClose();
   };
 
@@ -147,13 +150,13 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
           <div className="mt-6 flex items-center justify-between">
             {[1, 2, 3, 4, 5].map((num) => (
               <div key={num} className="flex items-center flex-1">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  step >= num ? 'bg-secondary text-white' : 'bg-white/20 text-white/60'
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold ${
+                  step >= num ? 'bg-secondary text-black' : 'bg-white/20 text-white/60'
                 }`}>
-                  {num}
+                  {step === 6 && num === 5 ? '✓' : num}
                 </div>
                 {num < 5 && (
-                  <div className={`flex-1 h-1 mx-2 ${
+                  <div className={`flex-1 h-1 mx-1 sm:mx-2 ${
                     step > num ? 'bg-secondary' : 'bg-white/20'
                   }`} />
                 )}
@@ -161,12 +164,13 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
             ))}
           </div>
 
-          <div className="mt-3 text-sm text-white/80 text-center">
+          <div className="mt-3 text-xs sm:text-sm text-white/80 text-center">
             {step === 1 && 'Select Service'}
             {step === 2 && 'Choose Stylist'}
             {step === 3 && 'Pick Date & Time'}
             {step === 4 && 'Your Information'}
             {step === 5 && 'Review & Confirm'}
+            {step === 6 && 'Booking Confirmed'}
           </div>
         </div>
 
@@ -390,36 +394,133 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               </p>
             </div>
           )}
+
+          {/* Step 6: Booking Receipt/Confirmation */}
+          {step === 6 && (
+            <div className="space-y-6">
+              {/* Success Icon */}
+              <div className="text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10 sm:w-12 sm:h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</h3>
+                <p className="text-gray-600 text-sm sm:text-base">Your appointment has been successfully booked</p>
+              </div>
+
+              {/* Receipt Card */}
+              <div className="bg-gradient-to-br from-gray-50 to-white border-2 border-secondary/20 rounded-lg p-4 sm:p-6">
+                <div className="flex justify-between items-start mb-4 pb-4 border-b border-gray-200">
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900">GeeGees Unisex Salon</h4>
+                    <p className="text-xs text-gray-500">Booking Receipt</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-500">Booking ID</p>
+                    <p className="text-sm font-bold text-secondary">#{bookingId?.toString().padStart(6, '0')}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Service:</span>
+                    <span className="font-semibold text-gray-900">{selectedService?.name}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Stylist:</span>
+                    <span className="font-semibold text-gray-900">{formData.stylist}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Date:</span>
+                    <span className="font-semibold text-gray-900">{new Date(formData.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Time:</span>
+                    <span className="font-semibold text-gray-900">{formData.appointmentTime}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Duration:</span>
+                    <span className="font-semibold text-gray-900">{selectedService?.duration}</span>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t-2 border-secondary/30">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600 font-medium">Estimated Price:</span>
+                    <span className="text-2xl font-bold text-secondary">{selectedService?.price}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Client Info */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h5 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  What's Next?
+                </h5>
+                <ul className="text-sm text-blue-800 space-y-1 ml-7">
+                  <li>• A confirmation message will be sent to: <strong>{formData.customerPhone}</strong></li>
+                  <li>• Please save your Booking ID for reference</li>
+                  <li>• Our team will confirm your appointment via WhatsApp</li>
+                  <li>• Arrive 10 minutes early for your appointment</li>
+                </ul>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={() => window.print()}
+                  className="flex-1 px-4 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  Print Receipt
+                </button>
+                <button
+                  onClick={handleClose}
+                  className="flex-1 px-4 py-3 bg-secondary text-black rounded-lg font-medium hover:bg-secondary/90 transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
-        <div className="p-4 sm:p-6 bg-gray-50 rounded-b-xl sm:rounded-b-2xl flex justify-between gap-3">
-          {step > 1 && (
-            <button
-              onClick={handleBack}
-              className="px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium text-sm sm:text-base hover:bg-gray-100 transition-colors"
-            >
-              Back
-            </button>
-          )}
+        {step !== 6 && (
+          <div className="p-4 sm:p-6 bg-gray-50 rounded-b-xl sm:rounded-b-2xl flex justify-between gap-3">
+            {step > 1 && (
+              <button
+                onClick={handleBack}
+                className="px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium text-sm sm:text-base hover:bg-gray-100 transition-colors"
+              >
+                Back
+              </button>
+            )}
 
-          {step < 5 ? (
-            <button
-              onClick={handleNext}
-              className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-secondary text-white rounded-lg font-medium text-sm sm:text-base hover:bg-secondary/90 transition-colors ml-auto"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-secondary text-white rounded-lg font-medium text-sm sm:text-base hover:bg-secondary/90 transition-colors disabled:opacity-50 ml-auto"
-            >
-              {loading ? 'Submitting...' : 'Confirm Booking'}
-            </button>
-          )}
-        </div>
+            {step < 5 ? (
+              <button
+                onClick={handleNext}
+                className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-secondary text-black rounded-lg font-medium text-sm sm:text-base hover:bg-secondary/90 transition-colors ml-auto"
+              >
+                Next
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-secondary text-black rounded-lg font-medium text-sm sm:text-base hover:bg-secondary/90 transition-colors disabled:opacity-50 ml-auto"
+              >
+                {loading ? 'Submitting...' : 'Confirm Booking'}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
