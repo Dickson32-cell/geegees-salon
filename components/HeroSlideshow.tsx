@@ -52,7 +52,11 @@ export default function HeroSlideshow({ category, children, className = "" }: He
   // Auto-play video when it becomes visible or loads
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !currentMedia || !isVideo(currentMedia)) return;
+    if (!video || images.length === 0) return;
+
+    // Calculate current media URL
+    const mediaUrl = images[currentIndex]?.image_url;
+    if (!mediaUrl || !isVideo(mediaUrl)) return;
 
     const playVideo = () => {
       video.play().catch(err => {
@@ -71,7 +75,7 @@ export default function HeroSlideshow({ category, children, className = "" }: He
     return () => {
       video.removeEventListener('loadeddata', playVideo);
     };
-  }, [currentIndex, currentMedia]);
+  }, [currentIndex, images]);
 
   const fetchImages = async () => {
     try {
