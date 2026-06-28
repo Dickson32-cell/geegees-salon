@@ -87,10 +87,17 @@ export default function SettingsPage() {
       if (response.ok) {
         setMessage({ type: 'success', text: 'Settings saved successfully!' });
       } else {
-        setMessage({ type: 'error', text: 'Failed to save settings' });
+        const errorData = await response.json();
+        setMessage({
+          type: 'error',
+          text: `Failed to save settings: ${errorData.details || errorData.error}`
+        });
       }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'An error occurred while saving' });
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: `An error occurred: ${error.message || 'Unknown error'}`
+      });
     } finally {
       setSaving(false);
     }

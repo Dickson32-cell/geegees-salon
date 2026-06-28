@@ -53,8 +53,12 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ success: true, settings: settings.content });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error saving settings:', error);
-    return NextResponse.json({ error: 'Failed to save settings' }, { status: 500 });
+    return NextResponse.json({
+      error: 'Failed to save settings',
+      details: error.message || String(error),
+      code: error.code
+    }, { status: 500 });
   }
 }
