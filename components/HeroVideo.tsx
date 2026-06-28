@@ -74,11 +74,15 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
   };
 
   return (
-    <div className="relative rounded-lg overflow-hidden shadow-2xl" style={{ height: '65vh' }}>
+    <div className="relative rounded-lg overflow-hidden shadow-2xl w-full" style={{ height: '65vh', minHeight: '500px' }}>
       {/* Video Element */}
       <video
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover"
+        style={{
+          objectFit: 'cover',
+          objectPosition: 'center center'
+        }}
         autoPlay
         loop
         muted
@@ -100,7 +104,7 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
       </video>
 
       {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent"></div>
+      <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/60 to-primary/30"></div>
 
       {/* Play Button (if autoplay fails) */}
       {showPlayButton && !isPlaying && (
