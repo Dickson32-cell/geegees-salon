@@ -161,9 +161,25 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       // Add image to PDF
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
 
-      // Download the PDF
+      // Download the PDF - mobile-friendly approach
       const filename = `GeeGees-Booking-${bookingId?.toString().padStart(6, '0')}.pdf`;
-      pdf.save(filename);
+
+      // For mobile browsers, use blob approach
+      const pdfBlob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Unable to generate PDF. Please try printing instead or contact support.');

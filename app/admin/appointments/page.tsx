@@ -29,10 +29,19 @@ export default function AppointmentsPage() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [showRevenueModal, setShowRevenueModal] = useState(false);
   const [revenueAmount, setRevenueAmount] = useState("");
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
 
   useEffect(() => {
     fetchAppointments();
     fetchSettings();
+
+    // Auto-refresh appointments every 30 seconds
+    const interval = setInterval(() => {
+      fetchAppointments();
+    }, 30000); // 30 seconds
+
+    // Cleanup interval on unmount
+    return () => clearInterval(interval);
   }, []);
 
   const fetchAppointments = async () => {
@@ -41,6 +50,7 @@ export default function AppointmentsPage() {
       if (response.ok) {
         const data = await response.json();
         setAppointments(data);
+        setLastUpdated(new Date());
       }
     } catch (error) {
       console.error('Error fetching appointments:', error);
@@ -184,7 +194,15 @@ export default function AppointmentsPage() {
               </span>
             )}
           </h1>
-          <p className="text-gray-600 mt-2">Manage all customer bookings and appointments</p>
+          <div className="flex items-center gap-4 mt-2">
+            <p className="text-gray-600">Manage all customer bookings and appointments</p>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>Auto-refreshing • Last updated: {lastUpdated.toLocaleTimeString()}</span>
+            </div>
+          </div>
         </div>
         <Link
           href="/admin"
