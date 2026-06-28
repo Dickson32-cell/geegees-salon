@@ -7,6 +7,7 @@ import { useBooking } from "@/contexts/BookingContext";
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [logoUrl, setLogoUrl] = useState('');
   const { openBookingModal } = useBooking();
 
   useEffect(() => {
@@ -16,6 +17,22 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    fetchLogo();
+  }, []);
+
+  const fetchLogo = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      if (response.ok) {
+        const data = await response.json();
+        setLogoUrl(data.logoUrl || '');
+      }
+    } catch (error) {
+      console.error('Error fetching logo:', error);
+    }
+  };
 
   return (
     <>
@@ -37,7 +54,14 @@ export default function Navbar() {
               </svg>
             )}
           </button>
-          <Link href="/">
+          <Link href="/" className="flex items-center gap-2 md:gap-3">
+            {logoUrl && (
+              <img
+                src={logoUrl}
+                alt="GeeGees Logo"
+                className="h-8 md:h-10 w-auto object-contain"
+              />
+            )}
             <h1 className="font-display-lg text-lg md:text-2xl uppercase tracking-widest text-primary">
               GeeGees
             </h1>
@@ -95,9 +119,18 @@ export default function Navbar() {
           onClick={(e) => e.stopPropagation()}
         >
             <div className="flex justify-between items-center mb-8">
-              <h1 className="font-display-lg text-headline-sm uppercase tracking-widest text-primary">
-                GeeGees
-              </h1>
+              <div className="flex items-center gap-2">
+                {logoUrl && (
+                  <img
+                    src={logoUrl}
+                    alt="GeeGees Logo"
+                    className="h-8 w-auto object-contain"
+                  />
+                )}
+                <h1 className="font-display-lg text-headline-sm uppercase tracking-widest text-primary">
+                  GeeGees
+                </h1>
+              </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="text-secondary"

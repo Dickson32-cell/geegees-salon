@@ -16,7 +16,8 @@ export async function GET() {
     // Return empty settings if not found
     return NextResponse.json({
       whatsappNumber: '',
-      whatsappBusinessApiKey: ''
+      whatsappBusinessApiKey: '',
+      logoUrl: ''
     });
   } catch (error) {
     console.error('Error fetching settings:', error);
@@ -28,7 +29,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { whatsappNumber, whatsappBusinessApiKey } = body;
+    const { whatsappNumber, whatsappBusinessApiKey, logoUrl } = body;
 
     // Upsert settings in website_content table
     const settings = await prisma.websiteContent.upsert({
@@ -36,7 +37,8 @@ export async function POST(request: Request) {
       update: {
         content: {
           whatsappNumber,
-          whatsappBusinessApiKey
+          whatsappBusinessApiKey,
+          logoUrl
         }
       },
       create: {
@@ -44,7 +46,8 @@ export async function POST(request: Request) {
         section: 'system',
         content: {
           whatsappNumber,
-          whatsappBusinessApiKey
+          whatsappBusinessApiKey,
+          logoUrl
         }
       }
     });
