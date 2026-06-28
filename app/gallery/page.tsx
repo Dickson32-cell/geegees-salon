@@ -142,7 +142,7 @@ export default function GalleryPage() {
           <p className="text-on-surface-variant text-lg">No images found in this category.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filteredItems.map((item) => {
             const isVideo = /\.(mp4|webm|mov|avi|ogg|m4v)$/i.test(item.image_url);
 
@@ -150,16 +150,18 @@ export default function GalleryPage() {
               <div
                 key={item.id}
                 className="relative group overflow-hidden cursor-pointer rounded-lg shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-gray-100"
-                style={{ minHeight: '400px' }}
+                style={{ minHeight: '280px' }}
                 onClick={() => setSelectedImage(item)}
               >
                 {isVideo ? (
                   <video
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    style={{ minHeight: '400px' }}
-                    controls
+                    className="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-105"
+                    style={{ minHeight: '280px' }}
+                    muted
                     playsInline
                     preload="metadata"
+                    loop
+                    autoPlay
                     onClick={(e) => e.stopPropagation()}
                     onError={(e) => {
                       console.error('Video load error:', item.image_url);
@@ -173,8 +175,8 @@ export default function GalleryPage() {
                   <img
                     src={item.image_url}
                     alt={item.title || 'Gallery image'}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    style={{ minHeight: '400px' }}
+                    className="w-full h-full object-cover transition-transform duration-700 md:group-hover:scale-105"
+                    style={{ minHeight: '280px' }}
                     loading="lazy"
                     onError={(e) => {
                       console.error('Image load error:', item.image_url);
@@ -183,17 +185,26 @@ export default function GalleryPage() {
                   />
                 )}
 
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                {/* Info Overlay - Always visible on mobile, hover on desktop */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-4 md:p-6 pointer-events-none">
                   {item.category && (
-                    <span className="font-label-caps text-secondary-fixed mb-2 uppercase tracking-widest text-xs">
+                    <span className="font-label-caps text-secondary mb-1 md:mb-2 uppercase tracking-widest text-xs">
                       {item.category}
                     </span>
                   )}
-                  {item.title && <h3 className="font-headline-sm text-white">{item.title}</h3>}
+                  {item.title && <h3 className="font-headline-sm text-base md:text-xl text-white">{item.title}</h3>}
                   {item.description && (
-                    <p className="text-white/80 text-sm mt-2">{item.description}</p>
+                    <p className="text-white/80 text-xs md:text-sm mt-1 md:mt-2 line-clamp-2">{item.description}</p>
                   )}
+
+                  {/* Tap to view indicator on mobile */}
+                  <div className="mt-2 md:hidden flex items-center gap-2 text-secondary text-xs">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span>Tap to view</span>
+                  </div>
                 </div>
               </div>
             );
