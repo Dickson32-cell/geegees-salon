@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { HomeServiceCardSkeleton } from "@/components/LoadingSkeleton";
+import HeroVideo from "@/components/HeroVideo";
 
 interface Service {
   id: number;
@@ -41,51 +42,29 @@ export default function Home() {
       {/* Hero Section with Video Frame */}
       <section className="relative min-h-[70vh] flex items-center justify-center bg-primary px-4 md:px-margin-desktop py-12">
         <div className="max-w-container-max mx-auto w-full">
-          {/* Video Frame Container */}
-          <div className="relative rounded-lg overflow-hidden shadow-2xl" style={{ height: '65vh' }}>
-            {/* Video Element */}
-            <video
-              className="absolute inset-0 w-full h-full object-cover"
-              autoPlay
-              loop
-              muted
-              playsInline
-              onError={(e) => {
-                console.error('Video failed to load');
-                e.currentTarget.style.display = 'none';
-              }}
-            >
-              <source src="https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-home/nzyn2iplvum_1782592129209.MP4" type="video/mp4" />
-            </video>
-
-            {/* Dark Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/60 to-transparent"></div>
-
-            {/* Text Overlay */}
-            <div className="absolute inset-0 flex items-center justify-center text-center px-6">
-              <div className="max-w-4xl">
-                <span className="font-label-caps text-xs md:text-label-caps text-secondary-fixed uppercase tracking-[0.2em] md:tracking-[0.3em] mb-4 block">
-                  The Editorial Experience
-                </span>
-                <h2 className="font-display-lg text-3xl md:text-5xl lg:text-6xl text-white mb-8 leading-tight">
-                  Mastering the Art of <br/>
-                  <span className="italic font-normal">Opulence & Grace</span>
-                </h2>
-                <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
-                  <Link href="/services">
-                    <button className="w-full md:w-auto bg-secondary border border-secondary text-white px-10 py-4 font-label-caps text-label-caps uppercase tracking-widest hover:bg-secondary/90 transition-colors shadow-lg">
-                      Explore Services
-                    </button>
-                  </Link>
-                  <Link href="/gallery">
-                    <button className="w-full md:w-auto border-2 border-white text-white px-10 py-4 font-label-caps text-label-caps uppercase tracking-widest hover:bg-white hover:text-primary transition-all">
-                      View Gallery
-                    </button>
-                  </Link>
-                </div>
+          <HeroVideo videoUrl="https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-home/nzyn2iplvum_1782592129209.MP4">
+            <div className="max-w-4xl">
+              <span className="font-label-caps text-xs md:text-label-caps text-secondary-fixed uppercase tracking-[0.2em] md:tracking-[0.3em] mb-4 block">
+                The Editorial Experience
+              </span>
+              <h2 className="font-display-lg text-3xl md:text-5xl lg:text-6xl text-white mb-8 leading-tight">
+                Mastering the Art of <br/>
+                <span className="italic font-normal">Opulence & Grace</span>
+              </h2>
+              <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
+                <Link href="/services">
+                  <button className="w-full md:w-auto bg-secondary border border-secondary text-white px-10 py-4 font-label-caps text-label-caps uppercase tracking-widest hover:bg-secondary/90 transition-colors shadow-lg">
+                    Explore Services
+                  </button>
+                </Link>
+                <Link href="/gallery">
+                  <button className="w-full md:w-auto border-2 border-white text-white px-10 py-4 font-label-caps text-label-caps uppercase tracking-widest hover:bg-white hover:text-primary transition-all">
+                    View Gallery
+                  </button>
+                </Link>
               </div>
             </div>
-          </div>
+          </HeroVideo>
         </div>
       </section>
 
