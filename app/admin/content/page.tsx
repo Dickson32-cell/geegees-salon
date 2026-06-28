@@ -6,6 +6,10 @@ interface ContentSection {
   title: string;
   subtitle?: string;
   description?: string;
+  stat1Value?: string;
+  stat1Label?: string;
+  stat2Value?: string;
+  stat2Label?: string;
   buttonText?: string;
   buttonLink?: string;
 }
@@ -214,7 +218,53 @@ export default function ContentManagement() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="border-t pt-4">
+                  <h4 className="text-md font-semibold mb-3 text-gray-800">Statistics</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Stat 1 Value (e.g. 15+)</label>
+                      <input
+                        type="text"
+                        value={(pageContent.about as any).stat1Value || ''}
+                        onChange={(e) => updateSection('about', 'stat1Value', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                        placeholder="15+"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Stat 1 Label</label>
+                      <input
+                        type="text"
+                        value={(pageContent.about as any).stat1Label || ''}
+                        onChange={(e) => updateSection('about', 'stat1Label', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                        placeholder="Years of Mastery"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Stat 2 Value (e.g. 24k)</label>
+                      <input
+                        type="text"
+                        value={(pageContent.about as any).stat2Value || ''}
+                        onChange={(e) => updateSection('about', 'stat2Value', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                        placeholder="24k"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Stat 2 Label</label>
+                      <input
+                        type="text"
+                        value={(pageContent.about as any).stat2Label || ''}
+                        onChange={(e) => updateSection('about', 'stat2Label', e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                        placeholder="Clients Styled"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 border-t pt-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
                     <input

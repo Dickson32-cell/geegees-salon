@@ -16,12 +16,34 @@ interface Service {
   image_url?: string; // Optional service image from Supabase
 }
 
+interface AboutContent {
+  title: string;
+  description: string;
+  stat1Value: string;
+  stat1Label: string;
+  stat2Value: string;
+  stat2Label: string;
+  buttonText: string;
+  buttonLink: string;
+}
+
 export default function Home() {
   const [services, setServices] = useState<Service[]>([]);
   const [error, setError] = useState<string>("");
+  const [aboutContent, setAboutContent] = useState<AboutContent>({
+    title: 'Redefining Luxury Grooming',
+    description: 'GeeGees Unisex Salon is more than a destination; it\'s a sanctuary for the discerning. We blend time-honored techniques with contemporary editorial trends to deliver an experience that transcends the traditional salon visit.',
+    stat1Value: '15+',
+    stat1Label: 'Years of Mastery',
+    stat2Value: '24k',
+    stat2Label: 'Clients Styled',
+    buttonText: 'Our Story',
+    buttonLink: '/team'
+  });
 
   useEffect(() => {
     fetchServices();
+    fetchAboutContent();
   }, []);
 
   const fetchServices = async () => {
@@ -36,6 +58,20 @@ export default function Home() {
     } catch (error) {
       console.error('Error fetching services:', error);
       setError("Unable to load services at this time.");
+    }
+  };
+
+  const fetchAboutContent = async () => {
+    try {
+      const response = await fetch('/api/content?page=home');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.about) {
+          setAboutContent(data.about);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching about content:', error);
     }
   };
 
@@ -80,23 +116,23 @@ export default function Home() {
 
           <div>
             <div className="w-10 h-[1px] bg-secondary mb-6"></div>
-            <h3 className="font-headline-md text-headline-md mb-6">Redefining Luxury Grooming</h3>
+            <h3 className="font-headline-md text-headline-md mb-6">{aboutContent.title}</h3>
             <p className="font-body-lg text-body-lg text-on-surface-variant mb-8 leading-relaxed">
-              GeeGees Unisex Salon is more than a destination; it&apos;s a sanctuary for the discerning. We blend time-honored techniques with contemporary editorial trends to deliver an experience that transcends the traditional salon visit.
+              {aboutContent.description}
             </p>
             <div className="grid grid-cols-2 gap-8 mb-8">
               <div>
-                <span className="font-display-lg text-headline-md text-secondary block mb-2">15+</span>
-                <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">Years of Mastery</span>
+                <span className="font-display-lg text-headline-md text-secondary block mb-2">{aboutContent.stat1Value}</span>
+                <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">{aboutContent.stat1Label}</span>
               </div>
               <div>
-                <span className="font-display-lg text-headline-md text-secondary block mb-2">24k</span>
-                <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">Clients Styled</span>
+                <span className="font-display-lg text-headline-md text-secondary block mb-2">{aboutContent.stat2Value}</span>
+                <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">{aboutContent.stat2Label}</span>
               </div>
             </div>
-            <Link href="/team">
+            <Link href={aboutContent.buttonLink}>
               <button className="border border-secondary text-secondary px-8 py-3 font-label-caps text-label-caps uppercase tracking-widest hover:bg-secondary hover:text-white transition-all">
-                Our Story
+                {aboutContent.buttonText}
               </button>
             </Link>
           </div>
