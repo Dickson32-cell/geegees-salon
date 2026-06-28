@@ -120,22 +120,36 @@ export default function HeroSlideshow({ category, children, className = "" }: He
 
   const fetchImages = async () => {
     try {
+      console.log('🔄 Fetching gallery images for category:', category);
       const response = await fetch('/api/gallery');
-      if (!response.ok) throw new Error('Failed to fetch images');
+
+      if (!response.ok) {
+        console.error('❌ API response not OK:', response.status, response.statusText);
+        throw new Error(`Failed to fetch images: ${response.status}`);
+      }
+
       const data: GalleryImage[] = await response.json();
+      console.log('📦 Total images received from API:', data.length);
 
       // Filter by category and sort by display_order
       const categoryImages = data
         .filter(img => img.category === category)
         .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
 
-      console.log('📸 Fetched images for category:', category, '| Count:', categoryImages.length);
-      console.log('📋 Images:', categoryImages.map(img => ({ url: img.image_url, category: img.category })));
+      console.log('✅ Images for category "' + category + '":', categoryImages.length);
+      if (categoryImages.length > 0) {
+        console.log('📋 Image URLs:');
+        categoryImages.forEach((img, index) => {
+          console.log(`   ${index + 1}. ${img.image_url}`);
+        });
+      } else {
+        console.warn('⚠️ No images found for category:', category);
+        console.log('💡 Using default fallback image');
+      }
 
       setImages(categoryImages);
     } catch (error) {
-      console.error('Error fetching hero images:', error);
-      // Fall back to default image if fetch fails
+      console.error('❌ Error fetching hero images:', error);
       setImages([]);
     } finally {
       setLoading(false);
@@ -150,10 +164,26 @@ export default function HeroSlideshow({ category, children, className = "" }: He
   const currentMedia = images.length > 0 ? images[currentIndex].image_url : defaultImage;
   const isCurrentMediaVideo = currentMedia && isVideo(currentMedia);
 
-  console.log('🎬 Media:', currentMedia, '| Video?', isCurrentMediaVideo);
+  console.log('==========================================');
+  console.log('🖼️  HERO SLIDESHOW STATUS');
+  console.log('==========================================');
+  console.log('Category:', category);
+  console.log('Total images loaded:', images.length);
+  console.log('Current index:', currentIndex);
+  console.log('Current media URL:', currentMedia);
+  console.log('Is video?', isCurrentMediaVideo);
+  console.log('Using fallback?', images.length === 0);
+  console.log('==========================================');
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
+      {/* Loading indicator */}
+      {loading && (
+        <div className="absolute top-4 right-4 z-50 bg-white/10 backdrop-blur-sm px-3 py-2 rounded text-white text-sm">
+          Loading media...
+        </div>
+      )}
+
       {/* Background Media (Video or Image) with Fade Transition */}
       {isCurrentMediaVideo ? (
         // Video Background - Supports ALL video formats including Supabase MP4 files
