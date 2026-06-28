@@ -21,8 +21,8 @@ interface PageContent {
 }
 
 export default function ContentManagement() {
-  const [selectedPage, setSelectedPage] = useState<'home' | 'services' | 'gallery' | 'booking'>('home');
-  const [content, setContent] = useState<Record<string, PageContent>>({});
+  const [selectedPage, setSelectedPage] = useState<'home' | 'services' | 'gallery' | 'booking' | 'footer'>('home');
+  const [content, setContent] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -85,8 +85,8 @@ export default function ContentManagement() {
       {/* Page Selector */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <h3 className="text-lg font-bold mb-4">Select Page to Edit</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {['home', 'services', 'gallery', 'booking'].map((page) => (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {['home', 'services', 'gallery', 'booking', 'footer'].map((page) => (
             <button
               key={page}
               onClick={() => setSelectedPage(page as any)}
@@ -345,6 +345,114 @@ export default function ContentManagement() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Footer Content (Footer page only) */}
+          {selectedPage === 'footer' && (
+            <>
+              {/* Contact Information */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold">Contact Information</h3>
+                  <button
+                    onClick={() => handleSave('contact')}
+                    disabled={saving}
+                    className="btn-primary"
+                  >
+                    {saving ? 'Saving...' : 'Save Contact'}
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                    <textarea
+                      value={pageContent?.contact?.address || ''}
+                      onChange={(e) => updateSection('contact', 'address', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                      rows={2}
+                      placeholder="123 Editorial Way,&#10;Fashion District, NY"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Use line breaks for multiple lines</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                    <input
+                      type="text"
+                      value={pageContent?.contact?.phone || ''}
+                      onChange={(e) => updateSection('contact', 'phone', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                      placeholder="+1 (555) 987-6543"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <input
+                      type="email"
+                      value={pageContent?.contact?.email || ''}
+                      onChange={(e) => updateSection('contact', 'email', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                      placeholder="concierge@geegees.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Media Links */}
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold">Social Media Links</h3>
+                  <button
+                    onClick={() => handleSave('social')}
+                    disabled={saving}
+                    className="btn-primary"
+                  >
+                    {saving ? 'Saving...' : 'Save Social Links'}
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Instagram URL</label>
+                    <input
+                      type="url"
+                      value={pageContent?.social?.instagramUrl || ''}
+                      onChange={(e) => updateSection('social', 'instagramUrl', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                      placeholder="https://instagram.com/geegees"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Facebook URL</label>
+                    <input
+                      type="url"
+                      value={pageContent?.social?.facebookUrl || ''}
+                      onChange={(e) => updateSection('social', 'facebookUrl', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                      placeholder="https://facebook.com/geegees"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">YouTube URL</label>
+                    <input
+                      type="url"
+                      value={pageContent?.social?.youtubeUrl || ''}
+                      onChange={(e) => updateSection('social', 'youtubeUrl', e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                      placeholder="https://youtube.com/@geegees"
+                    />
+                  </div>
+
+                  <p className="text-xs text-gray-500 mt-2">
+                    💡 Use "#" to disable a social link. Leave empty or use full URL to enable.
+                  </p>
+                </div>
+              </div>
+            </>
           )}
         </div>
       )}

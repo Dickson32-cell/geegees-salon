@@ -60,6 +60,22 @@ const defaultContent = {
       description: 'Step into a world of curated beauty. Select your desired treatments and let our editorial experts transform your vision into reality.',
     },
   },
+  footer: {
+    contact: {
+      id: 'footer-contact',
+      type: 'contact',
+      address: '123 Editorial Way,\nFashion District, NY',
+      phone: '+1 (555) 987-6543',
+      email: 'concierge@geegees.com',
+    },
+    social: {
+      id: 'footer-social',
+      type: 'social',
+      instagramUrl: '#',
+      facebookUrl: '#',
+      youtubeUrl: '#',
+    },
+  },
 };
 
 // Cache for 5 minutes (revalidate every 300 seconds)
