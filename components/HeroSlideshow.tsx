@@ -22,124 +22,63 @@ export default function HeroSlideshow({ category, children, className = "" }: He
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [fadeClass, setFadeClass] = useState('opacity-100');
-  const [isPlaying, setIsPlaying] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Helper function to check if URL is a video (supports MP4, MP3, and other video formats)
+  // Helper function to check if URL is a video - ALL FORMATS SUPPORTED
   const isVideo = (url: string): boolean => {
     if (!url) return false;
-    // Remove query parameters to check the actual file extension
-    const urlWithoutParams = url.split('?')[0];
-    const lowerUrl = urlWithoutParams.toLowerCase();
+    const urlWithoutParams = url.split('?')[0].toLowerCase();
 
-    // Check for video and audio extensions
-    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogg', '.m4v', '.mp3', '.wav', '.m4a'];
-    const hasVideoExtension = videoExtensions.some(ext => lowerUrl.endsWith(ext));
+    // Support ALL video and audio formats
+    const mediaExtensions = [
+      '.mp4', '.webm', '.ogg', '.mov', '.avi', '.m4v', '.mkv', '.flv', '.wmv',
+      '.mp3', '.wav', '.m4a', '.aac', '.flac', '.wma', '.opus'
+    ];
 
-    // Also check if URL path contains 'video' or common video MIME types
-    const hasVideoInPath = lowerUrl.includes('video') || lowerUrl.includes('/videos/');
+    const isMediaFile = mediaExtensions.some(ext => urlWithoutParams.endsWith(ext)) ||
+                        urlWithoutParams.includes('video') ||
+                        urlWithoutParams.includes('/videos/');
 
-    const isVideoFile = hasVideoExtension || hasVideoInPath;
-    console.log('🎥 Video detection for:', url, '| Is Video:', isVideoFile);
-    return isVideoFile;
+    console.log('🎥 Checking:', url, '→', isMediaFile);
+    return isMediaFile;
   };
 
   useEffect(() => {
     fetchImages();
   }, [category]);
 
+  // Simple slideshow - change media every 5 seconds
   useEffect(() => {
     if (images.length <= 1) return;
 
     const interval = setInterval(() => {
       setFadeClass('opacity-0');
-
       setTimeout(() => {
         setCurrentIndex((prev) => (prev + 1) % images.length);
         setFadeClass('opacity-100');
-      }, 500); // Half of transition duration
-    }, 5000); // Change image/video every 5 seconds
+      }, 500);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [images.length]);
 
-  // Force video to play - multiple aggressive attempts
-  const forcePlayVideo = () => {
+  // Simple video autoplay - works with ALL formats
+  useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    video.muted = true;
-    video.volume = 0;
-    video.setAttribute('muted', 'true');
-    video.setAttribute('playsinline', 'true');
-
-    const attemptPlay = () => {
-      video.play()
-        .then(() => {
-          console.log('✅ Video is now playing!');
-          setIsPlaying(true);
-        })
-        .catch(err => {
-          console.log('⚠️ Video autoplay prevented:', err);
-          setIsPlaying(false);
-        });
+    const playVideo = () => {
+      video.muted = true;
+      video.play().catch(() => {
+        // If autoplay fails, try again after user interaction
+        document.addEventListener('click', () => {
+          video.play().catch(() => {});
+        }, { once: true });
+      });
     };
 
-    attemptPlay();
-    // Retry multiple times
-    setTimeout(attemptPlay, 100);
-    setTimeout(attemptPlay, 500);
-    setTimeout(attemptPlay, 1000);
-  };
-
-  // Auto-play video when it becomes visible or loads
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || images.length === 0) return;
-
-    // Calculate current media URL
-    const mediaUrl = images[currentIndex]?.image_url;
-    if (!mediaUrl || !isVideo(mediaUrl)) return;
-
-    console.log('🎬 Attempting to play video:', mediaUrl);
-
-    video.addEventListener('loadeddata', forcePlayVideo);
-    video.addEventListener('canplay', forcePlayVideo);
-    video.addEventListener('canplaythrough', forcePlayVideo);
-
-    // Also try immediately
-    if (video.readyState >= 2) {
-      forcePlayVideo();
-    }
-
-    return () => {
-      video.removeEventListener('loadeddata', forcePlayVideo);
-      video.removeEventListener('canplay', forcePlayVideo);
-      video.removeEventListener('canplaythrough', forcePlayVideo);
-    };
-  }, [currentIndex, images]);
-
-  // Use Intersection Observer to play when visible
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            forcePlayVideo();
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    observer.observe(container);
-
-    return () => observer.disconnect();
-  }, [images, currentIndex]);
+    playVideo();
+  }, [currentIndex]);
 
   const fetchImages = async () => {
     try {
@@ -173,55 +112,32 @@ export default function HeroSlideshow({ category, children, className = "" }: He
   const currentMedia = images.length > 0 ? images[currentIndex].image_url : defaultImage;
   const isCurrentMediaVideo = currentMedia && isVideo(currentMedia);
 
-  console.log('🎬 Current media:', currentMedia, '| Is video:', isCurrentMediaVideo, '| Index:', currentIndex);
-
-  // Handle click to play video if autoplay failed
-  const handleClick = () => {
-    if (isCurrentMediaVideo && !isPlaying) {
-      forcePlayVideo();
-    }
-  };
+  console.log('🎬 Media:', currentMedia, '| Video?', isCurrentMediaVideo);
 
   return (
-    <div
-      ref={containerRef}
-      className={`relative overflow-hidden ${className}`}
-      onClick={handleClick}
-    >
+    <div className={`relative overflow-hidden ${className}`}>
       {/* Background Media (Video or Image) with Fade Transition */}
       {isCurrentMediaVideo ? (
-        // Video Background - Autoplays MP4, MP3 and other video formats
+        // Video Background - Supports ALL video formats (MP4, WebM, OGG, MOV, AVI, etc.)
         <video
           ref={videoRef}
-          key={currentMedia} // Force re-mount when video changes
+          key={currentMedia}
+          src={currentMedia}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 z-0 ${fadeClass}`}
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
-          controls={false}
-          onLoadedMetadata={forcePlayVideo}
-          onCanPlay={forcePlayVideo}
-          onCanPlayThrough={forcePlayVideo}
-          onPlay={() => {
-            console.log('🎥 Video started playing');
-            setIsPlaying(true);
+          onError={(e) => {
+            console.error('❌ Video error:', e);
+            console.error('Failed video URL:', currentMedia);
           }}
-          onPause={() => {
-            console.log('⏸️ Video paused');
-            setIsPlaying(false);
-            // Auto-resume if paused
-            setTimeout(forcePlayVideo, 100);
+          onLoadedData={() => {
+            console.log('✅ Video loaded successfully');
+            videoRef.current?.play().catch(err => console.log('Play error:', err));
           }}
-          onSuspend={forcePlayVideo}
-          onWaiting={forcePlayVideo}
-        >
-          <source src={currentMedia} type="video/mp4" />
-          <source src={currentMedia} type="video/webm" />
-          <source src={currentMedia} type="video/ogg" />
-          Your browser does not support the video tag.
-        </video>
+        />
       ) : (
         // Image Background
         <div
@@ -234,19 +150,6 @@ export default function HeroSlideshow({ category, children, className = "" }: He
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-primary/40 z-10"></div>
-
-      {/* Play button overlay if video not playing */}
-      {isCurrentMediaVideo && !isPlaying && (
-        <button
-          onClick={forcePlayVideo}
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-15 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full p-6 transition-all group"
-          aria-label="Play video"
-        >
-          <svg className="w-12 h-12 text-white group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-          </svg>
-        </button>
-      )}
 
       {/* Content */}
       <div className="relative z-20">
