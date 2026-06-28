@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
-// Default content structure
-let websiteContent = {
+const prisma = new PrismaClient();
+
+// Default content structure (used as fallback if database is empty)
+const defaultContent = {
   home: {
     hero: {
       id: 'home-hero',
@@ -62,27 +65,75 @@ let websiteContent = {
 };
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const page = searchParams.get('page');
+  try {
+    const { searchParams } = new URL(request.url);
+    const page = searchParams.get('page');
 
-  if (page && websiteContent[page as keyof typeof websiteContent]) {
-    return NextResponse.json(websiteContent[page as keyof typeof websiteContent]);
+    // Fetch all content from database
+    const dbContent = await prisma.websiteContent.findMany();
+
+    // Build content object from database, using defaults as fallback
+    const websiteContent: any = { ...defaultContent };
+
+    // Merge database content with defaults
+    dbContent.forEach((item) => {
+      if (!websiteContent[item.page]) {
+        websiteContent[item.page] = {};
+      }
+      websiteContent[item.page][item.section] = {
+        ...websiteContent[item.page][item.section],
+        ...(item.content as any)
+      };
+    });
+
+    if (page && websiteContent[page]) {
+      return NextResponse.json(websiteContent[page]);
+    }
+
+    return NextResponse.json(websiteContent);
+  } catch (error) {
+    console.error('Error fetching content:', error);
+    // Return defaults if database fails
+    const { searchParams } = new URL(request.url);
+    const page = searchParams.get('page');
+
+    if (page && defaultContent[page as keyof typeof defaultContent]) {
+      return NextResponse.json(defaultContent[page as keyof typeof defaultContent]);
+    }
+    return NextResponse.json(defaultContent);
   }
-
-  return NextResponse.json(websiteContent);
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const { page, section, data } = body;
+  try {
+    const body = await request.json();
+    const { page, section, data } = body;
 
-  if (websiteContent[page as keyof typeof websiteContent] && section) {
-    (websiteContent[page as keyof typeof websiteContent] as any)[section] = {
-      ...(websiteContent[page as keyof typeof websiteContent] as any)[section],
-      ...data,
-    };
-    return NextResponse.json({ success: true, data: (websiteContent[page as keyof typeof websiteContent] as any)[section] });
+    if (!page || !section || !data) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Upsert content to database
+    const result = await prisma.websiteContent.upsert({
+      where: {
+        page_section: {
+          page,
+          section
+        }
+      },
+      update: {
+        content: data,
+      },
+      create: {
+        page,
+        section,
+        content: data,
+      },
+    });
+
+    return NextResponse.json({ success: true, data: result.content });
+  } catch (error) {
+    console.error('Error saving content:', error);
+    return NextResponse.json({ error: 'Failed to save content' }, { status: 500 });
   }
-
-  return NextResponse.json({ error: 'Invalid page or section' }, { status: 400 });
 }

@@ -29,11 +29,12 @@ model Service {
 // Website Content Model
 model WebsiteContent {
   id        Int      @id @default(autoincrement())
-  page      String   @unique
+  page      String
   section   String
   content   Json
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  @@unique([page, section])
   @@map("website_content")
 }
 
