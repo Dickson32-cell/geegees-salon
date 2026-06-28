@@ -74,11 +74,11 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
   };
 
   return (
-    <div className="relative rounded-lg overflow-hidden shadow-2xl w-full" style={{ height: '65vh', minHeight: '500px' }}>
+    <div className="relative rounded-lg overflow-hidden shadow-2xl w-full bg-primary" style={{ height: '65vh', minHeight: '500px' }}>
       {/* Video Element */}
       <video
         ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover"
+        className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
         style={{
           objectFit: 'cover',
           objectPosition: 'center center'
@@ -88,6 +88,9 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
         muted
         playsInline
         preload="auto"
+        onLoadedData={(e) => {
+          e.currentTarget.style.opacity = '1';
+        }}
         onPlay={() => {
           setIsPlaying(true);
           setShowPlayButton(false);

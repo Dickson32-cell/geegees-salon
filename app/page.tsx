@@ -140,15 +140,18 @@ export default function Home() {
       </section>
 
       {/* Services Teaser Section - DYNAMIC FROM ADMIN */}
-      <section className="relative py-12 md:py-section-gap px-4 md:px-margin-desktop overflow-hidden">
+      <section className="relative py-12 md:py-section-gap px-4 md:px-margin-desktop overflow-hidden bg-primary">
         {/* Background Video */}
         <video
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
+          onLoadedData={(e) => {
+            e.currentTarget.style.opacity = '1';
+          }}
         >
           <source src="https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-services/be4p0vs2t1f_1782596442744.mp4" type="video/mp4" />
         </video>

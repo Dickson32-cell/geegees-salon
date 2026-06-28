@@ -84,7 +84,7 @@ export default function VideoSlideshow({
   }
 
   return (
-    <div className="aspect-[4/5] relative z-10 overflow-hidden bg-primary">
+    <div className="aspect-[4/5] relative z-10 overflow-hidden bg-gradient-to-br from-primary to-primary-container">
       {videos.map((video, index) => (
         <video
           key={video.id}
@@ -96,6 +96,12 @@ export default function VideoSlideshow({
           muted
           playsInline
           preload="auto"
+          onLoadedData={(e) => {
+            // Ensure smooth appearance when loaded
+            if (index === currentIndex) {
+              e.currentTarget.style.opacity = '1';
+            }
+          }}
         >
           <source src={video.image_url} type="video/mp4" />
         </video>
