@@ -186,15 +186,39 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     }
   };
 
+  const printReceipt = () => {
+    window.print();
+  };
+
   if (!isOpen) return null;
 
   const selectedService = services.find(s => s.id === parseInt(formData.service));
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl sm:rounded-2xl max-w-2xl w-full my-4 sm:my-8 shadow-2xl">
-        {/* Header */}
-        <div className="bg-primary text-white p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl">
+    <>
+      {/* Print-specific styles */}
+      <style jsx global>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #booking-receipt, #booking-receipt * {
+            visibility: visible;
+          }
+          #booking-receipt {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 20px;
+          }
+        }
+      `}</style>
+
+      <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:relative print:bg-transparent">
+        <div className="bg-white rounded-xl sm:rounded-2xl max-w-2xl w-full my-4 sm:my-8 shadow-2xl print:shadow-none print:my-0">
+          {/* Header */}
+          <div className="bg-primary text-white p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl print:hidden">
           <div className="flex justify-between items-center">
             <h2 className="text-xl sm:text-2xl font-bold">Book Your Appointment</h2>
             <button onClick={handleClose} className="text-white/80 hover:text-white text-3xl leading-none">×</button>
@@ -229,9 +253,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 min-h-[300px] sm:min-h-[400px]">
+        <div className="p-4 sm:p-6 min-h-[300px] sm:min-h-[400px] print:p-0 print:min-h-0">
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 print:hidden">
               {error}
             </div>
           )}
@@ -451,9 +475,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
           {/* Step 6: Booking Receipt/Confirmation */}
           {step === 6 && (
-            <div className="space-y-6" ref={receiptRef}>
+            <div id="booking-receipt" className="space-y-6" ref={receiptRef}>
               {/* Success Icon */}
-              <div className="text-center">
+              <div className="text-center print:mb-4">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-10 h-10 sm:w-12 sm:h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -524,19 +548,30 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-3">
-                <button
-                  onClick={downloadPDF}
-                  className="flex-1 px-4 py-3 bg-white border-2 border-secondary text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Download PDF Receipt
-                </button>
+              <div className="flex flex-col gap-3 print:hidden">
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button
+                    onClick={downloadPDF}
+                    className="flex-1 px-4 py-3 bg-white border-2 border-secondary text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download PDF
+                  </button>
+                  <button
+                    onClick={printReceipt}
+                    className="flex-1 px-4 py-3 bg-white border-2 border-secondary text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Print Receipt
+                  </button>
+                </div>
                 <button
                   onClick={handleClose}
-                  className="flex-1 px-4 py-3 bg-secondary text-black rounded-lg font-medium hover:bg-secondary/90 transition-colors"
+                  className="w-full px-4 py-3 bg-secondary text-black rounded-lg font-medium hover:bg-secondary/90 transition-colors"
                 >
                   Done
                 </button>
@@ -547,7 +582,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
         {/* Footer */}
         {step !== 6 && (
-          <div className="p-4 sm:p-6 bg-gray-50 rounded-b-xl sm:rounded-b-2xl flex justify-between gap-3">
+          <div className="p-4 sm:p-6 bg-gray-50 rounded-b-xl sm:rounded-b-2xl flex justify-between gap-3 print:hidden">
             {step > 1 && (
               <button
                 onClick={handleBack}
@@ -577,5 +612,6 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         )}
       </div>
     </div>
+    </>
   );
 }
