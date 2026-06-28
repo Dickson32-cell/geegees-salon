@@ -74,6 +74,7 @@ const defaultContent = {
       instagramUrl: '#',
       facebookUrl: '#',
       youtubeUrl: '#',
+      tiktokUrl: '#',
     },
   },
 };
