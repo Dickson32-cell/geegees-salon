@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import html2pdf from 'html2pdf.js';
 
 interface Service {
   id: number;
@@ -134,8 +133,11 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
     onClose();
   };
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     if (!receiptRef.current) return;
+
+    // Dynamic import to avoid SSR issues
+    const html2pdf = (await import('html2pdf.js')).default;
 
     const opt = {
       margin: 10,
