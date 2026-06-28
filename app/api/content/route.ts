@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // Default content structure (used as fallback if database is empty)
 const defaultContent = {
@@ -63,6 +61,9 @@ const defaultContent = {
     },
   },
 };
+
+// Cache for 5 minutes (revalidate every 300 seconds)
+export const revalidate = 300;
 
 export async function GET(request: Request) {
   try {
