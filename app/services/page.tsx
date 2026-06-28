@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { ServiceGridSkeleton } from "@/components/LoadingSkeleton";
-import HeroSlideshow from "@/components/HeroSlideshow";
 
 interface Service {
   id: number;
@@ -52,10 +51,14 @@ export default function ServicesPage() {
 
   return (
     <main className="pt-16 md:pt-24 pb-section-gap">
-      {/* Hero Section with Slideshow */}
+      {/* Hero Section */}
       <section className="max-w-container-max mx-auto px-4 md:px-margin-desktop mb-8 md:mb-stack-lg">
-        <HeroSlideshow category="hero-services" className="h-[300px] md:h-[400px] flex items-center justify-center text-center rounded-lg">
-          <div className="max-w-3xl px-4">
+        <div className="bg-primary h-[300px] md:h-[400px] flex items-center justify-center text-center rounded-lg relative overflow-hidden">
+          {/* Background Pattern/Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-container to-primary opacity-90"></div>
+
+          {/* Content */}
+          <div className="relative z-10 max-w-3xl px-4">
             <span className="font-label-caps text-xs md:text-label-caps text-secondary-fixed uppercase tracking-[0.2em] mb-3 md:mb-4 block">
               The Art of Refinement
             </span>
@@ -65,7 +68,7 @@ export default function ServicesPage() {
               Explore our curated selection of bespoke grooming and beauty experiences, where precision meets artistry in every detail.
             </p>
           </div>
-        </HeroSlideshow>
+        </div>
       </section>
 
       {/* Services Catalog Section - DYNAMIC FROM ADMIN */}
