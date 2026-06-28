@@ -49,14 +49,29 @@ export default function HeroSlideshow({ category, children, className = "" }: He
     return () => clearInterval(interval);
   }, [images.length]);
 
-  // Auto-play video when it becomes visible
+  // Auto-play video when it becomes visible or loads
   useEffect(() => {
-    if (videoRef.current && currentMedia && isVideo(currentMedia)) {
-      videoRef.current.play().catch(err => {
+    const video = videoRef.current;
+    if (!video || !currentMedia || !isVideo(currentMedia)) return;
+
+    const playVideo = () => {
+      video.play().catch(err => {
         console.log('Video autoplay prevented:', err);
       });
+    };
+
+    // Play immediately if video is ready
+    if (video.readyState >= 2) {
+      playVideo();
+    } else {
+      // Wait for video to load enough data before playing
+      video.addEventListener('loadeddata', playVideo);
     }
-  }, [currentIndex]);
+
+    return () => {
+      video.removeEventListener('loadeddata', playVideo);
+    };
+  }, [currentIndex, currentMedia]);
 
   const fetchImages = async () => {
     try {
@@ -95,7 +110,7 @@ export default function HeroSlideshow({ category, children, className = "" }: He
         <video
           ref={videoRef}
           key={currentMedia} // Force re-mount when video changes
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${fadeClass}`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 z-0 ${fadeClass}`}
           autoPlay
           loop
           muted
@@ -109,7 +124,7 @@ export default function HeroSlideshow({ category, children, className = "" }: He
       ) : (
         // Image Background
         <div
-          className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 ${fadeClass}`}
+          className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 z-0 ${fadeClass}`}
           style={{
             backgroundImage: `url('${currentMedia}')`,
           }}
