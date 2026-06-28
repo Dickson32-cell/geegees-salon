@@ -187,7 +187,95 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   };
 
   const printReceipt = () => {
-    window.print();
+    if (!receiptRef.current) return;
+
+    // Create a new window for printing
+    const printWindow = window.open('', '', 'width=800,height=600');
+    if (!printWindow) {
+      alert('Please allow popups to print the receipt');
+      return;
+    }
+
+    // Get the receipt HTML
+    const receiptHTML = receiptRef.current.innerHTML;
+
+    // Write the content to the new window
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>GeeGees Booking Receipt</title>
+          <style>
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+              margin: 20px;
+              color: #000;
+            }
+            .text-center { text-align: center; }
+            .mb-4 { margin-bottom: 1rem; }
+            .mb-2 { margin-bottom: 0.5rem; }
+            .mb-3 { margin-bottom: 0.75rem; }
+            .mx-auto { margin-left: auto; margin-right: auto; }
+            .flex { display: flex; }
+            .items-center { align-items: center; }
+            .justify-center { justify-center: center; }
+            .justify-between { justify-content: space-between; }
+            .font-bold { font-weight: bold; }
+            .font-semibold { font-weight: 600; }
+            .font-medium { font-medium: 500; }
+            .text-lg { font-size: 1.125rem; }
+            .text-xl { font-size: 1.25rem; }
+            .text-2xl { font-size: 1.5rem; }
+            .text-sm { font-size: 0.875rem; }
+            .text-xs { font-size: 0.75rem; }
+            .border { border: 1px solid #e5e7eb; }
+            .border-2 { border-width: 2px; }
+            .border-b { border-bottom: 1px solid #e5e7eb; }
+            .rounded-lg { border-radius: 0.5rem; }
+            .rounded-full { border-radius: 9999px; }
+            .p-4 { padding: 1rem; }
+            .p-6 { padding: 1.5rem; }
+            .pb-4 { padding-bottom: 1rem; }
+            .pt-4 { padding-top: 1rem; }
+            .ml-7 { margin-left: 1.75rem; }
+            .mt-2 { margin-top: 0.5rem; }
+            .space-y-1 > * + * { margin-top: 0.25rem; }
+            .space-y-3 > * + * { margin-top: 0.75rem; }
+            .gap-2 { gap: 0.5rem; }
+            .w-16 { width: 4rem; }
+            .h-16 { height: 4rem; }
+            .w-5 { width: 1.25rem; }
+            .h-5 { height: 1.25rem; }
+            .bg-green-100 { background-color: #dcfce7; }
+            .bg-blue-50 { background-color: #eff6ff; }
+            .text-green-600 { color: #16a34a; }
+            .text-blue-800 { color: #1e40af; }
+            .text-blue-900 { color: #1e3a8a; }
+            .text-gray-500 { color: #6b7280; }
+            .text-gray-600 { color: #4b5563; }
+            .text-gray-900 { color: #111827; }
+            .border-gray-200 { border-color: #e5e7eb; }
+            .border-blue-200 { border-color: #bfdbfe; }
+            svg { display: inline-block; vertical-align: middle; }
+            @media print {
+              body { margin: 0; padding: 20px; }
+            }
+          </style>
+        </head>
+        <body>
+          ${receiptHTML}
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+
+    // Wait for content to load, then print
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }, 250);
   };
 
   if (!isOpen) return null;
@@ -195,30 +283,10 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const selectedService = services.find(s => s.id === parseInt(formData.service));
 
   return (
-    <>
-      {/* Print-specific styles */}
-      <style jsx global>{`
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          #booking-receipt, #booking-receipt * {
-            visibility: visible;
-          }
-          #booking-receipt {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 20px;
-          }
-        }
-      `}</style>
-
-      <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto print:relative print:bg-transparent">
-        <div className="bg-white rounded-xl sm:rounded-2xl max-w-2xl w-full my-4 sm:my-8 shadow-2xl print:shadow-none print:my-0">
-          {/* Header */}
-          <div className="bg-primary text-white p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl print:hidden">
+    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded-xl sm:rounded-2xl max-w-2xl w-full my-4 sm:my-8 shadow-2xl">
+        {/* Header */}
+        <div className="bg-primary text-white p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl">
           <div className="flex justify-between items-center">
             <h2 className="text-xl sm:text-2xl font-bold">Book Your Appointment</h2>
             <button onClick={handleClose} className="text-white/80 hover:text-white text-3xl leading-none">×</button>
@@ -253,9 +321,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6 min-h-[300px] sm:min-h-[400px] print:p-0 print:min-h-0">
+        <div className="p-4 sm:p-6 min-h-[300px] sm:min-h-[400px]">
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 print:hidden">
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
               {error}
             </div>
           )}
@@ -475,9 +543,9 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
           {/* Step 6: Booking Receipt/Confirmation */}
           {step === 6 && (
-            <div id="booking-receipt" className="space-y-6" ref={receiptRef}>
+            <div className="space-y-6" ref={receiptRef}>
               {/* Success Icon */}
-              <div className="text-center print:mb-4">
+              <div className="text-center">
                 <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg className="w-10 h-10 sm:w-12 sm:h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -548,7 +616,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col gap-3 print:hidden">
+              <div className="flex flex-col gap-3">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={downloadPDF}
@@ -582,7 +650,7 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
 
         {/* Footer */}
         {step !== 6 && (
-          <div className="p-4 sm:p-6 bg-gray-50 rounded-b-xl sm:rounded-b-2xl flex justify-between gap-3 print:hidden">
+          <div className="p-4 sm:p-6 bg-gray-50 rounded-b-xl sm:rounded-b-2xl flex justify-between gap-3">
             {step > 1 && (
               <button
                 onClick={handleBack}
@@ -612,6 +680,5 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
         )}
       </div>
     </div>
-    </>
   );
 }
