@@ -136,18 +136,38 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
   const downloadPDF = async () => {
     if (!receiptRef.current) return;
 
-    // Dynamic import to avoid SSR issues
-    const html2pdf = (await import('html2pdf.js')).default;
+    try {
+      // Dynamic imports to avoid SSR issues
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
 
-    const opt = {
-      margin: 10,
-      filename: `GeeGees-Booking-${bookingId?.toString().padStart(6, '0')}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
+      // Capture the receipt as canvas
+      const canvas = await html2canvas(receiptRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
 
-    html2pdf().set(opt).from(receiptRef.current).save();
+      // Calculate dimensions
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      // Create PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+
+      // Add image to PDF
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+      // Download the PDF
+      const filename = `GeeGees-Booking-${bookingId?.toString().padStart(6, '0')}.pdf`;
+      pdf.save(filename);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Unable to generate PDF. Please try printing instead or contact support.');
+    }
   };
 
   if (!isOpen) return null;
