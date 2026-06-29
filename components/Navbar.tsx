@@ -91,6 +91,12 @@ export default function Navbar() {
           >
             Our Story
           </Link>
+          <Link
+            href="/services"
+            className="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary transition-colors uppercase tracking-widest"
+          >
+            Book Now
+          </Link>
         </nav>
       </div>
 
