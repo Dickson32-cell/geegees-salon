@@ -283,7 +283,7 @@ export default function AdminGallery() {
               {previewUrl && selectedFile && (
                 <div className="mt-4">
                   {selectedFile.type.startsWith('video/') ? (
-                    <video src={previewUrl} controls className="max-h-64 rounded-lg border">
+                    <video src={previewUrl} controls muted className="max-h-64 rounded-lg border">
                       Your browser does not support video preview.
                     </video>
                   ) : (

@@ -168,7 +168,7 @@ export default function GalleryPage() {
                       e.currentTarget.style.display = 'none';
                     }}
                   >
-                    <source src={item.image_url} type="video/mp4" />
+                    <source src={item.image_url} />
                     Your browser does not support video.
                   </video>
                 ) : (
