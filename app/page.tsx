@@ -6,6 +6,7 @@ import { HomeServiceCardSkeleton } from "@/components/LoadingSkeleton";
 import HeroVideo from "@/components/HeroVideo";
 import VideoSlideshow from "@/components/VideoSlideshow";
 import { useBooking } from "@/contexts/BookingContext";
+import { isVideoUrl } from "@/lib/media";
 
 interface Service {
   id: number;
@@ -145,17 +146,14 @@ export default function Home() {
       <section className="relative py-12 md:py-section-gap px-4 md:px-margin-desktop overflow-hidden bg-primary">
         {/* Background Video */}
         <video
-          className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
-          onLoadedData={(e) => {
-            e.currentTarget.style.opacity = '1';
-          }}
         >
-          <source src="https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-services/be4p0vs2t1f_1782596442744.mp4" type="video/mp4" />
+          <source src="https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-services/be4p0vs2t1f_1782596442744.mp4" />
         </video>
 
         {/* Dark Overlay */}
@@ -188,7 +186,7 @@ export default function Home() {
           ) : !error && services.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {services.map((service) => {
-                const isVideo = service.image_url && /\.(mp4|webm|mov|avi|ogg|m4v)$/i.test(service.image_url);
+                const isVideo = isVideoUrl(service.image_url);
 
                 return (
                   <div key={service.id} className="relative group overflow-hidden rounded-lg min-h-[280px] flex items-end">

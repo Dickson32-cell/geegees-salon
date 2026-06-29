@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import { isVideoUrl } from '@/lib/media';
 
 interface HeroSlideshowProps {
   category: 'hero-home' | 'hero-services';
@@ -23,25 +24,6 @@ export default function HeroSlideshow({ category, children, className = "" }: He
   const [loading, setLoading] = useState(true);
   const [fadeClass, setFadeClass] = useState('opacity-100');
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  // Helper function to check if URL is a video - ALL FORMATS SUPPORTED
-  const isVideo = (url: string): boolean => {
-    if (!url) return false;
-    const urlWithoutParams = url.split('?')[0].toLowerCase();
-
-    // Support ALL video and audio formats
-    const mediaExtensions = [
-      '.mp4', '.webm', '.ogg', '.mov', '.avi', '.m4v', '.mkv', '.flv', '.wmv',
-      '.mp3', '.wav', '.m4a', '.aac', '.flac', '.wma', '.opus'
-    ];
-
-    const isMediaFile = mediaExtensions.some(ext => urlWithoutParams.endsWith(ext)) ||
-                        urlWithoutParams.includes('video') ||
-                        urlWithoutParams.includes('/videos/');
-
-    console.log('🎥 Checking:', url, '→', isMediaFile);
-    return isMediaFile;
-  };
 
   useEffect(() => {
     fetchImages();
@@ -162,7 +144,7 @@ export default function HeroSlideshow({ category, children, className = "" }: He
     : 'https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=2669';
 
   const currentMedia = images.length > 0 ? images[currentIndex].image_url : defaultImage;
-  const isCurrentMediaVideo = currentMedia && isVideo(currentMedia);
+  const isCurrentMediaVideo = isVideoUrl(currentMedia);
 
   console.log('==========================================');
   console.log('🖼️  HERO SLIDESHOW STATUS');
@@ -196,7 +178,6 @@ export default function HeroSlideshow({ category, children, className = "" }: He
           muted
           playsInline
           preload="auto"
-          crossOrigin="anonymous"
           onError={(e) => {
             const videoElement = e.currentTarget;
             console.error('❌ VIDEO ERROR:');
@@ -223,8 +204,7 @@ export default function HeroSlideshow({ category, children, className = "" }: He
             videoRef.current?.play().catch(() => {});
           }}
         >
-          <source src={currentMedia} type="video/mp4" />
-          <source src={currentMedia} type="video/webm" />
+          <source src={currentMedia} />
           Your browser does not support the video tag.
         </video>
       ) : (

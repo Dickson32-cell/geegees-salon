@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { isVideoUrl } from "@/lib/media";
 
 interface GalleryImage {
   id: number;
@@ -28,12 +29,6 @@ export default function AdminGallery() {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
-
-  // Helper function to check if URL is a video
-  const isVideo = (url: string): boolean => {
-    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogg', '.m4v'];
-    return videoExtensions.some(ext => url.toLowerCase().includes(ext));
-  };
 
   useEffect(() => {
     fetchImages();
@@ -383,7 +378,7 @@ export default function AdminGallery() {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {categoryImages.map((image) => {
-                  const isVideoFile = isVideo(image.image_url);
+                  const isVideoFile = isVideoUrl(image.image_url);
                   return (
                     <div key={image.id} className="group relative bg-slate-50 rounded-lg overflow-hidden border border-slate-200">
                       <div className="aspect-video relative">
@@ -392,6 +387,7 @@ export default function AdminGallery() {
                             <video
                               src={image.image_url}
                               className="w-full h-full object-cover"
+                              autoPlay
                               muted
                               loop
                               playsInline

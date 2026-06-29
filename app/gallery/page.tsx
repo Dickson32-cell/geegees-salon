@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { isVideoUrl } from "@/lib/media";
 
 interface GalleryImage {
   id: number;
@@ -144,7 +145,7 @@ export default function GalleryPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {filteredItems.map((item) => {
-            const isVideo = /\.(mp4|webm|mov|avi|ogg|m4v)$/i.test(item.image_url);
+            const isVideo = isVideoUrl(item.image_url);
 
             return (
               <div
@@ -232,14 +233,15 @@ export default function GalleryPage() {
             className="relative max-w-7xl max-h-[90vh] w-full"
             onClick={(e) => e.stopPropagation()}
           >
-            {/\.(mp4|webm|mov|avi|ogg|m4v)$/i.test(selectedImage.image_url) ? (
+            {isVideoUrl(selectedImage.image_url) ? (
               <video
                 className="w-full h-full max-h-[90vh] object-contain"
                 controls
                 autoPlay
+                muted
                 playsInline
               >
-                <source src={selectedImage.image_url} type="video/mp4" />
+                <source src={selectedImage.image_url} />
                 Your browser does not support video.
               </video>
             ) : (

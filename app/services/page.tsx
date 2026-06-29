@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { ServiceGridSkeleton } from "@/components/LoadingSkeleton";
 import { useBooking } from "@/contexts/BookingContext";
+import { isVideoUrl } from "@/lib/media";
 
 interface Service {
   id: number;
@@ -40,8 +41,7 @@ function GalleryVideoBackground() {
       const data = await response.json();
       // Filter for ALL videos (no category filter)
       const allVideos = data.filter((item: GalleryVideo) =>
-        item.image_url &&
-        /\.(mp4|webm|mov|avi|ogg|m4v)$/i.test(item.image_url)
+        isVideoUrl(item.image_url)
       );
 
       if (allVideos.length > 0) {
@@ -94,12 +94,13 @@ function GalleryVideoBackground() {
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
             index === currentIndex && !isTransitioning ? 'opacity-100' : 'opacity-0'
           }`}
+          autoPlay
           loop
           muted
           playsInline
           preload="auto"
         >
-          <source src={video.image_url} type="video/mp4" />
+          <source src={video.image_url} />
         </video>
       ))}
 

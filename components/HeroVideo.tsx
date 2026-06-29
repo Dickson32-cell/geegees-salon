@@ -78,7 +78,7 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
       {/* Video Element */}
       <video
         ref={videoRef}
-        className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-1000"
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
         style={{
           objectFit: 'cover',
           objectPosition: 'center center'
@@ -88,9 +88,6 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
         muted
         playsInline
         preload="auto"
-        onLoadedData={(e) => {
-          e.currentTarget.style.opacity = '1';
-        }}
         onPlay={() => {
           setIsPlaying(true);
           setShowPlayButton(false);
@@ -103,7 +100,7 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
           }, 100);
         }}
       >
-        <source src={videoUrl} type="video/mp4" />
+        <source src={videoUrl} />
       </video>
 
       {/* Dark Overlay */}

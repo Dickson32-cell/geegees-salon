@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
+import { isVideoUrl } from '@/lib/media';
 
 interface GalleryVideo {
   id: number;
@@ -34,8 +35,7 @@ export default function VideoSlideshow({
       const data = await response.json();
       // Filter for videos in the specified category
       const categoryVideos = data.filter((item: GalleryVideo) =>
-        item.image_url &&
-        /\.(mp4|webm|mov|avi|ogg|m4v)$/i.test(item.image_url)
+        isVideoUrl(item.image_url)
       );
 
       if (categoryVideos.length > 0) {
@@ -92,18 +92,17 @@ export default function VideoSlideshow({
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
             index === currentIndex && !isTransitioning ? 'opacity-100' : 'opacity-0'
           }`}
+          autoPlay
           loop
           muted
           playsInline
           preload="auto"
           onLoadedData={(e) => {
-            // Ensure smooth appearance when loaded
-            if (index === currentIndex) {
-              e.currentTarget.style.opacity = '1';
-            }
+            // Video is ready
+            console.log('Video loaded:', video.image_url);
           }}
         >
-          <source src={video.image_url} type="video/mp4" />
+          <source src={video.image_url} />
         </video>
       ))}
 
