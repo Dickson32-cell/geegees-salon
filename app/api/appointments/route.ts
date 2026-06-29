@@ -52,14 +52,27 @@ export async function POST(request: Request) {
     } = body;
 
     console.log('[API] Creating appointment for:', customerName);
+    console.log('[API] Appointment data:', { service, stylist, appointmentDate, appointmentTime });
 
     // Validation
     if (!service || !stylist || !appointmentDate || !appointmentTime || !customerName || !customerPhone) {
+      console.error('[API] Missing required fields');
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
+
+    // Check Supabase connection
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error('[API] Supabase environment variables missing!');
+      return NextResponse.json({
+        error: 'Database configuration error',
+        details: 'Supabase environment variables are not set'
+      }, { status: 500 });
+    }
+
+    console.log('[API] Attempting to insert appointment...');
 
     const { data: appointment, error } = await supabase
       .from('appointments')
@@ -78,10 +91,17 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      console.error('[API] Appointment creation error:', error);
+      console.error('[API] Appointment creation error:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+
       return NextResponse.json({
         error: 'Failed to create appointment',
         details: error.message,
+        hint: error.hint,
         code: error.code
       }, { status: 500 });
     }
@@ -94,7 +114,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       error: 'Failed to create appointment',
       details: error.message || String(error),
-      code: error.code
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     }, { status: 500 });
   }
 }
