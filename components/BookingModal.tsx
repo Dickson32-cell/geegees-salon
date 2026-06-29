@@ -71,20 +71,35 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
   // Handle preselected service and reset modal state
   useEffect(() => {
     if (isOpen) {
-      // Always reset error and bookingId when modal opens
+      console.log('[BookingModal] Modal opened with preselectedServiceId:', preselectedServiceId);
+
+      // FORCE reset everything first
       setError('');
       setBookingId(null);
+      setLoading(false);
 
-      console.log('[BookingModal] Opening modal with preselectedServiceId:', preselectedServiceId);
+      // Check if service is preselected
+      const hasPreselectedService = preselectedServiceId && preselectedServiceId !== '' && preselectedServiceId !== null && preselectedServiceId !== undefined;
 
-      if (preselectedServiceId) {
-        // Service is preselected (from services page)
-        console.log('[BookingModal] Starting at Step 2 - Service preselected');
-        setFormData(prev => ({ ...prev, service: preselectedServiceId }));
-        setStep(2); // Skip to step 2 (Choose Stylist)
+      console.log('[BookingModal] hasPreselectedService:', hasPreselectedService);
+
+      if (hasPreselectedService) {
+        // Service is preselected (from services page) - START AT STEP 2
+        console.log('[BookingModal] Service preselected - Setting step to 2');
+        setFormData({
+          service: preselectedServiceId!,
+          stylist: '',
+          appointmentDate: '',
+          appointmentTime: '',
+          customerName: '',
+          customerEmail: '',
+          customerPhone: '',
+          notes: ''
+        });
+        setStep(2);
       } else {
-        // No service preselected (from home page/navbar)
-        console.log('[BookingModal] Starting at Step 1 - No service preselected');
+        // NO service preselected (from home page/navbar) - START AT STEP 1
+        console.log('[BookingModal] No service preselected - Setting step to 1');
         setFormData({
           service: '',
           stylist: '',
@@ -95,7 +110,7 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
           customerPhone: '',
           notes: ''
         });
-        setStep(1); // Start from step 1
+        setStep(1);
       }
     }
   }, [isOpen, preselectedServiceId]);
