@@ -34,6 +34,26 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
   const [bookingId, setBookingId] = useState<number | null>(null);
   const receiptRef = useRef<HTMLDivElement>(null);
 
+  // CRITICAL: Reset modal when it's not open
+  useEffect(() => {
+    if (!isOpen) {
+      console.log('[BookingModal] Modal closed - resetting all state');
+      setStep(1);
+      setFormData({
+        service: '',
+        stylist: '',
+        appointmentDate: '',
+        appointmentTime: '',
+        customerName: '',
+        customerEmail: '',
+        customerPhone: '',
+        notes: ''
+      });
+      setError('');
+      setBookingId(null);
+    }
+  }, [isOpen]);
+
   const stylists = ['Any Available', 'Sarah Johnson', 'Michael Chen', 'Emma Williams', 'David Martinez'];
 
   const timeSlots = [
