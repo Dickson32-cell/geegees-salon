@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useBooking } from "@/contexts/BookingContext";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [logoUrl, setLogoUrl] = useState('');
-  const { openBookingModal } = useBooking();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -94,13 +92,6 @@ export default function Navbar() {
             Our Story
           </Link>
         </nav>
-
-        <button
-          onClick={openBookingModal}
-          className="bg-primary text-on-primary px-4 md:px-6 py-2 rounded-lg font-label-caps text-xs md:text-sm uppercase tracking-widest hover:bg-secondary transition-all active:scale-95 duration-200 shrink-0"
-        >
-          Book Now
-        </button>
       </div>
 
     </header>
@@ -170,15 +161,6 @@ export default function Navbar() {
               >
                 Our Story
               </Link>
-              <button
-                className="font-body-lg text-on-surface-variant hover:text-secondary transition-colors py-3 text-left w-full"
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  openBookingModal();
-                }}
-              >
-                Book Appointment
-              </button>
             </nav>
           </div>
         </div>
