@@ -55,12 +55,16 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
       setError('');
       setBookingId(null);
 
+      console.log('[BookingModal] Opening modal with preselectedServiceId:', preselectedServiceId);
+
       if (preselectedServiceId) {
         // Service is preselected (from services page)
+        console.log('[BookingModal] Starting at Step 2 - Service preselected');
         setFormData(prev => ({ ...prev, service: preselectedServiceId }));
         setStep(2); // Skip to step 2 (Choose Stylist)
       } else {
         // No service preselected (from home page/navbar)
+        console.log('[BookingModal] Starting at Step 1 - No service preselected');
         setFormData({
           service: '',
           stylist: '',
