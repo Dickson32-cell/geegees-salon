@@ -265,10 +265,10 @@ export default function ServicesPage() {
                         </div>
 
                         <button
-                          onClick={openBookingModal}
+                          onClick={() => openBookingModal(service.id.toString())}
                           className="w-full bg-primary text-white py-3 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-colors mt-6"
                         >
-                          Book Now
+                          Book This Service
                         </button>
                       </div>
                     </div>

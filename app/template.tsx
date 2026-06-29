@@ -8,7 +8,7 @@ import BookingModal from "@/components/BookingModal";
 
 function TemplateContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { isBookingModalOpen, closeBookingModal } = useBooking();
+  const { isBookingModalOpen, preselectedServiceId, closeBookingModal } = useBooking();
 
   // Don't show Navbar/Footer on admin pages
   const isAdminPage = pathname?.startsWith("/admin");
@@ -22,7 +22,11 @@ function TemplateContent({ children }: { children: React.ReactNode }) {
       <Navbar />
       {children}
       <Footer />
-      <BookingModal isOpen={isBookingModalOpen} onClose={closeBookingModal} />
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={closeBookingModal}
+        preselectedServiceId={preselectedServiceId}
+      />
     </>
   );
 }

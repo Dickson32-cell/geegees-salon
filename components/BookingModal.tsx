@@ -13,9 +13,10 @@ interface Service {
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  preselectedServiceId?: string | null;
 }
 
-export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
+export default function BookingModal({ isOpen, onClose, preselectedServiceId }: BookingModalProps) {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
   const [formData, setFormData] = useState({
@@ -46,6 +47,16 @@ export default function BookingModal({ isOpen, onClose }: BookingModalProps) {
       fetchServices();
     }
   }, [isOpen]);
+
+  // Handle preselected service
+  useEffect(() => {
+    if (isOpen && preselectedServiceId) {
+      setFormData(prev => ({ ...prev, service: preselectedServiceId }));
+      setStep(2); // Skip to step 2 (Choose Stylist)
+    } else if (isOpen && !preselectedServiceId) {
+      setStep(1); // Start from step 1 if no service preselected
+    }
+  }, [isOpen, preselectedServiceId]);
 
   const fetchServices = async () => {
     try {
