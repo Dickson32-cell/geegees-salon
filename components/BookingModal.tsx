@@ -48,13 +48,31 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
     }
   }, [isOpen]);
 
-  // Handle preselected service
+  // Handle preselected service and reset modal state
   useEffect(() => {
-    if (isOpen && preselectedServiceId) {
-      setFormData(prev => ({ ...prev, service: preselectedServiceId }));
-      setStep(2); // Skip to step 2 (Choose Stylist)
-    } else if (isOpen && !preselectedServiceId) {
-      setStep(1); // Start from step 1 if no service preselected
+    if (isOpen) {
+      // Always reset error and bookingId when modal opens
+      setError('');
+      setBookingId(null);
+
+      if (preselectedServiceId) {
+        // Service is preselected (from services page)
+        setFormData(prev => ({ ...prev, service: preselectedServiceId }));
+        setStep(2); // Skip to step 2 (Choose Stylist)
+      } else {
+        // No service preselected (from home page/navbar)
+        setFormData({
+          service: '',
+          stylist: '',
+          appointmentDate: '',
+          appointmentTime: '',
+          customerName: '',
+          customerEmail: '',
+          customerPhone: '',
+          notes: ''
+        });
+        setStep(1); // Start from step 1
+      }
     }
   }, [isOpen, preselectedServiceId]);
 
