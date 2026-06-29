@@ -161,10 +161,12 @@ export default function AppointmentsPage() {
 
   const filteredAppointments = appointments.filter((apt) => {
     const matchesFilter = filter === "all" || apt.status === filter;
+    const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
-      apt.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      apt.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      apt.service.toLowerCase().includes(searchTerm.toLowerCase());
+      (apt.customerName || '').toLowerCase().includes(searchLower) ||
+      (apt.customerEmail || '').toLowerCase().includes(searchLower) ||
+      (apt.service || '').toLowerCase().includes(searchLower) ||
+      (apt.customerPhone || '').toLowerCase().includes(searchLower);
     return matchesFilter && matchesSearch;
   });
 
