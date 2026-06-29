@@ -92,6 +92,12 @@ export default function Navbar() {
             Our Story
           </Link>
         </nav>
+
+        <Link href="/services">
+          <button className="bg-primary text-on-primary px-4 md:px-6 py-2 rounded-lg font-label-caps text-xs md:text-sm uppercase tracking-widest hover:bg-secondary transition-all active:scale-95 duration-200 shrink-0">
+            Book Now
+          </button>
+        </Link>
       </div>
 
     </header>
@@ -160,6 +166,13 @@ export default function Navbar() {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Our Story
+              </Link>
+              <Link
+                href="/services"
+                className="font-body-lg text-on-surface-variant hover:text-secondary transition-colors py-3"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Book Appointment
               </Link>
             </nav>
           </div>
