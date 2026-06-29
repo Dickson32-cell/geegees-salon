@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 // Default content structure (used as fallback if database is empty)
 const defaultContent = {
@@ -87,14 +92,27 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const page = searchParams.get('page');
 
+    console.log('[API] Fetching website content...');
+
     // Fetch all content from database
-    const dbContent = await prisma.websiteContent.findMany();
+    const { data: dbContent, error } = await supabase
+      .from('website_content')
+      .select('*');
+
+    if (error) {
+      console.error('[API] Content fetch error:', error);
+      // Return defaults if database fails
+      if (page && defaultContent[page as keyof typeof defaultContent]) {
+        return NextResponse.json(defaultContent[page as keyof typeof defaultContent]);
+      }
+      return NextResponse.json(defaultContent);
+    }
 
     // Build content object from database, using defaults as fallback
     const websiteContent: any = { ...defaultContent };
 
     // Merge database content with defaults
-    dbContent.forEach((item) => {
+    dbContent?.forEach((item) => {
       if (!websiteContent[item.page]) {
         websiteContent[item.page] = {};
       }
@@ -110,7 +128,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(websiteContent);
   } catch (error) {
-    console.error('Error fetching content:', error);
+    console.error('[API] Content catch error:', error);
     // Return defaults if database fails
     const { searchParams } = new URL(request.url);
     const page = searchParams.get('page');
@@ -131,27 +149,58 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // Upsert content to database
-    const result = await prisma.websiteContent.upsert({
-      where: {
-        page_section: {
-          page,
-          section
-        }
-      },
-      update: {
-        content: data,
-      },
-      create: {
-        page,
-        section,
-        content: data,
-      },
-    });
+    console.log('[API] Saving content for page:', page, 'section:', section);
+
+    // Check if content exists
+    const { data: existing } = await supabase
+      .from('website_content')
+      .select('id')
+      .eq('page', page)
+      .eq('section', section)
+      .single();
+
+    let result;
+    if (existing) {
+      // Update existing content
+      const { data: updated, error } = await supabase
+        .from('website_content')
+        .update({ content: data })
+        .eq('page', page)
+        .eq('section', section)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[API] Content update error:', error);
+        return NextResponse.json({
+          error: 'Failed to update content',
+          details: error.message,
+          code: error.code
+        }, { status: 500 });
+      }
+      result = updated;
+    } else {
+      // Create new content
+      const { data: created, error } = await supabase
+        .from('website_content')
+        .insert([{ page, section, content: data }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('[API] Content creation error:', error);
+        return NextResponse.json({
+          error: 'Failed to create content',
+          details: error.message,
+          code: error.code
+        }, { status: 500 });
+      }
+      result = created;
+    }
 
     return NextResponse.json({ success: true, data: result.content });
   } catch (error: any) {
-    console.error('Error saving content:', error);
+    console.error('[API] Content save catch error:', error);
     // Return detailed error for debugging
     return NextResponse.json({
       error: 'Failed to save content',
