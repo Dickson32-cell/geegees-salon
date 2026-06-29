@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { HomeServiceCardSkeleton } from "@/components/LoadingSkeleton";
 import HeroVideo from "@/components/HeroVideo";
 import VideoSlideshow from "@/components/VideoSlideshow";
-import { useBooking } from "@/contexts/BookingContext";
 import { isVideoUrl } from "@/lib/media";
 
 interface Service {
@@ -32,7 +31,6 @@ interface AboutContent {
 export default function Home() {
   const [services, setServices] = useState<Service[]>([]);
   const [error, setError] = useState<string>("");
-  const { openBookingModal } = useBooking();
   const [aboutContent, setAboutContent] = useState<AboutContent>({
     title: 'Redefining Luxury Grooming',
     description: 'GeeGees Unisex Salon is more than a destination; it\'s a sanctuary for the discerning. We blend time-honored techniques with contemporary editorial trends to deliver an experience that transcends the traditional salon visit.',
@@ -259,23 +257,6 @@ export default function Home() {
 
       {/* Team Showcase Section - Will be managed through admin */}
       {/* Team members will be added through the admin panel */}
-
-      {/* Booking CTA Section */}
-      <section className="relative py-12 md:py-section-gap">
-        <div className="absolute inset-0 bg-primary-container -z-10"></div>
-        <div className="max-w-container-max mx-auto px-4 md:px-margin-desktop text-center">
-          <h2 className="font-display-lg text-3xl md:text-display-lg text-white mb-4">Secure Your Moment</h2>
-          <p className="font-body-lg text-sm md:text-base text-on-primary-container max-w-lg mx-auto mb-6 md:mb-8">
-            Experience the pinnacle of editorial grooming. Our schedule fills quickly—reserve your appointment today.
-          </p>
-          <button
-            onClick={openBookingModal}
-            className="bg-primary border border-secondary text-white px-12 py-5 font-label-caps text-label-caps uppercase tracking-widest hover:bg-secondary transition-colors shadow-lg"
-          >
-            Book Your Appointment
-          </button>
-        </div>
-      </section>
     </div>
   );
 }
