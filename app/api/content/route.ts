@@ -84,8 +84,8 @@ const defaultContent = {
   },
 };
 
-// Cache for 5 minutes (revalidate every 300 seconds)
-export const revalidate = 300;
+// No cache - changes appear immediately
+export const revalidate = 0;
 
 export async function GET(request: Request) {
   try {
