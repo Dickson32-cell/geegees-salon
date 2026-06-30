@@ -42,7 +42,7 @@ export default function ContentManagement() {
   const handleSave = async (section: string) => {
     setSaving(true);
     try {
-      await fetch('/api/content', {
+      const response = await fetch('/api/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -51,10 +51,38 @@ export default function ContentManagement() {
           data: content[selectedPage][section as keyof PageContent],
         }),
       });
-      alert('Content updated successfully!');
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        // Save failed - show detailed error
+        console.error('Save failed:', result);
+        const errorMsg = result.details || result.error || 'Unknown error occurred';
+
+        if (result.code === '42P01') {
+          // Table doesn't exist
+          alert(
+            '❌ DATABASE NOT SET UP!\n\n' +
+            'The website_content table does not exist in your database.\n\n' +
+            'SOLUTION:\n' +
+            '1. Go to your Supabase Dashboard\n' +
+            '2. Open the SQL Editor\n' +
+            '3. Run the CREATE_WEBSITE_CONTENT_TABLE_FIXED.sql file\n\n' +
+            'Error: ' + errorMsg
+          );
+        } else {
+          alert('❌ Failed to save content:\n\n' + errorMsg);
+        }
+        return;
+      }
+
+      // Success - refresh content from server to ensure sync
+      await fetchContent();
+      alert('✅ Content updated successfully!\n\nRefresh your main website to see the changes.');
+
     } catch (error) {
       console.error('Error saving content:', error);
-      alert('Error saving content');
+      alert('❌ Network error: Unable to save content.\n\nPlease check your internet connection.');
     } finally {
       setSaving(false);
     }
@@ -80,6 +108,31 @@ export default function ContentManagement() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Website Content Management</h1>
         <p className="text-gray-600">Edit all text, titles, and content on your main website</p>
+      </div>
+
+      {/* Database Setup Warning */}
+      <div className="bg-amber-50 border-l-4 border-amber-500 p-6 mb-6 rounded-lg">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div className="ml-3 flex-1">
+            <h3 className="text-sm font-semibold text-amber-800 mb-2">⚠️ First Time Setup Required</h3>
+            <div className="text-sm text-amber-700 space-y-2">
+              <p>If this is your first time using the content editor, you need to set up the database:</p>
+              <ol className="list-decimal list-inside ml-2 space-y-1">
+                <li>Go to your <strong>Supabase Dashboard</strong></li>
+                <li>Click on <strong>SQL Editor</strong></li>
+                <li>Open the file <code className="bg-amber-100 px-1 py-0.5 rounded">CREATE_WEBSITE_CONTENT_TABLE_FIXED.sql</code></li>
+                <li>Copy and paste the SQL code into the editor</li>
+                <li>Click <strong>Run</strong></li>
+              </ol>
+              <p className="mt-2 text-xs">💡 You only need to do this once. After that, all your edits will save automatically.</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Page Selector */}

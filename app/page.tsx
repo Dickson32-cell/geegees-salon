@@ -64,7 +64,11 @@ export default function Home() {
 
   const fetchAboutContent = async () => {
     try {
-      const response = await fetch('/api/content?page=home');
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/content?page=home&t=${timestamp}`, {
+        cache: 'no-store'
+      });
       if (response.ok) {
         const data = await response.json();
         if (data.about) {
