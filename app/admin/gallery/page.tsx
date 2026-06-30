@@ -303,6 +303,7 @@ export default function AdminGallery() {
               >
                 <option value="hero-home">Hero - Home Page</option>
                 <option value="hero-services">Hero - Services Page</option>
+                <option value="home-showcase">Home - About Section Videos</option>
                 <option value="gallery">Gallery</option>
                 <option value="cut">Gallery - Precision Cut</option>
                 <option value="color">Gallery - Editorial Color</option>
@@ -311,6 +312,7 @@ export default function AdminGallery() {
               </select>
               <p className="text-xs text-slate-500 mt-1">
                 <strong>Hero media:</strong> Auto-play slideshows as page backgrounds (images fade, videos loop continuously).
+                <strong>Home - About Section:</strong> Videos displayed in the about section of the homepage.
                 <strong>Gallery:</strong> Appear in the gallery page.
               </p>
             </div>

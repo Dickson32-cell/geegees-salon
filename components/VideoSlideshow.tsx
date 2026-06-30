@@ -34,8 +34,9 @@ export default function VideoSlideshow({
 
       const data = await response.json();
       // Filter for videos in the specified category
-      const categoryVideos = data.filter((item: GalleryVideo) =>
-        isVideoUrl(item.image_url)
+      const categoryVideos = data.filter((item: any) =>
+        isVideoUrl(item.image_url) &&
+        (item.category === category || (!item.category && category === "home-showcase"))
       );
 
       if (categoryVideos.length > 0) {
@@ -73,12 +74,15 @@ export default function VideoSlideshow({
   }, [currentIndex]);
 
   if (videos.length === 0) {
-    // Fallback to static image if no videos
+    // Fallback to elegant gradient when no videos are available
     return (
-      <div className="aspect-[4/5] bg-cover bg-center relative z-10"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1595475207225-428b62bda831?q=80&w=2574')",
-        }}>
+      <div className="aspect-[4/5] bg-gradient-to-br from-primary via-primary-container to-secondary relative z-10 flex items-center justify-center">
+        <div className="text-center text-white/90 px-6">
+          <svg className="w-16 h-16 mx-auto mb-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          <p className="text-sm font-light opacity-80">Upload videos to showcase your work</p>
+        </div>
       </div>
     );
   }
