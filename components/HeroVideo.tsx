@@ -74,7 +74,7 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
   };
 
   return (
-    <div className="relative rounded-lg overflow-hidden shadow-2xl w-full bg-primary" style={{ height: '65vh', minHeight: '500px' }}>
+    <div className="relative rounded-lg overflow-hidden shadow-2xl w-full bg-primary h-[60vh] min-h-[400px] sm:h-[65vh] sm:min-h-[500px]">
       {/* Video Element */}
       <video
         ref={videoRef}
@@ -110,10 +110,10 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
       {showPlayButton && !isPlaying && (
         <button
           onClick={handlePlayClick}
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 bg-secondary hover:bg-secondary/90 text-white rounded-full p-6 shadow-2xl transition-all group"
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 bg-secondary hover:bg-secondary/90 text-white rounded-full p-4 sm:p-6 shadow-2xl transition-all group"
           aria-label="Play video"
         >
-          <svg className="w-12 h-12 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-10 h-10 sm:w-12 sm:h-12 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
             <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
           </svg>
         </button>

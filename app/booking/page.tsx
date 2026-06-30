@@ -313,7 +313,7 @@ export default function BookingPage() {
 
                 <div className="space-y-6">
                   <div>
-                    <label className="block font-label-caps text-[10px] uppercase text-secondary mb-2">Preferred Date</label>
+                    <label className="block font-label-caps text-xs sm:text-sm uppercase text-secondary mb-2">Preferred Date</label>
                     <input
                       type="date"
                       name="date"
@@ -326,8 +326,8 @@ export default function BookingPage() {
                   </div>
 
                   <div>
-                    <label className="block font-label-caps text-[10px] uppercase text-secondary mb-4">Available Time Slots</label>
-                    <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+                    <label className="block font-label-caps text-xs sm:text-sm uppercase text-secondary mb-4">Available Time Slots</label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                       {timeSlots.map((slot) => (
                         <button
                           key={slot}
@@ -358,7 +358,7 @@ export default function BookingPage() {
 
                 <div className="space-y-6">
                   <div>
-                    <label className="block font-label-caps text-[10px] uppercase text-secondary mb-2">Full Name</label>
+                    <label className="block font-label-caps text-xs sm:text-sm uppercase text-secondary mb-2">Full Name</label>
                     <input
                       type="text"
                       name="name"
@@ -371,7 +371,7 @@ export default function BookingPage() {
                   </div>
 
                   <div>
-                    <label className="block font-label-caps text-[10px] uppercase text-secondary mb-2">Email Address</label>
+                    <label className="block font-label-caps text-xs sm:text-sm uppercase text-secondary mb-2">Email Address</label>
                     <input
                       type="email"
                       name="email"
@@ -384,7 +384,7 @@ export default function BookingPage() {
                   </div>
 
                   <div>
-                    <label className="block font-label-caps text-[10px] uppercase text-secondary mb-2">Phone Number</label>
+                    <label className="block font-label-caps text-xs sm:text-sm uppercase text-secondary mb-2">Phone Number</label>
                     <input
                       type="tel"
                       name="phone"
@@ -397,7 +397,7 @@ export default function BookingPage() {
                   </div>
 
                   <div>
-                    <label className="block font-label-caps text-[10px] uppercase text-secondary mb-2">Special Notes (Optional)</label>
+                    <label className="block font-label-caps text-xs sm:text-sm uppercase text-secondary mb-2">Special Notes (Optional)</label>
                     <textarea
                       name="notes"
                       value={formData.notes}
