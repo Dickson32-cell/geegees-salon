@@ -15,13 +15,19 @@ CREATE TABLE website_content (
     UNIQUE(page, section)
 );
 
--- Step 3: Disable Row Level Security
+-- Step 3: Disable Row Level Security (IMPORTANT!)
 ALTER TABLE website_content DISABLE ROW LEVEL SECURITY;
 
--- Step 4: Create an index for faster lookups
+-- Step 4: Grant full access to anon and authenticated roles (just in case)
+GRANT ALL ON website_content TO anon;
+GRANT ALL ON website_content TO authenticated;
+GRANT USAGE, SELECT ON SEQUENCE website_content_id_seq TO anon;
+GRANT USAGE, SELECT ON SEQUENCE website_content_id_seq TO authenticated;
+
+-- Step 5: Create an index for faster lookups
 CREATE INDEX idx_website_content_page_section ON website_content(page, section);
 
--- Step 5: Insert default home page about section
+-- Step 6: Insert default home page about section
 INSERT INTO website_content (page, section, content)
 VALUES (
     'home',
@@ -30,5 +36,18 @@ VALUES (
 )
 ON CONFLICT (page, section) DO NOTHING;
 
--- Step 6: Verify the data was inserted
+-- Step 7: Verify everything is set up correctly
+SELECT
+    'Table exists' as check_name,
+    COUNT(*) as count
+FROM website_content;
+
+SELECT
+    'Permissions granted' as check_name,
+    grantee,
+    privilege_type
+FROM information_schema.role_table_grants
+WHERE table_name = 'website_content';
+
+-- Step 8: Final verification - show all content
 SELECT page, section, content FROM website_content;

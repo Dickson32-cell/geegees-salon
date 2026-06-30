@@ -150,62 +150,55 @@ export async function POST(request: Request) {
     }
 
     console.log('[API] Saving content for page:', page, 'section:', section);
+    console.log('[API] Data to save:', JSON.stringify(data));
 
-    // Check if content exists
-    const { data: existing } = await supabase
+    // Use upsert instead of checking existence first
+    // This is more reliable and handles both insert and update in one operation
+    const { data: result, error } = await supabase
       .from('website_content')
-      .select('id')
-      .eq('page', page)
-      .eq('section', section)
+      .upsert(
+        {
+          page,
+          section,
+          content: data,
+          updated_at: new Date().toISOString()
+        },
+        {
+          onConflict: 'page,section',
+          ignoreDuplicates: false
+        }
+      )
+      .select()
       .single();
 
-    let result;
-    if (existing) {
-      // Update existing content
-      const { data: updated, error } = await supabase
-        .from('website_content')
-        .update({ content: data })
-        .eq('page', page)
-        .eq('section', section)
-        .select()
-        .single();
+    if (error) {
+      console.error('[API] Content save error:', error);
+      console.error('[API] Error code:', error.code);
+      console.error('[API] Error message:', error.message);
+      console.error('[API] Error details:', error.details);
+      console.error('[API] Error hint:', error.hint);
 
-      if (error) {
-        console.error('[API] Content update error:', error);
-        return NextResponse.json({
-          error: 'Failed to update content',
-          details: error.message,
-          code: error.code
-        }, { status: 500 });
-      }
-      result = updated;
-    } else {
-      // Create new content
-      const { data: created, error } = await supabase
-        .from('website_content')
-        .insert([{ page, section, content: data }])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('[API] Content creation error:', error);
-        return NextResponse.json({
-          error: 'Failed to create content',
-          details: error.message,
-          code: error.code
-        }, { status: 500 });
-      }
-      result = created;
+      return NextResponse.json({
+        error: 'Failed to save content',
+        details: error.message,
+        code: error.code,
+        hint: error.hint,
+        errorDetails: error.details
+      }, { status: 500 });
     }
 
+    console.log('[API] Content saved successfully:', result);
     return NextResponse.json({ success: true, data: result.content });
   } catch (error: any) {
     console.error('[API] Content save catch error:', error);
+    console.error('[API] Stack trace:', error.stack);
+
     // Return detailed error for debugging
     return NextResponse.json({
       error: 'Failed to save content',
       details: error.message || String(error),
-      code: error.code
+      code: error.code,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     }, { status: 500 });
   }
 }
