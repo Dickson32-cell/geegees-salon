@@ -364,11 +364,13 @@ export default function ServicesManagement() {
               {previewUrl && (
                 <div className="mt-4">
                   <p className="text-sm font-medium text-slate-700 mb-2">Preview:</p>
-                  <img
-                    src={previewUrl}
-                    alt="Preview"
-                    className="max-h-48 rounded-lg border border-gray-300 object-cover"
-                  />
+                  <div className="relative w-full max-w-sm aspect-[4/3] rounded-lg border-2 border-gray-300 overflow-hidden bg-gray-50">
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="absolute inset-0 w-full h-full object-cover object-center"
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -410,28 +412,43 @@ export default function ServicesManagement() {
       {!loading && (
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {services.map((service) => (
-          <div key={service.id} className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 hover:shadow-md transition-all hover:border-blue-300">
-            <div className="flex justify-between items-start mb-4">
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-slate-900 mb-2">{service.name}</h3>
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold uppercase">
-                    {service.category}
-                  </span>
-                  <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-semibold uppercase ${
-                    service.status === 'published' ? 'bg-green-100 text-green-700' :
-                    service.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-gray-100 text-gray-700'
-                  }`}>
-                    {service.status}
-                  </span>
+          <div key={service.id} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all hover:border-blue-300">
+            {/* Service Image */}
+            {service.imageUrl && (
+              <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
+                <img
+                  src={service.imageUrl}
+                  alt={service.name}
+                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
+
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">{service.name}</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold uppercase">
+                      {service.category}
+                    </span>
+                    <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-semibold uppercase ${
+                      service.status === 'published' ? 'bg-green-100 text-green-700' :
+                      service.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      {service.status}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {service.description && (
-              <p className="text-slate-600 text-sm mb-4 line-clamp-2">{service.description}</p>
-            )}
+              {service.description && (
+                <p className="text-slate-600 text-sm mb-4 line-clamp-2">{service.description}</p>
+              )}
 
             <div className="space-y-2 mb-5 pb-5 border-b border-slate-100">
               <div className="flex items-center text-slate-700">
@@ -461,6 +478,7 @@ export default function ServicesManagement() {
               >
                 Delete
               </button>
+            </div>
             </div>
           </div>
         ))}
