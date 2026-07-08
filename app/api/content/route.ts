@@ -80,6 +80,7 @@ const defaultContent = {
       snapchatUrl: '#',
       youtubeUrl: '#',
       tiktokUrl: '#',
+      whatsappUrl: '#',
     },
   },
 };
