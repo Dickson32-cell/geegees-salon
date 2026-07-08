@@ -77,7 +77,7 @@ const defaultContent = {
       id: 'footer-social',
       type: 'social',
       instagramUrl: '#',
-      facebookUrl: '#',
+      snapchatUrl: '#',
       youtubeUrl: '#',
       tiktokUrl: '#',
     },

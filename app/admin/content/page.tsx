@@ -479,13 +479,13 @@ export default function ContentManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Facebook URL</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Snapchat URL</label>
                     <input
                       type="url"
-                      value={pageContent?.social?.facebookUrl || ''}
-                      onChange={(e) => updateSection('social', 'facebookUrl', e.target.value)}
+                      value={pageContent?.social?.snapchatUrl || ''}
+                      onChange={(e) => updateSection('social', 'snapchatUrl', e.target.value)}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="https://facebook.com/geegees"
+                      placeholder="https://snapchat.com/add/geegees"
                     />
                   </div>
 
