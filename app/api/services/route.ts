@@ -82,9 +82,19 @@ export async function PUT(request: Request) {
 
     console.log('[API] Updating service:', id);
 
+    // Convert camelCase to snake_case for database
+    const dbUpdates: any = {};
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.price !== undefined) dbUpdates.price = updates.price;
+    if (updates.duration !== undefined) dbUpdates.duration = updates.duration;
+    if (updates.description !== undefined) dbUpdates.description = updates.description || null;
+    if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl || null;
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+
     const { data: updatedService, error } = await supabase
       .from('services')
-      .update(updates)
+      .update(dbUpdates)
       .eq('id', parseInt(id))
       .select()
       .single();
