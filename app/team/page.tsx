@@ -8,7 +8,6 @@ interface TeamMember {
   name: string;
   title: string;
   bio: string | null;
-  imageUrl: string | null;
   specialties: string[];
   active: boolean;
 }
@@ -86,21 +85,12 @@ export default function TeamPage() {
                 key={member.id}
                 className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border-t-2 border-secondary"
               >
-                {/* Image or Placeholder */}
-                {member.imageUrl ? (
-                  <div className="relative h-64 overflow-hidden">
-                    <div
-                      className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-500"
-                      style={{ backgroundImage: `url('${member.imageUrl}')` }}
-                    />
-                  </div>
-                ) : (
-                  <div className="relative h-64 bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                    <span className="text-white text-5xl font-bold">
-                      {member.name.split(' ').map(n => n[0]).join('')}
-                    </span>
-                  </div>
-                )}
+                {/* Initials Display */}
+                <div className="relative h-64 bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                  <span className="text-white text-5xl font-bold">
+                    {member.name.split(' ').map(n => n[0]).join('')}
+                  </span>
+                </div>
 
                 {/* Content */}
                 <div className="p-6">

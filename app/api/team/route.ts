@@ -42,7 +42,6 @@ export async function POST(request: Request) {
         name: body.name,
         title: body.title,
         bio: body.bio,
-        image_url: body.imageUrl,
         specialties: body.specialties || [],
         active: body.active !== undefined ? body.active : true,
         display_order: body.displayOrder,
@@ -69,7 +68,6 @@ export async function PUT(request: Request) {
 
     // Convert camelCase to snake_case for Supabase
     const dbUpdates: any = {};
-    if (updates.imageUrl !== undefined) dbUpdates.image_url = updates.imageUrl;
     if (updates.displayOrder !== undefined) dbUpdates.display_order = updates.displayOrder;
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.title !== undefined) dbUpdates.title = updates.title;
