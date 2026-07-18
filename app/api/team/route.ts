@@ -8,6 +8,7 @@ const supabase = createClient(
 
 export async function GET() {
   try {
+    console.log('[API] Fetching team members...');
     const { data: team, error } = await supabase
       .from('team_members')
       .select('*')
@@ -15,16 +16,19 @@ export async function GET() {
       .order('name', { ascending: true });
 
     if (error) {
-      console.error('[API] Team error:', error);
+      console.error('[API] Supabase error fetching team:', error);
       return NextResponse.json({
         error: 'Failed to fetch team members',
-        details: error.message
+        details: error.message,
+        code: error.code,
+        hint: error.hint
       }, { status: 500 });
     }
 
+    console.log(`[API] Fetched ${team?.length || 0} team members`);
     return NextResponse.json(team || []);
   } catch (error) {
-    console.error('[API] Team error:', error);
+    console.error('[API] Unexpected error fetching team:', error);
     return NextResponse.json({
       error: 'Failed to fetch team members',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -35,6 +39,14 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+
+    console.log('[API] Creating team member with data:', {
+      name: body.name,
+      title: body.title,
+      bio: body.bio,
+      specialties: body.specialties,
+      active: body.active
+    });
 
     const { data: newMember, error } = await supabase
       .from('team_members')
@@ -50,14 +62,24 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
-      console.error('Database error:', error);
-      return NextResponse.json({ error: 'Failed to create team member' }, { status: 500 });
+      console.error('[API] Supabase error:', error);
+      return NextResponse.json({
+        error: 'Failed to create team member',
+        details: error.message,
+        code: error.code,
+        hint: error.hint
+      }, { status: 500 });
     }
 
+    console.log('[API] Team member created successfully:', newMember);
     return NextResponse.json(newMember, { status: 201 });
   } catch (error) {
-    console.error('Database error:', error);
-    return NextResponse.json({ error: 'Failed to create team member' }, { status: 500 });
+    console.error('[API] Unexpected error:', error);
+    return NextResponse.json({
+      error: 'Failed to create team member',
+      details: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    }, { status: 500 });
   }
 }
 
