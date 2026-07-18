@@ -48,6 +48,7 @@ export async function POST(request: Request) {
       active: body.active
     });
 
+    const now = new Date().toISOString();
     const { data: newMember, error } = await supabase
       .from('team_members')
       .insert([{
@@ -57,6 +58,8 @@ export async function POST(request: Request) {
         specialties: body.specialties || [],
         active: body.active !== undefined ? body.active : true,
         display_order: body.displayOrder,
+        created_at: now,
+        updated_at: now,
       }])
       .select()
       .single();
@@ -89,7 +92,9 @@ export async function PUT(request: Request) {
     const { id, ...updates } = body;
 
     // Convert camelCase to snake_case for Supabase
-    const dbUpdates: any = {};
+    const dbUpdates: any = {
+      updated_at: new Date().toISOString()
+    };
     if (updates.displayOrder !== undefined) dbUpdates.display_order = updates.displayOrder;
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.title !== undefined) dbUpdates.title = updates.title;
