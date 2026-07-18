@@ -36,10 +36,12 @@ export default function TeamManagement() {
       if (response.ok) {
         const data = await response.json();
         setTeamMembers(data);
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Failed to fetch team members:', errorData);
       }
     } catch (error) {
       console.error('Error fetching team members:', error);
-      alert('Failed to load team members');
     } finally {
       setLoading(false);
     }
@@ -75,11 +77,13 @@ export default function TeamManagement() {
         setIsAdding(false);
         alert('Team member added successfully!');
       } else {
-        alert('Failed to add team member');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Server error:', errorData);
+        alert(`Failed to add team member: ${errorData.error || errorData.details || 'Unknown error'}\n\nCheck browser console for more details.`);
       }
     } catch (error) {
       console.error('Error adding team member:', error);
-      alert('Failed to add team member');
+      alert(`Failed to add team member: ${error instanceof Error ? error.message : 'Network error'}\n\nCheck browser console for more details.`);
     }
   };
 
@@ -122,11 +126,13 @@ export default function TeamManagement() {
         setEditingId(null);
         alert('Team member updated successfully!');
       } else {
-        alert('Failed to update team member');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('Server error:', errorData);
+        alert(`Failed to update team member: ${errorData.error || errorData.details || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error updating team member:', error);
-      alert('Failed to update team member');
+      alert(`Failed to update team member: ${error instanceof Error ? error.message : 'Network error'}`);
     }
   };
 
