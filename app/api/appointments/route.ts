@@ -88,37 +88,53 @@ export async function POST(request: Request) {
 
     console.log('[API] Attempting to insert appointment with retry logic...');
 
-    // Use retry logic for database insertion
-    const appointment = await withRetry(async () => {
-      const { data, error } = await supabase
-        .from('appointments')
-        .insert([{
-          service,
-          stylist,
-          appointment_date: new Date(appointmentDate).toISOString(),
-          appointment_time: appointmentTime,
-          customer_name: customerName,
-          customer_email: customerEmail || '',
-          customer_phone: customerPhone,
-          notes: notes || '',
-          status
-        }])
-        .select()
-        .single();
+    // Prepare appointment data
+    const appointmentData = {
+      service,
+      stylist,
+      appointment_date: new Date(appointmentDate).toISOString(),
+      appointment_time: appointmentTime,
+      customer_name: customerName,
+      customer_email: customerEmail || '',
+      customer_phone: customerPhone,
+      notes: notes || '',
+      status
+    };
 
-      if (error) {
-        console.error('[API] Appointment creation error:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
+    console.log('[API] Inserting appointment data:', appointmentData);
 
-        throw new Error(error.message || 'Failed to create appointment');
-      }
+    // Insert directly with detailed error logging
+    const { data: appointment, error } = await supabase
+      .from('appointments')
+      .insert([appointmentData])
+      .select()
+      .single();
 
-      return data;
-    }, 3, 1000); // 3 retries with 1 second delay
+    if (error) {
+      console.error('[API] Appointment creation error:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+        sentData: appointmentData
+      });
+
+      return NextResponse.json({
+        error: 'Failed to create appointment',
+        details: error.message,
+        hint: error.hint || 'Please check database permissions',
+        code: error.code,
+        debug: appointmentData
+      }, { status: 500 });
+    }
+
+    if (!appointment) {
+      console.error('[API] No appointment returned after insert');
+      return NextResponse.json({
+        error: 'Failed to create appointment',
+        details: 'No data returned from database'
+      }, { status: 500 });
+    }
 
     // Invalidate appointments cache
     cache.delete('appointments:all');
