@@ -88,16 +88,16 @@ export async function POST(request: Request) {
 
     console.log('[API] Attempting to insert appointment with retry logic...');
 
-    // Prepare appointment data
+    // Prepare appointment data - ensure email is never null
     const appointmentData = {
       service,
       stylist,
       appointment_date: new Date(appointmentDate).toISOString(),
       appointment_time: appointmentTime,
       customer_name: customerName,
-      customer_email: customerEmail || '',
+      customer_email: customerEmail && customerEmail.trim() !== '' ? customerEmail.trim() : '',
       customer_phone: customerPhone,
-      notes: notes || '',
+      notes: notes && notes.trim() !== '' ? notes.trim() : '',
       status
     };
 
