@@ -13,10 +13,19 @@ interface Service {
   description?: string;
 }
 
+interface TeamMember {
+  id: number;
+  name: string;
+  title: string;
+  active: boolean;
+}
+
 export default function BookingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
+  const [stylists, setStylists] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingStylists, setLoadingStylists] = useState(true);
   const [error, setError] = useState<string>("");
   const [formData, setFormData] = useState({
     service: "",
@@ -31,6 +40,7 @@ export default function BookingPage() {
 
   useEffect(() => {
     fetchServices();
+    fetchStylists();
   }, []);
 
   const fetchServices = async () => {
@@ -48,6 +58,25 @@ export default function BookingPage() {
       setError("Unable to load services. Please refresh the page.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchStylists = async () => {
+    try {
+      const response = await fetch('/api/team');
+      if (!response.ok) {
+        throw new Error('Failed to fetch team members');
+      }
+      const data = await response.json();
+      // Only show active team members
+      const activeStylists = data.filter((member: TeamMember) => member.active);
+      setStylists(activeStylists);
+    } catch (error) {
+      console.error('Error fetching stylists:', error);
+      // Set empty array on error so booking can still work
+      setStylists([]);
+    } finally {
+      setLoadingStylists(false);
     }
   };
 
@@ -98,13 +127,6 @@ export default function BookingPage() {
       setCurrentStep(Math.min(4, currentStep + 1));
     }
   };
-
-  const stylists = [
-    { name: "Julian Marc", title: "Master Stylist" },
-    { name: "Elena Rossi", title: "Artistic Director" },
-    { name: "Marcus Thorne", title: "Lead Barber" },
-    { name: "Sophia Chen", title: "Dermal Expert" },
-  ];
 
   const timeSlots = ["9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM"];
 
@@ -274,32 +296,42 @@ export default function BookingPage() {
                   <span className="font-label-caps text-on-surface-variant italic">2 of 4: Select your stylist</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {stylists.map((stylist, idx) => (
-                    <div
-                      key={idx}
-                      onClick={() => setFormData({ ...formData, stylist: stylist.name })}
-                      className={`cursor-pointer rounded-lg overflow-hidden transition-all ${
-                        formData.stylist === stylist.name ? "ring-2 ring-secondary" : ""
-                      }`}
-                    >
-                      <div className="aspect-[3/4] overflow-hidden">
-                        <div
-                          className="w-full h-full bg-cover bg-center hover:scale-105 transition-transform duration-500"
-                          style={{
-                            backgroundImage: `url('https://images.unsplash.com/photo-${
-                              idx === 0 ? "1507003211169-0a1dd7228f2d" : idx === 1 ? "1494790108377-be9c29b29330" : idx === 2 ? "1500648767791-00dcc994a43e" : "1534528741775-53994a69daeb"
-                            }?q=80&w=2574')`,
-                          }}
-                        />
+                {loadingStylists ? (
+                  <div className="text-center py-12">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                    <p className="mt-4 text-on-surface-variant">Loading our expert stylists...</p>
+                  </div>
+                ) : stylists.length === 0 ? (
+                  <div className="text-center py-12 bg-surface-container-low rounded-lg">
+                    <svg className="w-16 h-16 text-on-surface-variant/40 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <h3 className="font-headline-sm text-primary mb-2">No Stylists Available</h3>
+                    <p className="text-on-surface-variant">Our team is currently being updated. Please check back soon!</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {stylists.map((stylist) => (
+                      <div
+                        key={stylist.id}
+                        onClick={() => setFormData({ ...formData, stylist: stylist.name })}
+                        className={`cursor-pointer rounded-lg overflow-hidden transition-all ${
+                          formData.stylist === stylist.name ? "ring-2 ring-secondary" : ""
+                        }`}
+                      >
+                        <div className="aspect-[3/4] overflow-hidden bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                          <span className="text-white text-5xl font-bold">
+                            {stylist.name.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                        <div className={`p-4 ${formData.stylist === stylist.name ? "bg-secondary-container/20" : "bg-white"}`}>
+                          <h4 className="font-headline-sm text-headline-sm mb-1">{stylist.name}</h4>
+                          <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">{stylist.title}</span>
+                        </div>
                       </div>
-                      <div className={`p-4 ${formData.stylist === stylist.name ? "bg-secondary-container/20" : "bg-white"}`}>
-                        <h4 className="font-headline-sm text-headline-sm mb-1">{stylist.name}</h4>
-                        <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">{stylist.title}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
