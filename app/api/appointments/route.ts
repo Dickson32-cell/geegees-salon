@@ -1,31 +1,51 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase, withRetry } from '@/lib/supabase';
+import { cache } from '@/lib/cache';
 
 // GET all appointments
 export async function GET() {
   try {
     console.log('[API] Fetching appointments via Supabase client...');
 
-    const { data: appointments, error } = await supabase
-      .from('appointments')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const cacheKey = 'appointments:all';
 
-    if (error) {
-      console.error('[API] Appointments fetch error:', error);
-      return NextResponse.json({
-        error: 'Failed to fetch appointments',
-        details: error.message
-      }, { status: 500 });
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      console.log('[API] Returning cached appointments');
+      return NextResponse.json(cachedData, {
+        headers: {
+          'X-Cache': 'HIT',
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        },
+      });
     }
 
+    // Fetch from database with retry logic
+    const appointments = await withRetry(async () => {
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('[API] Appointments fetch error:', error);
+        throw new Error(error.message);
+      }
+
+      return data || [];
+    });
+
+    // Cache the result for 1 minute (60 seconds) - shorter cache for appointments
+    cache.set(cacheKey, appointments, 60);
+
     console.log('[API] Successfully fetched appointments:', appointments?.length || 0);
-    return NextResponse.json(appointments || []);
+    return NextResponse.json(appointments, {
+      headers: {
+        'X-Cache': 'MISS',
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+      },
+    });
   } catch (error) {
     console.error('[API] Appointments catch error:', error);
     return NextResponse.json({
@@ -56,64 +76,63 @@ export async function POST(request: Request) {
 
     // Validation
     if (!service || !stylist || !appointmentDate || !appointmentTime || !customerName || !customerPhone) {
-      console.error('[API] Missing required fields');
+      console.error('[API] Missing required fields:', { service, stylist, appointmentDate, appointmentTime, customerName, customerPhone });
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        {
+          error: 'Missing required fields',
+          details: 'Please ensure all required fields are filled out'
+        },
         { status: 400 }
       );
     }
 
-    // Check Supabase connection
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.error('[API] Supabase environment variables missing!');
-      return NextResponse.json({
-        error: 'Database configuration error',
-        details: 'Supabase environment variables are not set'
-      }, { status: 500 });
-    }
+    console.log('[API] Attempting to insert appointment with retry logic...');
 
-    console.log('[API] Attempting to insert appointment...');
+    // Use retry logic for database insertion
+    const appointment = await withRetry(async () => {
+      const { data, error } = await supabase
+        .from('appointments')
+        .insert([{
+          service,
+          stylist,
+          appointment_date: new Date(appointmentDate).toISOString(),
+          appointment_time: appointmentTime,
+          customer_name: customerName,
+          customer_email: customerEmail || '',
+          customer_phone: customerPhone,
+          notes: notes || '',
+          status
+        }])
+        .select()
+        .single();
 
-    const { data: appointment, error } = await supabase
-      .from('appointments')
-      .insert([{
-        service,
-        stylist,
-        appointment_date: new Date(appointmentDate).toISOString(),
-        appointment_time: appointmentTime,
-        customer_name: customerName,
-        customer_email: customerEmail || '',
-        customer_phone: customerPhone,
-        notes: notes || '',
-        status
-      }])
-      .select()
-      .single();
+      if (error) {
+        console.error('[API] Appointment creation error:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
 
-    if (error) {
-      console.error('[API] Appointment creation error:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
-      });
+        throw new Error(error.message || 'Failed to create appointment');
+      }
 
-      return NextResponse.json({
-        error: 'Failed to create appointment',
-        details: error.message,
-        hint: error.hint,
-        code: error.code
-      }, { status: 500 });
-    }
+      return data;
+    }, 3, 1000); // 3 retries with 1 second delay
+
+    // Invalidate appointments cache
+    cache.delete('appointments:all');
 
     console.log('[API] Successfully created appointment:', appointment.id);
     return NextResponse.json(appointment, { status: 201 });
   } catch (error: any) {
     console.error('[API] Appointment creation catch error:', error);
+
     // Return detailed error for debugging
     return NextResponse.json({
       error: 'Failed to create appointment',
       details: error.message || String(error),
+      hint: 'Please check your internet connection and try again. If the issue persists, contact support.',
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     }, { status: 500 });
   }

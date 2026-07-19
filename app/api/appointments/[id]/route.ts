@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase, withRetry } from '@/lib/supabase';
+import { cache } from '@/lib/cache';
 
 // GET single appointment
 export async function GET(
@@ -90,6 +86,9 @@ export async function PATCH(
       }, { status: 500 });
     }
 
+    // Invalidate appointments cache
+    cache.delete('appointments:all');
+
     console.log('[API] Successfully updated appointment:', id);
     return NextResponse.json(appointment);
   } catch (error) {
@@ -122,6 +121,9 @@ export async function DELETE(
         details: error.message
       }, { status: 500 });
     }
+
+    // Invalidate appointments cache
+    cache.delete('appointments:all');
 
     console.log('[API] Successfully deleted appointment:', id);
     return NextResponse.json({ success: true, message: 'Appointment deleted' });
