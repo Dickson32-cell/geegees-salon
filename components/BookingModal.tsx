@@ -10,6 +10,13 @@ interface Service {
   duration: string;
 }
 
+interface TeamMember {
+  id: number;
+  name: string;
+  title: string;
+  active: boolean;
+}
+
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -19,6 +26,7 @@ interface BookingModalProps {
 export default function BookingModal({ isOpen, onClose, preselectedServiceId }: BookingModalProps) {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
+  const [stylists, setStylists] = useState<string[]>(['Any Available']);
   const [formData, setFormData] = useState({
     service: '',
     stylist: '',
@@ -54,8 +62,6 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
     }
   }, [isOpen]);
 
-  const stylists = ['Any Available', 'Sarah Johnson', 'Michael Chen', 'Emma Williams', 'David Martinez'];
-
   const timeSlots = [
     '09:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
     '01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM',
@@ -65,6 +71,7 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
   useEffect(() => {
     if (isOpen) {
       fetchServices();
+      fetchStylists();
     }
   }, [isOpen]);
 
@@ -124,6 +131,26 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
       }
     } catch (error) {
       console.error('Error fetching services:', error);
+    }
+  };
+
+  const fetchStylists = async () => {
+    try {
+      const response = await fetch('/api/team');
+      if (response.ok) {
+        const data: TeamMember[] = await response.json();
+        // Only show active team members
+        const activeStylists = data
+          .filter((member: TeamMember) => member.active)
+          .map((member: TeamMember) => member.name);
+
+        // Add "Any Available" as first option, then team members
+        setStylists(['Any Available', ...activeStylists]);
+      }
+    } catch (error) {
+      console.error('Error fetching stylists:', error);
+      // Keep default "Any Available" on error
+      setStylists(['Any Available']);
     }
   };
 
