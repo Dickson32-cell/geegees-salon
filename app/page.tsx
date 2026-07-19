@@ -270,7 +270,7 @@ export default function Home() {
           <p className="font-body-lg text-sm md:text-base text-on-primary-container max-w-lg mx-auto mb-6 md:mb-8">
             Experience the pinnacle of editorial grooming. Our schedule fills quickly—reserve your appointment today.
           </p>
-          <Link href="/booking">
+          <Link href="/services">
             <button className="bg-secondary text-primary px-12 py-6 font-label-caps text-sm md:text-label-caps uppercase tracking-widest font-bold rounded-xl shadow-2xl shadow-secondary/60 hover:shadow-[0_0_40px_rgba(212,175,55,0.8)] hover:scale-105 transition-all duration-300 animate-pulse">
               Book Your Appointment
             </button>

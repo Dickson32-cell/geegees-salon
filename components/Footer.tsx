@@ -68,7 +68,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/booking" className="inline-block">
+              <Link href="/services" className="inline-block">
                 <span className="bg-secondary text-primary px-5 py-2.5 rounded-lg font-label-caps text-xs uppercase tracking-widest font-bold shadow-lg shadow-secondary/40 hover:shadow-xl hover:shadow-secondary/60 hover:scale-105 transition-all duration-300">
                   Book Appointment
                 </span>

@@ -92,7 +92,7 @@ export default function Navbar() {
             Our Story
           </Link>
           <Link
-            href="/booking"
+            href="/services"
             className="relative group"
           >
             <span className="inline-block bg-secondary text-primary px-6 py-3 rounded-lg font-label-caps text-label-caps uppercase tracking-widest font-bold shadow-lg shadow-secondary/50 hover:shadow-xl hover:shadow-secondary/70 hover:scale-105 transition-all duration-300 animate-pulse">
@@ -170,7 +170,7 @@ export default function Navbar() {
                 Our Story
               </Link>
               <Link
-                href="/booking"
+                href="/services"
                 className="pt-3"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
