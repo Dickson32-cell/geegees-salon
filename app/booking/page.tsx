@@ -244,7 +244,13 @@ export default function BookingPage() {
                     services.map((service) => (
                       <div
                         key={service.id}
-                        onClick={() => setFormData({ ...formData, service: service.name })}
+                        onClick={() => {
+                          setFormData({ ...formData, service: service.name });
+                          // Auto-advance to next step after brief delay for visual feedback
+                          setTimeout(() => {
+                            setCurrentStep(2);
+                          }, 400);
+                        }}
                         className={`flex items-center justify-between p-6 rounded-lg cursor-pointer transition-all ${
                           formData.service === service.name
                             ? "bg-white border-2 border-secondary ring-2 ring-secondary/20"
@@ -314,7 +320,13 @@ export default function BookingPage() {
                     {stylists.map((stylist) => (
                       <div
                         key={stylist.id}
-                        onClick={() => setFormData({ ...formData, stylist: stylist.name })}
+                        onClick={() => {
+                          setFormData({ ...formData, stylist: stylist.name });
+                          // Auto-advance to next step after brief delay for visual feedback
+                          setTimeout(() => {
+                            setCurrentStep(3);
+                          }, 400);
+                        }}
                         className={`cursor-pointer rounded-lg overflow-hidden transition-all ${
                           formData.stylist === stylist.name ? "ring-2 ring-secondary" : ""
                         }`}
