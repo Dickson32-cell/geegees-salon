@@ -7,7 +7,45 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Optimized Supabase client with connection pooling
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: false, // Disable session persistence for better performance
+  },
+  db: {
+    schema: 'public',
+  },
+  global: {
+    headers: {
+      'x-application-name': 'geegees-salon',
+    },
+  },
+});
+
+// Helper function for retry logic with exponential backoff
+export async function withRetry<T>(
+  operation: () => Promise<T>,
+  maxRetries: number = 3,
+  delay: number = 1000
+): Promise<T> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error as Error;
+      console.error(`[Retry ${attempt}/${maxRetries}] Operation failed:`, error);
+
+      if (attempt < maxRetries) {
+        // Exponential backoff: delay * attempt
+        await new Promise(resolve => setTimeout(resolve, delay * attempt));
+      }
+    }
+  }
+
+  throw lastError || new Error('Operation failed after retries');
+}
 
 /**
  * Upload an image to Supabase Storage

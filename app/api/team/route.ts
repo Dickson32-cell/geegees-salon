@@ -1,32 +1,51 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase, withRetry } from '@/lib/supabase';
+import { cache } from '@/lib/cache';
 
 export async function GET() {
   try {
     console.log('[API] Fetching team members...');
-    const { data: team, error } = await supabase
-      .from('team_members')
-      .select('*')
-      .order('display_order', { ascending: true })
-      .order('name', { ascending: true });
 
-    if (error) {
-      console.error('[API] Supabase error fetching team:', error);
-      return NextResponse.json({
-        error: 'Failed to fetch team members',
-        details: error.message,
-        code: error.code,
-        hint: error.hint
-      }, { status: 500 });
+    const cacheKey = 'team:all';
+
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      console.log('[API] Returning cached team members');
+      return NextResponse.json(cachedData, {
+        headers: {
+          'X-Cache': 'HIT',
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        },
+      });
     }
 
+    // Fetch from database with retry logic
+    const team = await withRetry(async () => {
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('*')
+        .order('display_order', { ascending: true })
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('[API] Supabase error fetching team:', error);
+        throw new Error(error.message);
+      }
+
+      return data || [];
+    });
+
+    // Cache the result for 5 minutes (300 seconds)
+    cache.set(cacheKey, team, 300);
+
     console.log(`[API] Fetched ${team?.length || 0} team members`);
-    return NextResponse.json(team || []);
+    return NextResponse.json(team, {
+      headers: {
+        'X-Cache': 'MISS',
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    });
   } catch (error) {
     console.error('[API] Unexpected error fetching team:', error);
     return NextResponse.json({
@@ -75,6 +94,10 @@ export async function POST(request: Request) {
     }
 
     console.log('[API] Team member created successfully:', newMember);
+
+    // Invalidate cache when new team member is created
+    cache.delete('team:all');
+
     return NextResponse.json(newMember, { status: 201 });
   } catch (error) {
     console.error('[API] Unexpected error:', error);
@@ -114,6 +137,9 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Failed to update team member' }, { status: 500 });
     }
 
+    // Invalidate cache when team member is updated
+    cache.delete('team:all');
+
     return NextResponse.json(updatedMember);
   } catch (error) {
     console.error('Database error:', error);
@@ -135,6 +161,9 @@ export async function DELETE(request: Request) {
       console.error('Database error:', error);
       return NextResponse.json({ error: 'Failed to delete team member' }, { status: 500 });
     }
+
+    // Invalidate cache when team member is deleted
+    cache.delete('team:all');
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase, withRetry } from '@/lib/supabase';
+import { cache } from '@/lib/cache';
 
 export async function GET(request: Request) {
   try {
@@ -14,27 +10,52 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
 
-    let query = supabase
-      .from('services')
-      .select('*');
+    // Create cache key based on status filter
+    const cacheKey = `services:${status || 'all'}`;
 
-    // Filter by status if provided
-    if (status) {
-      query = query.eq('status', status);
+    // Check cache first
+    const cachedData = cache.get(cacheKey);
+    if (cachedData) {
+      console.log('[API] Returning cached services');
+      return NextResponse.json(cachedData, {
+        headers: {
+          'X-Cache': 'HIT',
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        },
+      });
     }
 
-    const { data: services, error } = await query.order('id', { ascending: true });
+    // Fetch from database with retry logic
+    const services = await withRetry(async () => {
+      let query = supabase
+        .from('services')
+        .select('*');
 
-    if (error) {
-      console.error('[API] Services fetch error:', error);
-      return NextResponse.json({
-        error: 'Failed to fetch services',
-        details: error.message
-      }, { status: 500 });
-    }
+      // Filter by status if provided
+      if (status) {
+        query = query.eq('status', status);
+      }
+
+      const { data, error } = await query.order('id', { ascending: true });
+
+      if (error) {
+        console.error('[API] Services fetch error:', error);
+        throw new Error(error.message);
+      }
+
+      return data || [];
+    });
+
+    // Cache the result for 5 minutes (300 seconds)
+    cache.set(cacheKey, services, 300);
 
     console.log('[API] Successfully fetched services:', services?.length || 0);
-    return NextResponse.json(services || []);
+    return NextResponse.json(services, {
+      headers: {
+        'X-Cache': 'MISS',
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    });
   } catch (error) {
     console.error('[API] Services catch error:', error);
     return NextResponse.json({
@@ -67,6 +88,11 @@ export async function POST(request: Request) {
       console.error('[API] Service creation error:', error);
       return NextResponse.json({ error: 'Failed to create service', details: error.message }, { status: 500 });
     }
+
+    // Invalidate cache when new service is created
+    cache.delete('services:all');
+    cache.delete('services:published');
+    cache.delete('services:draft');
 
     return NextResponse.json(newService, { status: 201 });
   } catch (error) {
@@ -104,6 +130,11 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Failed to update service', details: error.message }, { status: 500 });
     }
 
+    // Invalidate cache when service is updated
+    cache.delete('services:all');
+    cache.delete('services:published');
+    cache.delete('services:draft');
+
     return NextResponse.json(updatedService);
   } catch (error) {
     console.error('[API] Service update catch error:', error);
@@ -127,6 +158,11 @@ export async function DELETE(request: Request) {
       console.error('[API] Service deletion error:', error);
       return NextResponse.json({ error: 'Failed to delete service', details: error.message }, { status: 500 });
     }
+
+    // Invalidate cache when service is deleted
+    cache.delete('services:all');
+    cache.delete('services:published');
+    cache.delete('services:draft');
 
     return NextResponse.json({ success: true });
   } catch (error) {
