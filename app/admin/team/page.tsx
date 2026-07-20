@@ -8,7 +8,7 @@ interface TeamMember {
   title: string;
   bio: string | null;
   specialties: string[];
-  role: string;
+  role?: string;
   active: boolean;
   display_order: number | null;
 }
@@ -97,7 +97,7 @@ export default function TeamManagement() {
       title: member.title,
       bio: member.bio || "",
       specialties: member.specialties.join(', '),
-      role: member.role,
+      role: member.role || "stylist",
       active: member.active,
     });
   };
@@ -319,11 +319,11 @@ export default function TeamManagement() {
                   <h3 className="text-xl font-bold text-gray-900">{member.name}</h3>
                   <div className="flex gap-2">
                     <span className={`px-2 py-1 text-xs rounded font-semibold ${
-                      member.role === 'stylist' ? 'bg-blue-100 text-blue-700' :
+                      !member.role || member.role === 'stylist' ? 'bg-blue-100 text-blue-700' :
                       member.role === 'receptionist' ? 'bg-green-100 text-green-700' :
                       'bg-purple-100 text-purple-700'
                     }`}>
-                      {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
+                      {member.role ? member.role.charAt(0).toUpperCase() + member.role.slice(1) : 'Stylist'}
                     </span>
                     {!member.active && (
                       <span className="px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded">Hidden</span>

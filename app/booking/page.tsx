@@ -17,7 +17,7 @@ interface TeamMember {
   id: number;
   name: string;
   title: string;
-  role: string;
+  role?: string;
   active: boolean;
 }
 
@@ -70,7 +70,10 @@ export default function BookingPage() {
       }
       const data = await response.json();
       // Only show active team members who are stylists (not receptionists, managers, etc.)
-      const activeStylists = data.filter((member: TeamMember) => member.active && member.role === 'stylist');
+      // If role is not set (legacy data), assume stylist for backwards compatibility
+      const activeStylists = data.filter((member: TeamMember) =>
+        member.active && (!member.role || member.role === 'stylist')
+      );
       setStylists(activeStylists);
     } catch (error) {
       console.error('Error fetching stylists:', error);
