@@ -17,6 +17,7 @@ interface TeamMember {
   id: number;
   name: string;
   title: string;
+  role: string;
   active: boolean;
 }
 
@@ -68,8 +69,8 @@ export default function BookingPage() {
         throw new Error('Failed to fetch team members');
       }
       const data = await response.json();
-      // Only show active team members
-      const activeStylists = data.filter((member: TeamMember) => member.active);
+      // Only show active team members who are stylists (not receptionists, managers, etc.)
+      const activeStylists = data.filter((member: TeamMember) => member.active && member.role === 'stylist');
       setStylists(activeStylists);
     } catch (error) {
       console.error('Error fetching stylists:', error);

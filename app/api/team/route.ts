@@ -64,6 +64,7 @@ export async function POST(request: Request) {
       title: body.title,
       bio: body.bio,
       specialties: body.specialties,
+      role: body.role,
       active: body.active
     });
 
@@ -75,6 +76,7 @@ export async function POST(request: Request) {
         title: body.title,
         bio: body.bio,
         specialties: body.specialties || [],
+        role: body.role || 'stylist',
         active: body.active !== undefined ? body.active : true,
         display_order: body.displayOrder,
         created_at: now,
@@ -123,6 +125,7 @@ export async function PUT(request: Request) {
     if (updates.title !== undefined) dbUpdates.title = updates.title;
     if (updates.bio !== undefined) dbUpdates.bio = updates.bio;
     if (updates.specialties !== undefined) dbUpdates.specialties = updates.specialties;
+    if (updates.role !== undefined) dbUpdates.role = updates.role;
     if (updates.active !== undefined) dbUpdates.active = updates.active;
 
     const { data: updatedMember, error } = await supabase

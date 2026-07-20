@@ -8,6 +8,7 @@ interface TeamMember {
   title: string;
   bio: string | null;
   specialties: string[];
+  role: string;
   active: boolean;
   display_order: number | null;
 }
@@ -22,6 +23,7 @@ export default function TeamManagement() {
     title: "",
     bio: "",
     specialties: "",
+    role: "stylist",
     active: true,
   });
 
@@ -67,13 +69,14 @@ export default function TeamManagement() {
           title: newMember.title,
           bio: newMember.bio || null,
           specialties: specialtiesArray,
+          role: newMember.role,
           active: newMember.active,
         }),
       });
 
       if (response.ok) {
         await fetchTeamMembers();
-        setNewMember({ name: "", title: "", bio: "", specialties: "", active: true });
+        setNewMember({ name: "", title: "", bio: "", specialties: "", role: "stylist", active: true });
         setIsAdding(false);
         alert('Team member added successfully!');
       } else {
@@ -94,6 +97,7 @@ export default function TeamManagement() {
       title: member.title,
       bio: member.bio || "",
       specialties: member.specialties.join(', '),
+      role: member.role,
       active: member.active,
     });
   };
@@ -116,13 +120,14 @@ export default function TeamManagement() {
           title: newMember.title,
           bio: newMember.bio || null,
           specialties: specialtiesArray,
+          role: newMember.role,
           active: newMember.active,
         }),
       });
 
       if (response.ok) {
         await fetchTeamMembers();
-        setNewMember({ name: "", title: "", bio: "", specialties: "", active: true });
+        setNewMember({ name: "", title: "", bio: "", specialties: "", role: "stylist", active: true });
         setEditingId(null);
         alert('Team member updated successfully!');
       } else {
@@ -161,7 +166,7 @@ export default function TeamManagement() {
   const cancelEdit = () => {
     setEditingId(null);
     setIsAdding(false);
-    setNewMember({ name: "", title: "", bio: "", specialties: "", active: true });
+    setNewMember({ name: "", title: "", bio: "", specialties: "", role: "stylist", active: true });
   };
 
   const getInitials = (name: string) => {
@@ -205,7 +210,7 @@ export default function TeamManagement() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Title/Role *</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Title *</label>
               <input
                 type="text"
                 placeholder="e.g., Master Hair Stylist"
@@ -213,6 +218,18 @@ export default function TeamManagement() {
                 onChange={(e) => setNewMember({ ...newMember, title: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Role *</label>
+              <select
+                value={newMember.role}
+                onChange={(e) => setNewMember({ ...newMember, role: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="stylist">Stylist</option>
+                <option value="receptionist">Receptionist</option>
+                <option value="manager">Manager</option>
+              </select>
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-1">Bio</label>
@@ -300,9 +317,18 @@ export default function TeamManagement() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-xl font-bold text-gray-900">{member.name}</h3>
-                  {!member.active && (
-                    <span className="px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded">Hidden</span>
-                  )}
+                  <div className="flex gap-2">
+                    <span className={`px-2 py-1 text-xs rounded font-semibold ${
+                      member.role === 'stylist' ? 'bg-blue-100 text-blue-700' :
+                      member.role === 'receptionist' ? 'bg-green-100 text-green-700' :
+                      'bg-purple-100 text-purple-700'
+                    }`}>
+                      {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
+                    </span>
+                    {!member.active && (
+                      <span className="px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded">Hidden</span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-primary-600 font-semibold mb-3">{member.title}</p>
 
