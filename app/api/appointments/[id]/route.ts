@@ -5,10 +5,11 @@ import { cache } from '@/lib/cache';
 // GET single appointment
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     console.log('[API] Fetching appointment:', id);
 
     const { data: appointment, error } = await supabase
@@ -45,10 +46,11 @@ export async function GET(
 // PATCH update appointment (status, revenue, etc.)
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     const body = await request.json();
 
     console.log('[API] Updating appointment:', id);
@@ -107,10 +109,11 @@ export async function PATCH(
 // DELETE appointment
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const resolvedParams = await params;
+    const id = parseInt(resolvedParams.id);
     console.log('[API] Deleting appointment:', id);
 
     const { error } = await supabase

@@ -4,10 +4,11 @@ import { supabase } from '@/lib/supabase';
 // PATCH update gift request status
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = parseInt(params.id);
+        const resolvedParams = await params;
+        const id = parseInt(resolvedParams.id);
         const body = await request.json();
 
         const updateData: any = {};
@@ -44,10 +45,11 @@ export async function PATCH(
 // DELETE gift request
 export async function DELETE(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const id = parseInt(params.id);
+        const resolvedParams = await params;
+        const id = parseInt(resolvedParams.id);
 
         const { error } = await supabase
             .from('gift_requests')
