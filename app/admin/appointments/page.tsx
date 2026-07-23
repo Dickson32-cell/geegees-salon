@@ -51,7 +51,18 @@ export default function AppointmentsPage() {
       const response = await fetch('/api/appointments');
       if (response.ok) {
         const data = await response.json();
-        setAppointments(data);
+        // Map snake_case to camelCase
+        const mappedData = data.map((apt: any) => ({
+          ...apt,
+          appointmentDate: apt.appointment_date || apt.appointmentDate,
+          appointmentTime: apt.appointment_time || apt.appointmentTime,
+          customerName: apt.customer_name || apt.customerName,
+          customerEmail: apt.customer_email || apt.customerEmail,
+          customerPhone: apt.customer_phone || apt.customerPhone,
+          finalPrice: apt.final_price || apt.finalPrice,
+          createdAt: apt.created_at || apt.createdAt,
+        }));
+        setAppointments(mappedData);
         setLastUpdated(new Date());
       }
     } catch (error) {

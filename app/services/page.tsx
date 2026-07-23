@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { ServiceGridSkeleton } from "@/components/LoadingSkeleton";
 import { useBooking } from "@/contexts/BookingContext";
+import GiftModal from "@/components/GiftModal";
 import { isVideoUrl } from "@/lib/media";
 import { getCategoryDisplayName } from "@/lib/serviceCategories";
 
@@ -93,9 +94,8 @@ function GalleryVideoBackground() {
         <video
           key={video.id}
           ref={(el) => { videoRefs.current[index] = el; }}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-            index === currentIndex && !isTransitioning ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${index === currentIndex && !isTransitioning ? 'opacity-100' : 'opacity-0'
+            }`}
           autoPlay
           loop
           muted
@@ -120,6 +120,7 @@ export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
+  const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
   const { openBookingModal } = useBooking();
 
   useEffect(() => {
@@ -235,67 +236,67 @@ export default function ServicesPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-gutter">
                       {categoryServices.map((service) => (
-                    <div key={service.id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow border-t-2 border-secondary overflow-hidden flex flex-col">
-                      {/* Service Image */}
-                      <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-primary to-primary-container overflow-hidden">
-                        {service.image_url ? (
-                          <img
-                            src={service.image_url}
-                            alt={service.name}
-                            className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 hover:scale-110"
-                            loading="lazy"
-                            onError={(e) => {
-                              console.error('Service image load error:', service.image_url);
-                              // Replace with gradient background on error
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-white/40 text-4xl md:text-5xl font-light italic">GG</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Service Details */}
-                      <div className="p-6 md:p-8">
-                        <div className="mb-4">
-                          <h4 className="font-headline-sm text-xl md:text-headline-sm text-primary mb-2">{service.name}</h4>
-                          <div className="flex flex-wrap gap-2">
-                            <span className="inline-block px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
-                              {getCategoryDisplayName(service.category)}
-                            </span>
-                            {service.subcategory && (
-                              <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
-                                {service.subcategory}
-                              </span>
+                        <div key={service.id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow border-t-2 border-secondary overflow-hidden flex flex-col">
+                          {/* Service Image */}
+                          <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-primary to-primary-container overflow-hidden">
+                            {service.image_url ? (
+                              <img
+                                src={service.image_url}
+                                alt={service.name}
+                                className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 hover:scale-110"
+                                loading="lazy"
+                                onError={(e) => {
+                                  console.error('Service image load error:', service.image_url);
+                                  // Replace with gradient background on error
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-white/40 text-4xl md:text-5xl font-light italic">GG</span>
+                              </div>
                             )}
                           </div>
-                        </div>
 
-                        {service.description && (
-                          <p className="font-body-md text-on-surface-variant mb-4 line-clamp-3">{service.description}</p>
-                        )}
+                          {/* Service Details */}
+                          <div className="p-6 md:p-8">
+                            <div className="mb-4">
+                              <h4 className="font-headline-sm text-xl md:text-headline-sm text-primary mb-2">{service.name}</h4>
+                              <div className="flex flex-wrap gap-2">
+                                <span className="inline-block px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
+                                  {getCategoryDisplayName(service.category)}
+                                </span>
+                                {service.subcategory && (
+                                  <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
+                                    {service.subcategory}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
 
-                        <div className="flex justify-between items-center pt-4 border-t border-secondary/10">
-                          <div>
-                            <p className="text-xs text-on-surface-variant uppercase tracking-wide">Price</p>
-                            <p className="font-headline-sm text-primary">{service.price}</p>
+                            {service.description && (
+                              <p className="font-body-md text-on-surface-variant mb-4 line-clamp-3">{service.description}</p>
+                            )}
+
+                            <div className="flex justify-between items-center pt-4 border-t border-secondary/10">
+                              <div>
+                                <p className="text-xs text-on-surface-variant uppercase tracking-wide">Price</p>
+                                <p className="font-headline-sm text-primary">{service.price}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs text-on-surface-variant uppercase tracking-wide">Duration</p>
+                                <p className="font-body-md text-on-surface">{service.duration}</p>
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={() => openBookingModal(service.id.toString())}
+                              className="w-full bg-primary text-white py-3 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-colors mt-6"
+                            >
+                              Book This Service
+                            </button>
                           </div>
-                          <div className="text-right">
-                            <p className="text-xs text-on-surface-variant uppercase tracking-wide">Duration</p>
-                            <p className="font-body-md text-on-surface">{service.duration}</p>
-                          </div>
                         </div>
-
-                        <button
-                          onClick={() => openBookingModal(service.id.toString())}
-                          className="w-full bg-primary text-white py-3 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-colors mt-6"
-                        >
-                          Book This Service
-                        </button>
-                      </div>
-                    </div>
                       ))}
                     </div>
                   </div>
@@ -318,12 +319,17 @@ export default function ServicesPage() {
             >
               Schedule Appointment
             </button>
-            <button className="border border-secondary text-secondary px-10 py-4 rounded-lg font-label-caps text-label-caps hover:bg-secondary hover:text-white transition-all active:scale-95">
+            <button
+              onClick={() => setIsGiftModalOpen(true)}
+              className="border border-secondary text-secondary px-10 py-4 rounded-lg font-label-caps text-label-caps hover:bg-secondary hover:text-white transition-all active:scale-95"
+            >
               Gift a Signature Session
             </button>
           </div>
         </div>
       </section>
+
+      <GiftModal isOpen={isGiftModalOpen} onClose={() => setIsGiftModalOpen(false)} />
     </main>
   );
 }
