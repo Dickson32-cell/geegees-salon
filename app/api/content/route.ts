@@ -1,10 +1,24 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Force Next.js to never cache this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+// Create a fresh Supabase client per-request with no-store fetch
+// so Next.js data cache never intercepts the Supabase queries
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        fetch: (url, options = {}) =>
+          fetch(url, { ...options, cache: 'no-store' }),
+      },
+    }
+  );
+}
 
 // Default content structure (used as fallback if database is empty)
 const defaultContent = {
@@ -85,8 +99,7 @@ const defaultContent = {
   },
 };
 
-// No cache - changes appear immediately
-export const revalidate = 0;
+// (revalidate and dynamic are declared at the top of the file)
 
 export async function GET(request: Request) {
   try {
@@ -94,6 +107,9 @@ export async function GET(request: Request) {
     const page = searchParams.get('page');
 
     console.log('[API] Fetching website content...');
+
+    // Create fresh client per-request to bypass any Next.js fetch cache
+    const supabase = getSupabaseClient();
 
     // Fetch all content from database
     const { data: dbContent, error } = await supabase
@@ -123,11 +139,13 @@ export async function GET(request: Request) {
       };
     });
 
+    const noStoreHeaders = { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' };
+
     if (page && websiteContent[page]) {
-      return NextResponse.json(websiteContent[page]);
+      return NextResponse.json(websiteContent[page], { headers: noStoreHeaders });
     }
 
-    return NextResponse.json(websiteContent);
+    return NextResponse.json(websiteContent, { headers: noStoreHeaders });
   } catch (error) {
     console.error('[API] Content catch error:', error);
     // Return defaults if database fails
@@ -152,6 +170,8 @@ export async function POST(request: Request) {
 
     console.log('[API] Saving content for page:', page, 'section:', section);
     console.log('[API] Data to save:', JSON.stringify(data));
+
+    const supabase = getSupabaseClient();
 
     // Use upsert instead of checking existence first
     // This is more reliable and handles both insert and update in one operation
