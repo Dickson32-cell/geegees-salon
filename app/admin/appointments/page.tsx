@@ -112,11 +112,12 @@ export default function AppointmentsPage() {
       if (response.ok) {
         fetchAppointments(); // Refresh the list
       } else {
-        alert('Failed to update appointment status');
+        const errorData = await response.json().catch(() => ({}));
+        alert(`Failed to update appointment status: ${errorData.error || errorData.details || response.statusText}`);
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      alert('An error occurred while updating status');
+      alert(`An error occurred while updating status: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -131,11 +132,12 @@ export default function AppointmentsPage() {
       if (response.ok) {
         fetchAppointments();
       } else {
-        alert('Failed to assign stylist');
+        const errorData = await response.json().catch(() => ({}));
+        alert(`Failed to assign stylist: ${errorData.error || errorData.details || response.statusText}`);
       }
     } catch (error) {
       console.error('Error assigning stylist:', error);
-      alert('An error occurred while assigning stylist');
+      alert(`An error occurred while assigning stylist: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
