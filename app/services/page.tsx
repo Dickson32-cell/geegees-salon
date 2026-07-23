@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { ServiceGridSkeleton } from "@/components/LoadingSkeleton";
 import { useBooking } from "@/contexts/BookingContext";
 import { isVideoUrl } from "@/lib/media";
+import { getCategoryDisplayName } from "@/lib/serviceCategories";
 
 interface Service {
   id: number;
@@ -218,7 +219,7 @@ export default function ServicesPage() {
             {Object.entries(groupedServices).map(([category, subcategories]) => (
               <div key={category} className="scroll-mt-24" id={category.toLowerCase()}>
                 <div className="text-center mb-8 md:mb-12">
-                  <h3 className="font-headline-md text-2xl md:text-headline-md text-primary">{category}</h3>
+                  <h3 className="font-headline-md text-2xl md:text-headline-md text-primary">{getCategoryDisplayName(category)}</h3>
                   <div className="w-10 h-[1px] bg-secondary mx-auto mt-2"></div>
                 </div>
 
@@ -262,7 +263,7 @@ export default function ServicesPage() {
                           <h4 className="font-headline-sm text-xl md:text-headline-sm text-primary mb-2">{service.name}</h4>
                           <div className="flex flex-wrap gap-2">
                             <span className="inline-block px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
-                              {service.category}
+                              {getCategoryDisplayName(service.category)}
                             </span>
                             {service.subcategory && (
                               <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">

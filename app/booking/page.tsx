@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { BookingServiceSkeleton } from "@/components/LoadingSkeleton";
+import { getCategoryDisplayName } from "@/lib/serviceCategories";
 
 interface Service {
   id: number;
@@ -271,7 +272,7 @@ export default function BookingPage() {
                             <p className="font-headline-sm text-body-lg text-primary">{service.name}</p>
                             <div className="flex items-center gap-2">
                               <span className="inline-block px-2 py-0.5 bg-secondary/10 text-secondary rounded text-xs font-bold uppercase">
-                                {service.category}
+                                {getCategoryDisplayName(service.category)}
                               </span>
                               <span className="font-body-md text-on-surface-variant">{service.duration}</span>
                             </div>

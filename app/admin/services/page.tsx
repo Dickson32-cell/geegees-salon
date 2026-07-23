@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { SERVICE_CATEGORIES, getSubcategoriesForCategory } from "@/lib/serviceCategories";
+import { SERVICE_CATEGORIES, getSubcategoriesForCategory, getCategoryDisplayName } from "@/lib/serviceCategories";
 
 interface Service {
   id: number;
@@ -449,7 +449,7 @@ export default function ServicesManagement() {
                   <h3 className="text-lg font-bold text-slate-900 mb-2">{service.name}</h3>
                   <div className="flex flex-wrap gap-2">
                     <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold uppercase">
-                      {service.category}
+                      {getCategoryDisplayName(service.category)}
                     </span>
                     {service.subcategory && (
                       <span className="inline-block px-2.5 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-semibold">

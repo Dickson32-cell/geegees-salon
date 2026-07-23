@@ -6,6 +6,7 @@ import { HomeServiceCardSkeleton } from "@/components/LoadingSkeleton";
 import HeroVideo from "@/components/HeroVideo";
 import VideoSlideshow from "@/components/VideoSlideshow";
 import { isVideoUrl } from "@/lib/media";
+import { getCategoryDisplayName } from "@/lib/serviceCategories";
 
 interface Service {
   id: number;
@@ -234,7 +235,7 @@ export default function Home() {
                     <div className="relative p-6 w-full z-10">
                       <div className="flex flex-wrap gap-2 mb-2">
                         <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest text-xs">
-                          {service.category}
+                          {getCategoryDisplayName(service.category)}
                         </span>
                         {service.subcategory && (
                           <span className="font-label-caps text-label-caps text-secondary-fixed uppercase tracking-widest text-xs">
