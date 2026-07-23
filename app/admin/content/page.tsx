@@ -92,15 +92,20 @@ export default function ContentManagement() {
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <h3 className="text-lg font-bold mb-4">Select Page to Edit</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {pages.map((page) => (
-            <button
-              key={page}
-              onClick={() => setSelectedPage(page)}
-              className={"px-6 py-3 rounded-lg font-semibold uppercase transition-colors " + (selectedPage === page ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')}
-            >
-              {page}
-            </button>
-          ))}
+          {pages.map((page) => {
+            const isActive = selectedPage === page;
+            const className = "px-6 py-3 rounded-lg font-semibold uppercase transition-colors " + 
+                              (isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200');
+            return (
+              <button
+                key={page}
+                onClick={() => setSelectedPage(page)}
+                className={className}
+              >
+                {page}
+              </button>
+            );
+          })}
         </div>
       </div>
 
