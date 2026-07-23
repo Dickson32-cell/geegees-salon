@@ -1,18 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface ContentSection {
   title: string;
   subtitle?: string;
   description?: string;
-  stat1Value?: string;
-  stat1Label?: string;
-  stat2Value?: string;
-  stat2Label?: string;
   buttonText?: string;
   buttonLink?: string;
-  heroVideoUrl?: string;
 }
 
 interface PageContent {
@@ -26,10 +21,12 @@ export default function ContentManagement() {
   const [content, setContent] = useState<Record<string, any>>({});
   const [saving, setSaving] = useState(false);
 
-  // Dedicated state + save for the hero video URL
-  const [heroVideoInput, setHeroVideoInput] = useState('');
-  const [savingVideo, setSavingVideo] = useState(false);
+  // Hero video state
+  const [currentVideoUrl, setCurrentVideoUrl] = useState('');
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
   const [videoSaveStatus, setVideoSaveStatus] = useState<'idle' | 'ok' | 'error'>('idle');
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchContent();
@@ -46,46 +43,75 @@ export default function ContentManagement() {
     }
   };
 
-  // Fetch the current hero video URL directly from dedicated endpoint
   const fetchHeroVideo = async () => {
     try {
       const res = await fetch('/api/hero-video', { cache: 'no-store' });
       if (res.ok) {
         const { heroVideoUrl } = await res.json();
-        setHeroVideoInput(heroVideoUrl || '');
+        setCurrentVideoUrl(heroVideoUrl || '');
       }
     } catch (err) {
       console.error('Error fetching hero video:', err);
     }
   };
 
-  // Save the hero video URL via dedicated endpoint
-  const handleSaveHeroVideo = async () => {
-    if (!heroVideoInput.trim()) {
-      alert('Please enter a video URL first.');
+  const handleVideoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate it's a video
+    if (!file.type.startsWith('video/')) {
+      alert('Please select a video file (mp4, mov, etc.)');
       return;
     }
-    setSavingVideo(true);
+
+    setUploadingVideo(true);
     setVideoSaveStatus('idle');
+    setUploadProgress('Uploading video to Supabase storage...');
+
     try {
-      const res = await fetch('/api/hero-video', {
+      // Step 1: Upload the video file to Supabase via /api/upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', 'hero-home');
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        const err = await uploadRes.json();
+        throw new Error(err.details || err.error || 'Upload failed');
+      }
+
+      const { url: videoUrl } = await uploadRes.json();
+      setUploadProgress('Saving video URL to database...');
+
+      // Step 2: Save the returned public URL via /api/hero-video
+      const saveRes = await fetch('/api/hero-video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ heroVideoUrl: heroVideoInput.trim() }),
+        body: JSON.stringify({ heroVideoUrl: videoUrl }),
       });
-      if (res.ok) {
-        setVideoSaveStatus('ok');
-        alert('Hero video updated successfully! The home page will now show the new video.');
-      } else {
-        const result = await res.json();
-        setVideoSaveStatus('error');
-        alert('Error saving video: ' + (result.error || 'Unknown error'));
+
+      if (!saveRes.ok) {
+        const err = await saveRes.json();
+        throw new Error(err.error || 'Failed to save URL');
       }
-    } catch (err) {
+
+      setCurrentVideoUrl(videoUrl);
+      setVideoSaveStatus('ok');
+      setUploadProgress('');
+      // Reset file input
+      if (videoFileInputRef.current) videoFileInputRef.current.value = '';
+    } catch (err: any) {
+      console.error('Hero video upload error:', err);
       setVideoSaveStatus('error');
-      alert('Network error saving video.');
+      setUploadProgress('');
+      alert('Error uploading video: ' + err.message);
     } finally {
-      setSavingVideo(false);
+      setUploadingVideo(false);
     }
   };
 
@@ -145,14 +171,10 @@ export default function ContentManagement() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {pages.map((page) => {
             const isActive = selectedPage === page;
-            const className = "px-6 py-3 rounded-lg font-semibold uppercase transition-colors " +
+            const btnClass = "px-6 py-3 rounded-lg font-semibold uppercase transition-colors " +
               (isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200');
             return (
-              <button
-                key={page}
-                onClick={() => setSelectedPage(page)}
-                className={className}
-              >
+              <button key={page} onClick={() => setSelectedPage(page)} className={btnClass}>
                 {page}
               </button>
             );
@@ -160,39 +182,84 @@ export default function ContentManagement() {
         </div>
       </div>
 
-      {/* Dedicated Hero Video card — always visible on home page */}
+      {/* Hero Video Upload — only shown on home page */}
       {selectedPage === 'home' && (
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6 border-2 border-indigo-300">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h3 className="text-xl font-bold text-indigo-900">🎬 Home Page — Hero Background Video</h3>
-              <p className="text-sm text-indigo-600 mt-1">
-                This controls the video playing behind &quot;The Editorial Experience / Opulence &amp; Grace&quot; text on the homepage.
-              </p>
-            </div>
-            <button
-              onClick={handleSaveHeroVideo}
-              disabled={savingVideo}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-60 transition-colors"
-            >
-              {savingVideo ? 'Saving...' : '💾 Save Video'}
-            </button>
-          </div>
+          <h3 className="text-xl font-bold text-indigo-900 mb-1">🎬 Home Page — Hero Background Video</h3>
+          <p className="text-sm text-indigo-600 mb-5">
+            This is the video playing behind <strong>"The Editorial Experience / Opulence &amp; Grace"</strong> text on the homepage.
+          </p>
 
-          <div className="space-y-2">
-            <label className="block text-sm font-bold text-indigo-800">Video URL <span className="font-normal text-gray-500">(paste the direct Supabase video link)</span></label>
+          {/* Current video preview */}
+          {currentVideoUrl && (
+            <div className="mb-5">
+              <p className="text-sm font-medium text-gray-600 mb-2">Current video:</p>
+              <video
+                src={currentVideoUrl}
+                className="w-full max-w-md rounded-lg border border-indigo-200"
+                style={{ maxHeight: '200px', objectFit: 'cover' }}
+                controls
+                muted
+              />
+            </div>
+          )}
+
+          {/* Upload control */}
+          <div className="flex flex-col gap-3">
+            <label className="block text-sm font-bold text-indigo-800">
+              Upload New Hero Video
+              <span className="font-normal text-gray-500 ml-2">(mp4, mov — will replace the current video)</span>
+            </label>
+
+            {/* Hidden file input */}
             <input
-              type="text"
-              value={heroVideoInput}
-              onChange={(e) => setHeroVideoInput(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-400 text-black text-sm"
-              placeholder="https://...supabase.co/storage/v1/object/public/salon-images/...video.mp4"
+              ref={videoFileInputRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={handleVideoFileChange}
+              disabled={uploadingVideo}
             />
+
+            {/* Styled upload button */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => videoFileInputRef.current?.click()}
+                disabled={uploadingVideo}
+                className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-60 transition-colors"
+              >
+                {uploadingVideo ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                    </svg>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    Choose Video File
+                  </>
+                )}
+              </button>
+
+              {uploadProgress && (
+                <span className="text-sm text-indigo-600 font-medium">{uploadProgress}</span>
+              )}
+            </div>
+
             {videoSaveStatus === 'ok' && (
-              <p className="text-green-600 font-semibold text-sm">✅ Video URL saved! Home page will use the new video.</p>
+              <p className="text-green-600 font-semibold text-sm mt-1">
+                ✅ Video uploaded and saved! The home page now shows the new video.
+              </p>
             )}
             {videoSaveStatus === 'error' && (
-              <p className="text-red-600 font-semibold text-sm">❌ Failed to save. Please try again.</p>
+              <p className="text-red-600 font-semibold text-sm mt-1">
+                ❌ Upload failed. Please try again.
+              </p>
             )}
           </div>
         </div>
