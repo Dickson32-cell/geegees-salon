@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { HomeServiceCardSkeleton } from "@t/components/LoadingSkeleton";
-import HeroVideo from "@t/components/HeroVideo";
-import VideoSlideshow from "@t/components/VideoSlideshow";
-import { isVideoUrl } from "@t/lib/media";
-import { getCategoryDisplayName } from "@t/lib/serviceCategories";
+import { HomeServiceCardSkeleton } from "@/components/LoadingSkeleton";
+import HeroVideo from "@/components/HeroVideo";
+import VideoSlideshow from "@/components/VideoSlideshow";
+import { isVideoUrl } from "@/lib/media";
+import { getCategoryDisplayName } from "@/lib/serviceCategories";
 
 interface Service {
   id: number;
@@ -28,7 +28,7 @@ interface AboutContent {
   stat2Label: string;
   buttonText: string;
   buttonLink: string;
-  heroVideoUrl?: string; // Dynamic video URL from DB
+  heroVideoUrl?: string;
 }
 
 export default function Home() {
@@ -53,9 +53,7 @@ export default function Home() {
   const fetchServices = async () => {
     try {
       const response = await fetch('/api/services');
-      if (!response.ok) {
-        throw new Error('Failed to fetch services');
-      }
+      if (!response.ok) throw new Error('Failed to fetch services');
       const data = await response.json();
       setServices(data.slice(0, 4));
       setError("");
@@ -76,7 +74,6 @@ export default function Home() {
         if (data.about) {
           setAboutContent(data.about);
         } else if (data.hero) {
-          // If the video is stored in the 'hero' section instead of 'about'
           setAboutContent(prev => ({ ...prev, heroVideoUrl: data.hero.heroVideoUrl }));
         }
       }
@@ -166,7 +163,7 @@ export default function Home() {
           </div>
 
           {error && (
-            <div className="mb-8 p-6 bg-red-50/10 border border la-200/30 rounded-lg flex items-center gap-4 justify-center">
+            <div className="mb-8 p-6 bg-red-50/10 border border-red-200/30 rounded-lg flex items-center gap-4 justify-center">
               <p className="text-white/90">{error}</p>
               <button
                 onClick={fetchServices}
@@ -178,7 +175,7 @@ export default function Home() {
           )}
 
           {!error && services.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols- que la 4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {Array.from({ length: 4 }).map((_, idx) => (
                 <HomeServiceCardSkeleton key={idx} />
               ))}
@@ -211,10 +208,10 @@ export default function Home() {
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             loading="lazy"
                             onError={(e) => {
-                              console.error('Service video load error:', service.image_url);
+                              console.error('Service image load error:', service.image_url);
                               e.currentTarget.style.display = 'none';
-                            }
-                          }
+                            }}
+                          />
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/20"></div>
                       </>
@@ -235,7 +232,7 @@ export default function Home() {
                           </span>
                         )}
                       </div>
-                      <h4 className="font-headline-sm text-headline-sm text-white mb- la-2"> {service.name}</h4>
+                      <h4 className="font-headline-sm text-headline-sm text-white mb-2"> {service.name}</h4>
                       {service.description && (
                         <p className="text-white/90 text-sm mb-3 line-clamp-2">{service.description}</p>
                       )}

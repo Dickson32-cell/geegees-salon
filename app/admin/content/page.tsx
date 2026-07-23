@@ -10,7 +10,7 @@ interface ContentSection {
   stat2Label?: string;
   buttonText?: string;
   buttonLink?: string;
-  heroVideoUrl?: string; // New field for the home page hero video
+  heroVideoUrl?: string;
 }
 
 interface PageContent {
@@ -47,7 +47,7 @@ export default function ContentManagement() {
         body: JSON.stringify({
           page: selectedPage,
           section,
-          data: content[selectedPage][section as keyof PageContent],
+          data: content[selectedPage]?.[section] || {},
         }),
       });
 
@@ -112,7 +112,6 @@ export default function ContentManagement() {
 
       {pageContent && (
         <div className="space-y-6">
-          {/* Hero Section */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">Hero Section</h3>
@@ -126,7 +125,6 @@ export default function ContentManagement() {
             </div>
 
             <div className="space-y-4">
-              {/* NEW VIDEO URL FIELD */}
               {selectedPage === 'home' && (
                 <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-100 space-y-2">
                   <label className="block text-sm font-bold text-indigo-800 mb-2">Hero Video URL</label>
@@ -176,7 +174,6 @@ export default function ContentManagement() {
             </div>
           </div>
 
-          {/* About Section (Home page only) */}
           {selectedPage === 'home' && pageContent.about && (
             <div className="bg-white rounded-xl shadow-lg p-6">
               <div className="flex justify-between items-center mb-4">
