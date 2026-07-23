@@ -65,30 +65,37 @@ export default function Home() {
 
   const fetchAboutContent = async () => {
     try {
-      const timestamp = new Date().getTime();
-      const response = await fetch(`/api/content?page=home&t=${timestamp}`, {
-        cache: 'no-store'
+      // Fetch about/text content
+      const contentResponse = await fetch(`/api/content?page=home`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
       });
-      if (response.ok) {
-        const data = await response.json();
-        // DEBUG: log the full API response
-        console.log('[GeeGees DEBUG] Full API response:', JSON.stringify(data));
-        console.log('[GeeGees DEBUG] hero section:', JSON.stringify(data.hero));
-        console.log('[GeeGees DEBUG] heroVideoUrl from API:', data.hero?.heroVideoUrl);
-        setAboutContent(prev => {
-          let newContent = { ...prev };
-          if (data.about) {
-            newContent = { ...newContent, ...data.about };
-          }
-          if (data.hero && data.hero.heroVideoUrl) {
-            newContent.heroVideoUrl = data.hero.heroVideoUrl;
-          }
-          console.log('[GeeGees DEBUG] Final heroVideoUrl applied to state:', newContent.heroVideoUrl);
-          return newContent;
-        });
+      if (contentResponse.ok) {
+        const data = await contentResponse.json();
+        if (data.about) {
+          setAboutContent(prev => ({ ...prev, ...data.about }));
+        }
       }
     } catch (error) {
       console.error('Error fetching about content:', error);
+    }
+
+    try {
+      // Fetch hero video URL from dedicated endpoint - direct DB read, no merging
+      const ts = new Date().getTime();
+      const videoResponse = await fetch(`/api/hero-video?t=${ts}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
+      if (videoResponse.ok) {
+        const { heroVideoUrl } = await videoResponse.json();
+        console.log('[GeeGees] heroVideoUrl from /api/hero-video:', heroVideoUrl);
+        if (heroVideoUrl) {
+          setAboutContent(prev => ({ ...prev, heroVideoUrl }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching hero video:', error);
     }
   };
 
