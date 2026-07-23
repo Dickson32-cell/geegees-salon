@@ -7,11 +7,9 @@ interface HeroVideoProps {
   children: React.ReactNode;
 }
 
-const DEFAULT_VIDEO = "https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-home/nzyn2iplvum_1782592129209.MP4";
 const CYCLE_INTERVAL_MS = 8000;
 
 export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
-  const urls = videoUrls.length > 0 ? videoUrls : [DEFAULT_VIDEO];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState<number | null>(null);
   const [transitioning, setTransitioning] = useState(false);
@@ -37,15 +35,17 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
 
   // Reload + play whenever the URL at the current index changes
   useEffect(() => {
-    playVideo(currentRef.current);
+    if (videoUrls.length > 0) {
+      playVideo(currentRef.current);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, urls[currentIndex]]);
+  }, [currentIndex, videoUrls[currentIndex]]);
 
   // Auto-cycle to next video
   useEffect(() => {
-    if (urls.length <= 1) return;
+    if (videoUrls.length <= 1) return;
     const timer = setInterval(() => {
-      const next = (currentIndex + 1) % urls.length;
+      const next = (currentIndex + 1) % videoUrls.length;
       setNextIndex(next);
       setTransitioning(true);
 
@@ -58,7 +58,7 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
     }, CYCLE_INTERVAL_MS);
 
     return () => clearInterval(timer);
-  }, [currentIndex, urls.length]);
+  }, [currentIndex, videoUrls.length]);
 
   // Pre-load next video as soon as it's assigned
   useEffect(() => {
@@ -71,22 +71,24 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
     <div className="relative rounded-lg overflow-hidden shadow-2xl w-full bg-primary h-[60vh] min-h-[400px] sm:h-[65vh] sm:min-h-[500px]">
 
       {/* Current video */}
-      <video
-        key={`current-${currentIndex}`}
-        ref={currentRef}
-        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-        style={{ opacity: transitioning ? 0 : 1, objectFit: 'cover', objectPosition: 'center' }}
-        autoPlay
-        loop
-        muted
-        playsInline
-        preload="auto"
-      >
-        <source src={urls[currentIndex]} />
-      </video>
+      {videoUrls.length > 0 && (
+        <video
+          key={`current-${currentIndex}`}
+          ref={currentRef}
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+          style={{ opacity: transitioning ? 0 : 1, objectFit: 'cover', objectPosition: 'center' }}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+        >
+          <source src={videoUrls[currentIndex]} />
+        </video>
+      )}
 
       {/* Next video (fades in during transition) */}
-      {nextIndex !== null && (
+      {nextIndex !== null && videoUrls.length > 0 && (
         <video
           key={`next-${nextIndex}`}
           ref={nextRef}
@@ -98,7 +100,7 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
           playsInline
           preload="auto"
         >
-          <source src={urls[nextIndex]} />
+          <source src={videoUrls[nextIndex]} />
         </video>
       )}
 
@@ -106,9 +108,9 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
       <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/60 to-primary/30" />
 
       {/* Dot indicators (only if multiple videos) */}
-      {urls.length > 1 && (
+      {videoUrls.length > 1 && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-30">
-          {urls.map((_, i) => (
+          {videoUrls.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}

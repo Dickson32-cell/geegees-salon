@@ -14,6 +14,7 @@ interface PageContent {
   hero: ContentSection;
   about?: ContentSection;
   cta?: ContentSection;
+  social?: any;
 }
 
 export default function ContentManagement() {
@@ -305,6 +306,31 @@ export default function ContentManagement() {
                   <label className="block text-sm font-medium text-gray-700">Description</label>
                   <textarea value={pageContent.about.description || ''} onChange={(e) => updateSection('about', 'description', e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary" rows={4} />
                 </div>
+              </div>
+            </div>
+          )}
+
+          {selectedPage === 'footer' && (
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">Social Links</h3>
+                <button onClick={() => handleSave('social')} disabled={saving} className="btn-primary">
+                  {saving ? 'Saving...' : 'Save Social Links'}
+                </button>
+              </div>
+              <div className="space-y-4">
+                {['instagramUrl', 'snapchatUrl', 'youtubeUrl', 'tiktokUrl', 'whatsappUrl'].map((field) => (
+                  <div key={field} className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace('Url', '')}</label>
+                    <input
+                      type="text"
+                      value={(pageContent.social as any)?.[field] || ''}
+                      onChange={(e) => updateSection('social', field, e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                      placeholder="https://..."
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           )}
