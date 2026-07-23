@@ -75,6 +75,7 @@ export async function POST(request: Request) {
       .insert([{
         name: body.name,
         category: body.category,
+        subcategory: body.subcategory || null,
         price: body.price,
         duration: body.duration,
         description: body.description || null,
@@ -112,6 +113,7 @@ export async function PUT(request: Request) {
     const dbUpdates: any = {};
     if (updates.name !== undefined) dbUpdates.name = updates.name;
     if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.subcategory !== undefined) dbUpdates.subcategory = updates.subcategory || null;
     if (updates.price !== undefined) dbUpdates.price = updates.price;
     if (updates.duration !== undefined) dbUpdates.duration = updates.duration;
     if (updates.description !== undefined) dbUpdates.description = updates.description || null;

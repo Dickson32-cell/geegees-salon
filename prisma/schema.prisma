@@ -15,6 +15,7 @@ model Service {
   id          Int      @id @default(autoincrement())
   name        String
   category    String
+  subcategory String?  // Subcategory within main category (e.g., Cuts, Colors for Hair)
   price       String
   duration    String
   description String?

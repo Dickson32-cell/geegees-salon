@@ -11,6 +11,7 @@ interface Service {
   id: number;
   name: string;
   category: string;
+  subcategory?: string;
   price: string;
   duration: string;
   description?: string;
@@ -231,9 +232,16 @@ export default function Home() {
 
                     {/* Service Details Overlay */}
                     <div className="relative p-6 w-full z-10">
-                      <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest text-xs block mb-2">
-                        {service.category}
-                      </span>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest text-xs">
+                          {service.category}
+                        </span>
+                        {service.subcategory && (
+                          <span className="font-label-caps text-label-caps text-secondary-fixed uppercase tracking-widest text-xs">
+                            • {service.subcategory}
+                          </span>
+                        )}
+                      </div>
                       <h4 className="font-headline-sm text-headline-sm text-white mb-2">{service.name}</h4>
                       {service.description && (
                         <p className="text-white/90 text-sm mb-3 line-clamp-2">{service.description}</p>

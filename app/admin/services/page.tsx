@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { SERVICE_CATEGORIES, getSubcategoriesForCategory } from "@/lib/serviceCategories";
 
 interface Service {
   id: number;
   name: string;
   category: string;
+  subcategory?: string;
   price: string;
   duration: string;
   description?: string;
@@ -27,6 +29,7 @@ export default function ServicesManagement() {
   const [formData, setFormData] = useState({
     name: "",
     category: "Hair",
+    subcategory: "",
     price: "",
     duration: "",
     description: "",
@@ -203,6 +206,7 @@ export default function ServicesManagement() {
     setFormData({
       name: service.name,
       category: service.category,
+      subcategory: service.subcategory || "",
       price: service.price,
       duration: service.duration,
       description: service.description || "",
@@ -215,7 +219,7 @@ export default function ServicesManagement() {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", category: "Hair", price: "", duration: "", description: "", imageUrl: "", status: "draft" });
+    setFormData({ name: "", category: "Hair", subcategory: "", price: "", duration: "", description: "", imageUrl: "", status: "draft" });
     setPreviewUrl("");
     setSelectedFile(null);
     setIsAdding(false);
@@ -305,7 +309,7 @@ export default function ServicesManagement() {
       {!loading && isAdding && (
         <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
           <h3 className="text-xl font-bold mb-4">{editingService ? 'Edit Service' : 'Add New Service'}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input
               type="text"
               placeholder="Service Name"
@@ -315,7 +319,7 @@ export default function ServicesManagement() {
             />
             <select
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: "" })}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
             >
               <option value="Hair">Hair</option>
@@ -324,6 +328,16 @@ export default function ServicesManagement() {
               <option value="Skincare">Skincare</option>
               <option value="Nails">Nails</option>
               <option value="Braids">Braids</option>
+            </select>
+            <select
+              value={formData.subcategory}
+              onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+            >
+              <option value="">Select Subcategory (Optional)</option>
+              {getSubcategoriesForCategory(formData.category).map((sub) => (
+                <option key={sub} value={sub}>{sub}</option>
+              ))}
             </select>
             <input
               type="text"
@@ -343,12 +357,12 @@ export default function ServicesManagement() {
               placeholder="Description (optional)"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary md:col-span-2"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary md:col-span-3"
               rows={3}
             />
 
             {/* Image Upload Field */}
-            <div className="md:col-span-2">
+            <div className="md:col-span-3">
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Service Image (Optional)
               </label>
@@ -375,7 +389,7 @@ export default function ServicesManagement() {
               )}
             </div>
 
-            <div className="md:col-span-2">
+            <div className="md:col-span-3">
               <label className="block text-sm font-semibold text-slate-700 mb-2">
                 Status (Controls visibility on main website)
               </label>
@@ -435,6 +449,11 @@ export default function ServicesManagement() {
                     <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold uppercase">
                       {service.category}
                     </span>
+                    {service.subcategory && (
+                      <span className="inline-block px-2.5 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-semibold">
+                        {service.subcategory}
+                      </span>
+                    )}
                     <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-semibold uppercase ${
                       service.status === 'published' ? 'bg-green-100 text-green-700' :
                       service.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :

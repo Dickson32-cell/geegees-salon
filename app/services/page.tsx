@@ -10,6 +10,7 @@ interface Service {
   id: number;
   name: string;
   category: string;
+  subcategory?: string;
   price: string;
   duration: string;
   description?: string;
@@ -142,13 +143,17 @@ export default function ServicesPage() {
     }
   };
 
-  // Group services by category
-  const groupedServices: Record<string, Service[]> = {};
+  // Group services by category and subcategory
+  const groupedServices: Record<string, Record<string, Service[]>> = {};
   services.forEach((service) => {
     if (!groupedServices[service.category]) {
-      groupedServices[service.category] = [];
+      groupedServices[service.category] = {};
     }
-    groupedServices[service.category].push(service);
+    const subcategory = service.subcategory || 'General';
+    if (!groupedServices[service.category][subcategory]) {
+      groupedServices[service.category][subcategory] = [];
+    }
+    groupedServices[service.category][subcategory].push(service);
   });
 
   return (
@@ -210,15 +215,25 @@ export default function ServicesPage() {
           </div>
         ) : !error ? (
           <div className="space-y-12 md:space-y-section-gap">
-            {Object.entries(groupedServices).map(([category, categoryServices]) => (
+            {Object.entries(groupedServices).map(([category, subcategories]) => (
               <div key={category} className="scroll-mt-24" id={category.toLowerCase()}>
                 <div className="text-center mb-8 md:mb-12">
                   <h3 className="font-headline-md text-2xl md:text-headline-md text-primary">{category}</h3>
                   <div className="w-10 h-[1px] bg-secondary mx-auto mt-2"></div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-gutter">
-                  {categoryServices.map((service) => (
+                {/* Render each subcategory */}
+                {Object.entries(subcategories).map(([subcategory, categoryServices]) => (
+                  <div key={subcategory} className="mb-10">
+                    {/* Subcategory Header */}
+                    <div className="mb-6">
+                      <h4 className="font-headline-sm text-xl text-secondary-container inline-block px-4 py-2 bg-secondary/10 rounded-full">
+                        {subcategory}
+                      </h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-gutter">
+                      {categoryServices.map((service) => (
                     <div key={service.id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow border-t-2 border-secondary overflow-hidden flex flex-col">
                       {/* Service Image */}
                       <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-primary to-primary-container overflow-hidden">
@@ -245,9 +260,16 @@ export default function ServicesPage() {
                       <div className="p-6 md:p-8">
                         <div className="mb-4">
                           <h4 className="font-headline-sm text-xl md:text-headline-sm text-primary mb-2">{service.name}</h4>
-                          <span className="inline-block px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
-                            {service.category}
-                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="inline-block px-3 py-1 bg-secondary/20 text-secondary rounded-full text-xs font-bold uppercase tracking-wider">
+                              {service.category}
+                            </span>
+                            {service.subcategory && (
+                              <span className="inline-block px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
+                                {service.subcategory}
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {service.description && (
@@ -273,8 +295,10 @@ export default function ServicesPage() {
                         </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
