@@ -3,126 +3,116 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface HeroVideoProps {
-  videoUrl: string;
+  videoUrls: string[];
   children: React.ReactNode;
 }
 
-export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [showPlayButton, setShowPlayButton] = useState(false);
+const DEFAULT_VIDEO = "https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-home/nzyn2iplvum_1782592129209.MP4";
+const CYCLE_INTERVAL_MS = 8000;
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
+  const urls = videoUrls.length > 0 ? videoUrls : [DEFAULT_VIDEO];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [nextIndex, setNextIndex] = useState<number | null>(null);
+  const [transitioning, setTransitioning] = useState(false);
 
-    // Force video to be muted and ready to play
-    video.muted = true;
-    video.volume = 0;
+  const currentRef = useRef<HTMLVideoElement>(null);
+  const nextRef = useRef<HTMLVideoElement>(null);
 
-    // CRITICAL: Reload the video element so the browser picks up the new source URL
-    video.load();
-
-    const attemptPlay = () => {
-      video.play()
-        .then(() => {
-          console.log('✅ Video is playing!');
-          setIsPlaying(true);
-          setShowPlayButton(false);
-        })
-        .catch((error) => {
-          console.log('⚠️ Autoplay blocked, showing play button');
-          setShowPlayButton(true);
-          setIsPlaying(false);
-        });
-    };
-
-    // Try to play when loaded
-    const handleCanPlay = () => {
-      attemptPlay();
-    };
-
-    video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('loadeddata', handleCanPlay);
-
-    // Also try immediately if already loaded
-    if (video.readyState >= 3) {
-      attemptPlay();
-    }
-
-    // Try multiple times
-    setTimeout(attemptPlay, 100);
-    setTimeout(attemptPlay, 500);
-    setTimeout(attemptPlay, 1000);
-
-    return () => {
-      video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('loadeddata', handleCanPlay);
-    };
-  }, [videoUrl]); // Re-run whenever videoUrl changes
-
-  const handlePlayClick = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.muted = true;
-    video.play()
-      .then(() => {
-        setIsPlaying(true);
-        setShowPlayButton(false);
-      })
-      .catch((error) => {
-        console.error('Failed to play:', error);
-      });
+  // Play/load a video element
+  const playVideo = (el: HTMLVideoElement | null) => {
+    if (!el) return;
+    el.muted = true;
+    el.volume = 0;
+    el.load();
+    el.play().catch(() => { });
   };
+
+  // Play current video on mount and whenever currentIndex changes
+  useEffect(() => {
+    playVideo(currentRef.current);
+  }, [currentIndex]);
+
+  // Auto-cycle to next video
+  useEffect(() => {
+    if (urls.length <= 1) return;
+    const timer = setInterval(() => {
+      const next = (currentIndex + 1) % urls.length;
+      setNextIndex(next);
+      setTransitioning(true);
+
+      // After crossfade completes, swap to next as current
+      setTimeout(() => {
+        setCurrentIndex(next);
+        setNextIndex(null);
+        setTransitioning(false);
+      }, 1000);
+    }, CYCLE_INTERVAL_MS);
+
+    return () => clearInterval(timer);
+  }, [currentIndex, urls.length]);
+
+  // Pre-load next video as soon as it's assigned
+  useEffect(() => {
+    if (nextIndex !== null) {
+      playVideo(nextRef.current);
+    }
+  }, [nextIndex]);
 
   return (
     <div className="relative rounded-lg overflow-hidden shadow-2xl w-full bg-primary h-[60vh] min-h-[400px] sm:h-[65vh] sm:min-h-[500px]">
-      {/* Video Element */}
+
+      {/* Current video */}
       <video
-        ref={videoRef}
+        key={`current-${currentIndex}`}
+        ref={currentRef}
         className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-        style={{
-          objectFit: 'cover',
-          objectPosition: 'center center'
-        }}
+        style={{ opacity: transitioning ? 0 : 1, objectFit: 'cover', objectPosition: 'center' }}
         autoPlay
         loop
         muted
         playsInline
         preload="auto"
-        onPlay={() => {
-          setIsPlaying(true);
-          setShowPlayButton(false);
-        }}
-        onPause={() => {
-          setIsPlaying(false);
-          // Auto-resume
-          setTimeout(() => {
-            videoRef.current?.play().catch(() => { });
-          }, 100);
-        }}
       >
-        <source src={videoUrl} />
+        <source src={urls[currentIndex]} />
       </video>
 
-      {/* Dark Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/60 to-primary/30"></div>
-
-      {/* Play Button (if autoplay fails) */}
-      {showPlayButton && !isPlaying && (
-        <button
-          onClick={handlePlayClick}
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 bg-secondary hover:bg-secondary/90 text-white rounded-full p-4 sm:p-6 shadow-2xl transition-all group"
-          aria-label="Play video"
+      {/* Next video (fades in during transition) */}
+      {nextIndex !== null && (
+        <video
+          key={`next-${nextIndex}`}
+          ref={nextRef}
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+          style={{ opacity: transitioning ? 1 : 0, objectFit: 'cover', objectPosition: 'center' }}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
         >
-          <svg className="w-10 h-10 sm:w-12 sm:h-12 group-hover:scale-110 transition-transform" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-          </svg>
-        </button>
+          <source src={urls[nextIndex]} />
+        </video>
       )}
 
-      {/* Text Overlay */}
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/60 to-primary/30" />
+
+      {/* Dot indicators (only if multiple videos) */}
+      {urls.length > 1 && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-30">
+          {urls.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentIndex(i)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${i === currentIndex ? 'bg-secondary w-6' : 'bg-white/50'
+                }`}
+              aria-label={`Play video ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Text overlay */}
       <div className="absolute inset-0 flex items-center justify-center text-center px-6 z-20">
         {children}
       </div>

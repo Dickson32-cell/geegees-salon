@@ -28,7 +28,6 @@ interface AboutContent {
   stat2Label: string;
   buttonText: string;
   buttonLink: string;
-  heroVideoUrl?: string;
 }
 
 export default function Home() {
@@ -44,6 +43,7 @@ export default function Home() {
     buttonText: 'Our Story',
     buttonLink: '/team'
   });
+  const [heroVideoUrls, setHeroVideoUrls] = useState<string[]>([]);
 
   useEffect(() => {
     fetchServices();
@@ -65,7 +65,6 @@ export default function Home() {
 
   const fetchAboutContent = async () => {
     try {
-      // Fetch about/text content
       const contentResponse = await fetch(`/api/content?page=home`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache' },
@@ -81,21 +80,19 @@ export default function Home() {
     }
 
     try {
-      // Fetch hero video URL from dedicated endpoint - direct DB read, no merging
       const ts = new Date().getTime();
       const videoResponse = await fetch(`/api/hero-video?t=${ts}`, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache' },
       });
       if (videoResponse.ok) {
-        const { heroVideoUrl } = await videoResponse.json();
-        console.log('[GeeGees] heroVideoUrl from /api/hero-video:', heroVideoUrl);
-        if (heroVideoUrl) {
-          setAboutContent(prev => ({ ...prev, heroVideoUrl }));
+        const { heroVideos } = await videoResponse.json();
+        if (Array.isArray(heroVideos) && heroVideos.length > 0) {
+          setHeroVideoUrls(heroVideos);
         }
       }
     } catch (error) {
-      console.error('Error fetching hero video:', error);
+      console.error('Error fetching hero videos:', error);
     }
   };
 
@@ -103,7 +100,7 @@ export default function Home() {
     <div className="min-h-screen">
       <section className="relative min-h-[70vh] flex items-center justify-center bg-primary px-4 md:px-margin-desktop py-12">
         <div className="max-w-container-max mx-auto w-full">
-          <HeroVideo key={aboutContent.heroVideoUrl || 'default-video'} videoUrl={aboutContent.heroVideoUrl || "https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-home/nzyn2iplvum_1782592129209.MP4"}>
+          <HeroVideo videoUrls={heroVideoUrls}>
             <div className="max-w-4xl">
               <span className="font-label-caps text-xs md:text-label-caps text-secondary-fixed uppercase tracking-[0.2em] md:tracking-[0.3em] mb-4 block">
                 The Editorial Experience
