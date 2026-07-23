@@ -322,7 +322,9 @@ export default function ServicesManagement() {
               onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: "" })}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
             >
-              <option value="Hair">Hair</option>
+              <option value="Hair">Hair Cuts</option>
+              <option value="Styling">Hair Styling</option>
+              <option value="Treatments">Hair Treatments</option>
               <option value="Spa">Spa</option>
               <option value="Makeup">Makeup</option>
               <option value="Skincare">Skincare</option>

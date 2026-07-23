@@ -1,10 +1,12 @@
 // Service Categories and Subcategories Structure
 export const SERVICE_CATEGORIES = {
-  Hair: ['Cuts', 'Colors', 'Treatments', 'Styling'],
+  Hair: ["Men's Cut", "Women's Cut", "Kids Cut", "Trim"],
+  Styling: ['Bridal Hair', 'Event Styling', 'Updos', 'Blowouts'],
+  Treatments: ['Hair Coloring', 'Highlights', 'Keratin', 'Deep Conditioning'],
   Spa: ['Massages', 'Facials', 'Body Treatments'],
-  Makeup: ['Bridal', 'Event', 'Everyday'],
+  Makeup: ['Bridal Makeup', 'Event Makeup', 'Everyday Makeup'],
   Skincare: ['Facials', 'Treatments', 'Waxing'],
-  Nails: ['Manicure', 'Pedicure', 'Nail Art'],
+  Nails: ['Manicure', 'Pedicure', 'Nail Art', 'Acrylic/Gel'],
   Braids: ['Box Braids', 'Cornrows', 'Twists', 'Weaves'],
 } as const;
 
@@ -29,7 +31,9 @@ export const isValidSubcategory = (category: string, subcategory: string): boole
 
 // Category display names with icons (optional)
 export const CATEGORY_DISPLAY = {
-  Hair: { name: 'Hair Services', icon: '✂️' },
+  Hair: { name: 'Hair Cuts', icon: '✂️' },
+  Styling: { name: 'Hair Styling', icon: '💇' },
+  Treatments: { name: 'Hair Treatments', icon: '🎨' },
   Spa: { name: 'Spa & Wellness', icon: '💆' },
   Makeup: { name: 'Makeup Services', icon: '💄' },
   Skincare: { name: 'Skincare', icon: '✨' },
