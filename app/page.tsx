@@ -100,7 +100,7 @@ export default function Home() {
     <div className="min-h-screen">
       <section className="relative min-h-[70vh] flex items-center justify-center bg-primary px-4 md:px-margin-desktop py-12">
         <div className="max-w-container-max mx-auto w-full">
-          <HeroVideo videoUrls={heroVideoUrls}>
+          <HeroVideo key={heroVideoUrls.join('|') || 'default'} videoUrls={heroVideoUrls}>
             <div className="max-w-4xl">
               <span className="font-label-caps text-xs md:text-label-caps text-secondary-fixed uppercase tracking-[0.2em] md:tracking-[0.3em] mb-4 block">
                 The Editorial Experience

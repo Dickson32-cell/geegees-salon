@@ -28,10 +28,18 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
     el.play().catch(() => { });
   };
 
-  // Play current video on mount and whenever currentIndex changes
+  // Reset to index 0 whenever the videoUrls prop changes (e.g. async data arrives)
+  useEffect(() => {
+    setCurrentIndex(0);
+    setNextIndex(null);
+    setTransitioning(false);
+  }, [videoUrls]);
+
+  // Reload + play whenever the URL at the current index changes
   useEffect(() => {
     playVideo(currentRef.current);
-  }, [currentIndex]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentIndex, urls[currentIndex]]);
 
   // Auto-cycle to next video
   useEffect(() => {
