@@ -20,8 +20,8 @@ interface PageContent {
 }
 
 export default function ContentManagement() {
-  const [selectedPage, setSelectedPage] = useState<'home' | 'services' | 'gallery' | 'booking' | 'footer'>('home');
-  const [content, setContent] = useState<Record<string, any>>({});
+  const [selectedPage, setSelectedPage] = useState('home');
+  const [content, setContent] = useState({});
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function ContentManagement() {
     }
   };
 
-  const handleSave = async (section: string) => {
+  const handleSave = async (section) => {
     setSaving(true);
     try {
       const response = await fetch('/api/content', {
@@ -46,30 +46,27 @@ export default function ContentManagement() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           page: selectedPage,
-          section,
+          section: section,
           data: content[selectedPage]?.[section] || {},
         }),
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        console.error('Save failed:', result);
-        alert('❌ Failed to save content: ' + (result.details || result.error || 'Unknown error'));
+        const result = await response.json();
+        alert('Error: ' + (result.details || result.error || 'Unknown error'));
         return;
       }
 
       await fetchContent();
-      alert('✅ Content updated successfully! Refresh your main website to see the changes.');
+      alert('Content updated successfully!');
     } catch (error) {
-      console.error('Error saving content:', error);
-      alert('❌ Network error: Unable to save content.');
+      alert('Network error occurred.');
     } finally {
       setSaving(false);
     }
   };
 
-  const updateSection = (section: string, field: string, value: string) => {
+  const updateSection = (section, field, value) => {
     setContent({
       ...content,
       [selectedPage]: {
@@ -83,6 +80,7 @@ export default function ContentManagement() {
   };
 
   const pageContent = content[selectedPage];
+  const pages = ['home', 'services', 'gallery', 'booking', 'footer'];
 
   return (
     <div className="p-8">
@@ -94,15 +92,11 @@ export default function ContentManagement() {
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <h3 className="text-lg font-bold mb-4">Select Page to Edit</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {['home', 'services', 'gallery', 'booking', 'footer'].map((page) => (
+          {pages.map((page) => (
             <button
               key={page}
-              onClick={() => setSelectedPage(page as any)}
-              className={`px-6 py-3 rounded-lg font-semibold uppercase transition-colors ${
-                selectedPage === page
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              onClick={() => setSelectedPage(page)}
+              className={"px-6 py-3 rounded-lg font-semibold uppercase transition-colors " + (selectedPage === page ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')}
             >
               {page}
             </button>
@@ -146,7 +140,6 @@ export default function ContentManagement() {
                   value={pageContent.hero?.title || ''}
                   onChange={(e) => updateSection('hero', 'title', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                  placeholder="Enter title..."
                 />
               </div>
 
@@ -157,7 +150,6 @@ export default function ContentManagement() {
                   value={pageContent.hero?.subtitle || ''}
                   onChange={(e) => updateSection('hero', 'subtitle', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                  placeholder="Enter subtitle..."
                 />
               </div>
 
@@ -168,7 +160,6 @@ export default function ContentManagement() {
                   onChange={(e) => updateSection('hero', 'description', e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
                   rows={3}
-                  placeholder="Enter description..."
                 />
               </div>
             </div>
