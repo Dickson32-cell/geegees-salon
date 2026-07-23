@@ -40,8 +40,8 @@ export default function Home() {
     stat1Label: 'Years of Mastery',
     stat2Value: '24k',
     stat2Label: 'Clients Styled',
-    buttonText: 'Our Story',
-    buttonLink: '/team'
+    buttonText: 'View Gallery',
+    buttonLink: '/gallery'
   });
   const [heroVideoUrls, setHeroVideoUrls] = useState<string[]>([]);
 
