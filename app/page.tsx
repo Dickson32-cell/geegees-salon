@@ -71,11 +71,16 @@ export default function Home() {
       });
       if (response.ok) {
         const data = await response.json();
-        if (data.about) {
-          setAboutContent(data.about);
-        } else if (data.hero) {
-          setAboutContent(prev => ({ ...prev, heroVideoUrl: data.hero.heroVideoUrl }));
-        }
+        setAboutContent(prev => {
+          let newContent = { ...prev };
+          if (data.about) {
+            newContent = { ...newContent, ...data.about };
+          }
+          if (data.hero && data.hero.heroVideoUrl) {
+            newContent.heroVideoUrl = data.hero.heroVideoUrl;
+          }
+          return newContent;
+        });
       }
     } catch (error) {
       console.error('Error fetching about content:', error);
