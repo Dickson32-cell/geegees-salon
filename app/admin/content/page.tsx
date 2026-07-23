@@ -85,7 +85,7 @@ export default function ContentManagement() {
   const pageContent = content[selectedPage];
 
   return (
-    <div>
+    <div className="p-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Website Content Management</h1>
         <p className="text-gray-600">Edit all text, titles, and content on your main website</p>
@@ -139,8 +139,8 @@ export default function ContentManagement() {
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Title</label>
                 <input
                   type="text"
                   value={pageContent.hero?.title || ''}
@@ -150,8 +150,8 @@ export default function ContentManagement() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Subtitle</label>
                 <input
                   type="text"
                   value={pageContent.hero?.subtitle || ''}
@@ -161,8 +161,8 @@ export default function ContentManagement() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Description</label>
                 <textarea
                   value={pageContent.hero?.description || ''}
                   onChange={(e) => updateSection('hero', 'description', e.target.value)}
@@ -188,8 +188,8 @@ export default function ContentManagement() {
               </div>
 
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Title</label>
                   <input
                     type="text"
                     value={pageContent.about.title || ''}
@@ -197,8 +197,8 @@ export default function ContentManagement() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Description</label>
                   <textarea
                     value={pageContent.about.description || ''}
                     onChange={(e) => updateSection('about', 'description', e.target.value)}
