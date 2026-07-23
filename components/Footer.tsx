@@ -12,7 +12,11 @@ export default function Footer() {
       email: 'concierge@geegees.com',
     },
     social: {
-      activeSocialHandle: 'all',
+      showInstagram: true,
+      showSnapchat: true,
+      showYoutube: true,
+      showTiktok: true,
+      showWhatsapp: true,
       instagramUrl: '#',
       snapchatUrl: '#',
       youtubeUrl: '#',
@@ -107,7 +111,7 @@ export default function Footer() {
         <div>
           <h5 className="font-label-caps text-label-caps text-white uppercase tracking-widest mb-6">Follow Us</h5>
           <div className="flex gap-4">
-            {(!footerContent.social.activeSocialHandle || footerContent.social.activeSocialHandle === 'all' || footerContent.social.activeSocialHandle === 'instagram') && (
+            {footerContent.social.showInstagram !== false && (
               <a
                 href={footerContent.social.instagramUrl}
                 target={footerContent.social.instagramUrl !== '#' ? '_blank' : undefined}
@@ -120,7 +124,7 @@ export default function Footer() {
                 </svg>
               </a>
             )}
-            {(!footerContent.social.activeSocialHandle || footerContent.social.activeSocialHandle === 'all' || footerContent.social.activeSocialHandle === 'snapchat') && (
+            {footerContent.social.showSnapchat !== false && (
               <a
                 href={footerContent.social.snapchatUrl}
                 target={footerContent.social.snapchatUrl !== '#' ? '_blank' : undefined}
@@ -133,7 +137,7 @@ export default function Footer() {
                 </svg>
               </a>
             )}
-            {(!footerContent.social.activeSocialHandle || footerContent.social.activeSocialHandle === 'all' || footerContent.social.activeSocialHandle === 'youtube') && (
+            {footerContent.social.showYoutube !== false && (
               <a
                 href={footerContent.social.youtubeUrl}
                 target={footerContent.social.youtubeUrl !== '#' ? '_blank' : undefined}
@@ -146,7 +150,7 @@ export default function Footer() {
                 </svg>
               </a>
             )}
-            {(!footerContent.social.activeSocialHandle || footerContent.social.activeSocialHandle === 'all' || footerContent.social.activeSocialHandle === 'tiktok') && (
+            {footerContent.social.showTiktok !== false && (
               <a
                 href={footerContent.social.tiktokUrl}
                 target={footerContent.social.tiktokUrl !== '#' ? '_blank' : undefined}
@@ -159,7 +163,7 @@ export default function Footer() {
                 </svg>
               </a>
             )}
-            {(!footerContent.social.activeSocialHandle || footerContent.social.activeSocialHandle === 'all' || footerContent.social.activeSocialHandle === 'whatsapp') && (
+            {footerContent.social.showWhatsapp !== false && (
               <a
                 href={footerContent.social.whatsappUrl}
                 target={footerContent.social.whatsappUrl !== '#' ? '_blank' : undefined}

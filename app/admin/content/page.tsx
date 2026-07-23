@@ -136,7 +136,7 @@ export default function ContentManagement() {
     finally { setSaving(false); }
   };
 
-  const updateSection = (section: string, field: string, value: string) => {
+  const updateSection = (section: string, field: string, value: any) => {
     setContent({
       ...content,
       [selectedPage]: {
@@ -319,34 +319,33 @@ export default function ContentManagement() {
                 </button>
               </div>
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Visible Social Handle</label>
-                  <select
-                    value={(pageContent.social as any)?.activeSocialHandle || 'all'}
-                    onChange={(e) => updateSection('social', 'activeSocialHandle', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                  >
-                    <option value="all">Show All</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="snapchat">Snapchat</option>
-                    <option value="youtube">YouTube</option>
-                    <option value="tiktok">TikTok</option>
-                    <option value="whatsapp">WhatsApp</option>
-                  </select>
-                  <p className="text-xs text-gray-500">Choose which social handle to show on the main web page footer.</p>
-                </div>
-                {['instagramUrl', 'snapchatUrl', 'youtubeUrl', 'tiktokUrl', 'whatsappUrl'].map((field) => (
-                  <div key={field} className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace('Url', '')}</label>
-                    <input
-                      type="text"
-                      value={(pageContent.social as any)?.[field] || ''}
-                      onChange={(e) => updateSection('social', field, e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="https://..."
-                    />
-                  </div>
-                ))}
+                {['instagram', 'snapchat', 'youtube', 'tiktok', 'whatsapp'].map((platform) => {
+                  const urlField = `${platform}Url`;
+                  const showField = `show${platform.charAt(0).toUpperCase() + platform.slice(1)}`;
+                  return (
+                    <div key={platform} className="space-y-2 border border-gray-100 p-4 rounded-lg bg-gray-50">
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-gray-700 capitalize">{platform}</label>
+                        <label className="flex items-center space-x-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={(pageContent.social as any)?.[showField] !== false}
+                            onChange={(e) => updateSection('social', showField, e.target.checked)}
+                            className="rounded text-primary focus:ring-primary w-4 h-4"
+                          />
+                          <span className="text-sm font-medium text-gray-600">Visible</span>
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        value={(pageContent.social as any)?.[urlField] || ''}
+                        onChange={(e) => updateSection('social', urlField, e.target.value)}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                        placeholder="https://..."
+                      />
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
