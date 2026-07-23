@@ -91,13 +91,13 @@ export default function Home() {
     <div className="min-h-screen">
       <section className="relative min-h-[70vh] flex items-center justify-center bg-primary px-4 md:px-margin-desktop py-12">
         <div className="max-w-container-max mx-auto w-full">
-          <HeroVideo videoUrl={aboutContent.heroVideoUrl || "https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-home/nzyn2iplvum_1782592129209.MP4"}>
+          <HeroVideo key={aboutContent.heroVideoUrl || 'default-video'} videoUrl={aboutContent.heroVideoUrl || "https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-home/nzyn2iplvum_1782592129209.MP4"}>
             <div className="max-w-4xl">
               <span className="font-label-caps text-xs md:text-label-caps text-secondary-fixed uppercase tracking-[0.2em] md:tracking-[0.3em] mb-4 block">
                 The Editorial Experience
               </span>
               <h2 className="font-display-lg text-3xl md:text-5xl lg:text-6xl text-white mb-8 leading-tight">
-                Mastering the Art of <br/>
+                Mastering the Art of <br />
                 <span className="italic font-normal">Opulence & Grace</span>
               </h2>
               <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">

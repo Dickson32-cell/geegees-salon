@@ -20,6 +20,9 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
     video.muted = true;
     video.volume = 0;
 
+    // CRITICAL: Reload the video element so the browser picks up the new source URL
+    video.load();
+
     const attemptPlay = () => {
       video.play()
         .then(() => {
@@ -56,7 +59,7 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
       video.removeEventListener('canplay', handleCanPlay);
       video.removeEventListener('loadeddata', handleCanPlay);
     };
-  }, []);
+  }, [videoUrl]); // Re-run whenever videoUrl changes
 
   const handlePlayClick = () => {
     const video = videoRef.current;
@@ -96,7 +99,7 @@ export default function HeroVideo({ videoUrl, children }: HeroVideoProps) {
           setIsPlaying(false);
           // Auto-resume
           setTimeout(() => {
-            videoRef.current?.play().catch(() => {});
+            videoRef.current?.play().catch(() => { });
           }, 100);
         }}
       >
