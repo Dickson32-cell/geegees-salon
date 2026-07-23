@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
 interface ContentSection {
   title: string;
@@ -12,6 +10,7 @@ interface ContentSection {
   stat2Label?: string;
   buttonText?: string;
   buttonLink?: string;
+  heroVideoUrl?: string; // New field for the home page hero video
 }
 
 interface PageContent {
@@ -55,34 +54,16 @@ export default function ContentManagement() {
       const result = await response.json();
 
       if (!response.ok) {
-        // Save failed - show detailed error
         console.error('Save failed:', result);
-        const errorMsg = result.details || result.error || 'Unknown error occurred';
-
-        if (result.code === '42P01') {
-          // Table doesn't exist
-          alert(
-            '❌ DATABASE NOT SET UP!\n\n' +
-            'The website_content table does not exist in your database.\n\n' +
-            'SOLUTION:\n' +
-            '1. Go to your Supabase Dashboard\n' +
-            '2. Open the SQL Editor\n' +
-            '3. Run the CREATE_WEBSITE_CONTENT_TABLE_FIXED.sql file\n\n' +
-            'Error: ' + errorMsg
-          );
-        } else {
-          alert('❌ Failed to save content:\n\n' + errorMsg);
-        }
+        alert('❌ Failed to save content: ' + (result.details || result.error || 'Unknown error'));
         return;
       }
 
-      // Success - refresh content from server to ensure sync
       await fetchContent();
-      alert('✅ Content updated successfully!\n\nRefresh your main website to see the changes.');
-
+      alert('✅ Content updated successfully! Refresh your main website to see the changes.');
     } catch (error) {
       console.error('Error saving content:', error);
-      alert('❌ Network error: Unable to save content.\n\nPlease check your internet connection.');
+      alert('❌ Network error: Unable to save content.');
     } finally {
       setSaving(false);
     }
@@ -94,7 +75,7 @@ export default function ContentManagement() {
       [selectedPage]: {
         ...content[selectedPage],
         [section]: {
-          ...(content[selectedPage]?.[section as keyof PageContent] || {}),
+          ...(content[selectedPage]?.[section] || {}),
           [field]: value,
         },
       },
@@ -110,32 +91,6 @@ export default function ContentManagement() {
         <p className="text-gray-600">Edit all text, titles, and content on your main website</p>
       </div>
 
-      {/* Database Setup Warning */}
-      <div className="bg-amber-50 border-l-4 border-amber-500 p-6 mb-6 rounded-lg">
-        <div className="flex items-start">
-          <div className="flex-shrink-0">
-            <svg className="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-          </div>
-          <div className="ml-3 flex-1">
-            <h3 className="text-sm font-semibold text-amber-800 mb-2">⚠️ First Time Setup Required</h3>
-            <div className="text-sm text-amber-700 space-y-2">
-              <p>If this is your first time using the content editor, you need to set up the database:</p>
-              <ol className="list-decimal list-inside ml-2 space-y-1">
-                <li>Go to your <strong>Supabase Dashboard</strong></li>
-                <li>Click on <strong>SQL Editor</strong></li>
-                <li>Open the file <code className="bg-amber-100 px-1 py-0.5 rounded">CREATE_WEBSITE_CONTENT_TABLE_FIXED.sql</code></li>
-                <li>Copy and paste the SQL code into the editor</li>
-                <li>Click <strong>Run</strong></li>
-              </ol>
-              <p className="mt-2 text-xs">💡 You only need to do this once. After that, all your edits will save automatically.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Page Selector */}
       <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
         <h3 className="text-lg font-bold mb-4">Select Page to Edit</h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -155,7 +110,6 @@ export default function ContentManagement() {
         </div>
       </div>
 
-      {/* Content Editor */}
       {pageContent && (
         <div className="space-y-6">
           {/* Hero Section */}
@@ -172,16 +126,18 @@ export default function ContentManagement() {
             </div>
 
             <div className="space-y-4">
-              {pageContent.hero?.subtitle !== undefined && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
+              {/* NEW VIDEO URL FIELD */}
+              {selectedPage === 'home' && (
+                <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-100 space-y-2">
+                  <label className="block text-sm font-bold text-indigo-800 mb-2">Hero Video URL</label>
                   <input
                     type="text"
-                    value={pageContent.hero.subtitle || ''}
-                    onChange={(e) => updateSection('hero', 'subtitle', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                    placeholder="Enter subtitle..."
+                    value={pageContent.hero?.heroVideoUrl || ''}
+                    onChange={(e) => updateSection('hero', 'heroVideoUrl', e.target.value)}
+                    className="w-full px-4 py-2 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-black"
+                    placeholder="https://supabase...video.mp4"
                   />
+                  <p className="text-xs text-indigo-600 italic">This controls the main background video on the home page.</p>
                 </div>
               )}
 
@@ -196,43 +152,27 @@ export default function ContentManagement() {
                 />
               </div>
 
-              {pageContent.hero?.description !== undefined && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                  <textarea
-                    value={pageContent.hero.description || ''}
-                    onChange={(e) => updateSection('hero', 'description', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                    rows={3}
-                    placeholder="Enter description..."
-                  />
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Subtitle</label>
+                <input
+                  type="text"
+                  value={pageContent.hero?.subtitle || ''}
+                  onChange={(e) => updateSection('hero', 'subtitle', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                  placeholder="Enter subtitle..."
+                />
+              </div>
 
-              {pageContent.hero?.buttonText !== undefined && (
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
-                    <input
-                      type="text"
-                      value={pageContent.hero.buttonText || ''}
-                      onChange={(e) => updateSection('hero', 'buttonText', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="Button text..."
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Button Link</label>
-                    <input
-                      type="text"
-                      value={pageContent.hero.buttonLink || ''}
-                      onChange={(e) => updateSection('hero', 'buttonLink', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="/services"
-                    />
-                  </div>
-                </div>
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea
+                  value={pageContent.hero?.description || ''}
+                  onChange={(e) => updateSection('hero', 'description', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                  rows={3}
+                  placeholder="Enter description..."
+                />
+              </div>
             </div>
           </div>
 
@@ -260,7 +200,6 @@ export default function ContentManagement() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                   <textarea
@@ -270,276 +209,10 @@ export default function ContentManagement() {
                     rows={4}
                   />
                 </div>
-
-                <div className="border-t pt-4">
-                  <h4 className="text-md font-semibold mb-3 text-gray-800">Statistics</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Stat 1 Value (e.g. 15+)</label>
-                      <input
-                        type="text"
-                        value={(pageContent.about as any).stat1Value || ''}
-                        onChange={(e) => updateSection('about', 'stat1Value', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                        placeholder="15+"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Stat 1 Label</label>
-                      <input
-                        type="text"
-                        value={(pageContent.about as any).stat1Label || ''}
-                        onChange={(e) => updateSection('about', 'stat1Label', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                        placeholder="Years of Mastery"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Stat 2 Value (e.g. 24k)</label>
-                      <input
-                        type="text"
-                        value={(pageContent.about as any).stat2Value || ''}
-                        onChange={(e) => updateSection('about', 'stat2Value', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                        placeholder="24k"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Stat 2 Label</label>
-                      <input
-                        type="text"
-                        value={(pageContent.about as any).stat2Label || ''}
-                        onChange={(e) => updateSection('about', 'stat2Label', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                        placeholder="Clients Styled"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 border-t pt-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
-                    <input
-                      type="text"
-                      value={pageContent.about.buttonText || ''}
-                      onChange={(e) => updateSection('about', 'buttonText', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Button Link</label>
-                    <input
-                      type="text"
-                      value={pageContent.about.buttonLink || ''}
-                      onChange={(e) => updateSection('about', 'buttonLink', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-                </div>
               </div>
             </div>
-          )}
-
-          {/* CTA Section (Home page only) */}
-          {selectedPage === 'home' && pageContent.cta && (
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">Call-to-Action Section</h3>
-                <button
-                  onClick={() => handleSave('cta')}
-                  disabled={saving}
-                  className="btn-primary"
-                >
-                  {saving ? 'Saving...' : 'Save CTA'}
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                  <input
-                    type="text"
-                    value={pageContent.cta.title || ''}
-                    onChange={(e) => updateSection('cta', 'title', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                  <textarea
-                    value={pageContent.cta.description || ''}
-                    onChange={(e) => updateSection('cta', 'description', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                    rows={3}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
-                    <input
-                      type="text"
-                      value={pageContent.cta.buttonText || ''}
-                      onChange={(e) => updateSection('cta', 'buttonText', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Button Link</label>
-                    <input
-                      type="text"
-                      value={pageContent.cta.buttonLink || ''}
-                      onChange={(e) => updateSection('cta', 'buttonLink', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Footer Content (Footer page only) */}
-          {selectedPage === 'footer' && (
-            <>
-              {/* Contact Information */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold">Contact Information</h3>
-                  <button
-                    onClick={() => handleSave('contact')}
-                    disabled={saving}
-                    className="btn-primary"
-                  >
-                    {saving ? 'Saving...' : 'Save Contact'}
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
-                    <textarea
-                      value={pageContent?.contact?.address || ''}
-                      onChange={(e) => updateSection('contact', 'address', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      rows={2}
-                      placeholder="123 Editorial Way,&#10;Fashion District, NY"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Use line breaks for multiple lines</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                    <input
-                      type="text"
-                      value={pageContent?.contact?.phone || ''}
-                      onChange={(e) => updateSection('contact', 'phone', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="+1 (555) 987-6543"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-                    <input
-                      type="email"
-                      value={pageContent?.contact?.email || ''}
-                      onChange={(e) => updateSection('contact', 'email', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="concierge@geegees.com"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Social Media Links */}
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-xl font-bold">Social Media Links</h3>
-                  <button
-                    onClick={() => handleSave('social')}
-                    disabled={saving}
-                    className="btn-primary"
-                  >
-                    {saving ? 'Saving...' : 'Save Social Links'}
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Instagram URL</label>
-                    <input
-                      type="url"
-                      value={pageContent?.social?.instagramUrl || ''}
-                      onChange={(e) => updateSection('social', 'instagramUrl', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="https://instagram.com/geegees"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Snapchat URL</label>
-                    <input
-                      type="url"
-                      value={pageContent?.social?.snapchatUrl || ''}
-                      onChange={(e) => updateSection('social', 'snapchatUrl', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="https://snapchat.com/add/geegees"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">YouTube URL</label>
-                    <input
-                      type="url"
-                      value={pageContent?.social?.youtubeUrl || ''}
-                      onChange={(e) => updateSection('social', 'youtubeUrl', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="https://youtube.com/@geegees"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">TikTok URL</label>
-                    <input
-                      type="url"
-                      value={pageContent?.social?.tiktokUrl || ''}
-                      onChange={(e) => updateSection('social', 'tiktokUrl', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="https://tiktok.com/@geegees"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">WhatsApp URL</label>
-                    <input
-                      type="url"
-                      value={pageContent?.social?.whatsappUrl || ''}
-                      onChange={(e) => updateSection('social', 'whatsappUrl', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
-                      placeholder="https://wa.me/1234567890"
-                    />
-                  </div>
-
-                  <p className="text-xs text-gray-500 mt-2">
-                    💡 Use "#" to disable a social link. Leave empty or use full URL to enable.
-                  </p>
-                </div>
-              </div>
-            </>
           )}
         </div>
-      )}
-
-      <div className="mt-8 p-6 bg-blue-50 rounded-lg">
-        <h4 className="font-bold text-blue-900 mb-2">💡 How it works</h4>
-        <ul className="text-sm text-blue-800 space-y-1">
-          <li>• Edit any text field and click "Save" to update the content</li>
-          <li>• Changes will appear immediately on the main website</li>
-          <li>• Select different pages using the buttons above to edit their content</li>
-          <li>• Services are managed separately in the Services page</li>
-        </ul>
       </div>
     </div>
   );

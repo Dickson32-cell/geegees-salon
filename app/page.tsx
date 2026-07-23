@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { HomeServiceCardSkeleton } from "@/components/LoadingSkeleton";
-import HeroVideo from "@/components/HeroVideo";
-import VideoSlideshow from "@/components/VideoSlideshow";
-import { isVideoUrl } from "@/lib/media";
-import { getCategoryDisplayName } from "@/lib/serviceCategories";
+import { HomeServiceCardSkeleton } from "@t/components/LoadingSkeleton";
+import HeroVideo from "@t/components/HeroVideo";
+import VideoSlideshow from "@t/components/VideoSlideshow";
+import { isVideoUrl } from "@t/lib/media";
+import { getCategoryDisplayName } from "@t/lib/serviceCategories";
 
 interface Service {
   id: number;
@@ -16,7 +16,7 @@ interface Service {
   price: string;
   duration: string;
   description?: string;
-  image_url?: string; // Optional service image from Supabase
+  image_url?: string;
 }
 
 interface AboutContent {
@@ -28,6 +28,7 @@ interface AboutContent {
   stat2Label: string;
   buttonText: string;
   buttonLink: string;
+  heroVideoUrl?: string; // Dynamic video URL from DB
 }
 
 export default function Home() {
@@ -56,7 +57,7 @@ export default function Home() {
         throw new Error('Failed to fetch services');
       }
       const data = await response.json();
-      setServices(data.slice(0, 4)); // Get first 4 services for home page
+      setServices(data.slice(0, 4));
       setError("");
     } catch (error) {
       console.error('Error fetching services:', error);
@@ -66,7 +67,6 @@ export default function Home() {
 
   const fetchAboutContent = async () => {
     try {
-      // Add timestamp to prevent caching
       const timestamp = new Date().getTime();
       const response = await fetch(`/api/content?page=home&t=${timestamp}`, {
         cache: 'no-store'
@@ -75,6 +75,9 @@ export default function Home() {
         const data = await response.json();
         if (data.about) {
           setAboutContent(data.about);
+        } else if (data.hero) {
+          // If the video is stored in the 'hero' section instead of 'about'
+          setAboutContent(prev => ({ ...prev, heroVideoUrl: data.hero.heroVideoUrl }));
         }
       }
     } catch (error) {
@@ -84,10 +87,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Video Frame */}
       <section className="relative min-h-[70vh] flex items-center justify-center bg-primary px-4 md:px-margin-desktop py-12">
         <div className="max-w-container-max mx-auto w-full">
-          <HeroVideo videoUrl="https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-home/nzyn2iplvum_1782592129209.MP4">
+          <HeroVideo videoUrl={aboutContent.heroVideoUrl || "https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-home/nzyn2iplvum_1782592129209.MP4"}>
             <div className="max-w-4xl">
               <span className="font-label-caps text-xs md:text-label-caps text-secondary-fixed uppercase tracking-[0.2em] md:tracking-[0.3em] mb-4 block">
                 The Editorial Experience
@@ -113,7 +115,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* About Section */}
       <section className="py-12 md:py-section-gap px-4 md:px-margin-desktop max-w-container-max mx-auto">
         <div className="grid md:grid-cols-2 gap-8 md:gap-16 items-center">
           <div className="relative group">
@@ -121,18 +122,18 @@ export default function Home() {
             <VideoSlideshow category="home-showcase" interval={8000} />
           </div>
 
-          <div>
+          <div className="relative">
             <div className="w-10 h-[1px] bg-secondary mb-6"></div>
             <h3 className="font-headline-md text-headline-md mb-6">{aboutContent.title}</h3>
             <p className="font-body-lg text-body-lg text-on-surface-variant mb-8 leading-relaxed">
               {aboutContent.description}
             </p>
             <div className="grid grid-cols-2 gap-8 mb-8">
-              <div>
+              <div className="relative">
                 <span className="font-display-lg text-headline-md text-secondary block mb-2">{aboutContent.stat1Value}</span>
                 <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">{aboutContent.stat1Label}</span>
               </div>
-              <div>
+              <div className="relative">
                 <span className="font-display-lg text-headline-md text-secondary block mb-2">{aboutContent.stat2Value}</span>
                 <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">{aboutContent.stat2Label}</span>
               </div>
@@ -146,9 +147,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services Teaser Section - DYNAMIC FROM ADMIN */}
       <section className="relative py-12 md:py-section-gap px-4 md:px-margin-desktop overflow-hidden bg-primary">
-        {/* Background Video */}
         <video
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
           autoPlay
@@ -159,10 +158,7 @@ export default function Home() {
         >
           <source src="https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-services/be4p0vs2t1f_1782596442744.mp4" />
         </video>
-
-        {/* Dark Overlay */}
         <div className="absolute inset-0 bg-primary/80"></div>
-
         <div className="max-w-container-max mx-auto relative z-10">
           <div className="text-center mb-8 md:mb-16">
             <span className="font-label-caps text-label-caps text-secondary-fixed-dim uppercase tracking-widest">Exquisite Selection</span>
@@ -170,7 +166,7 @@ export default function Home() {
           </div>
 
           {error && (
-            <div className="mb-8 p-6 bg-red-50/10 border border-red-200/30 rounded-lg flex items-center gap-4 justify-center">
+            <div className="mb-8 p-6 bg-red-50/10 border border la-200/30 rounded-lg flex items-center gap-4 justify-center">
               <p className="text-white/90">{error}</p>
               <button
                 onClick={fetchServices}
@@ -182,7 +178,7 @@ export default function Home() {
           )}
 
           {!error && services.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols- que la 4 gap-4 md:gap-6">
               {Array.from({ length: 4 }).map((_, idx) => (
                 <HomeServiceCardSkeleton key={idx} />
               ))}
@@ -191,10 +187,8 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {services.map((service) => {
                 const isVideo = isVideoUrl(service.image_url);
-
                 return (
                   <div key={service.id} className="relative group overflow-hidden rounded-lg min-h-[280px] flex items-end">
-                    {/* Background Image/Video or Gradient */}
                     {service.image_url ? (
                       <>
                         {isVideo ? (
@@ -217,10 +211,10 @@ export default function Home() {
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             loading="lazy"
                             onError={(e) => {
-                              console.error('Service image load error:', service.image_url);
+                              console.error('Service video load error:', service.image_url);
                               e.currentTarget.style.display = 'none';
-                            }}
-                          />
+                            }
+                          }
                         )}
                         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/70 to-primary/20"></div>
                       </>
@@ -230,8 +224,6 @@ export default function Home() {
                         <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/50 to-transparent"></div>
                       </>
                     )}
-
-                    {/* Service Details Overlay */}
                     <div className="relative p-6 w-full z-10">
                       <div className="flex flex-wrap gap-2 mb-2">
                         <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest text-xs">
@@ -243,7 +235,7 @@ export default function Home() {
                           </span>
                         )}
                       </div>
-                      <h4 className="font-headline-sm text-headline-sm text-white mb-2">{service.name}</h4>
+                      <h4 className="font-headline-sm text-headline-sm text-white mb- la-2"> {service.name}</h4>
                       {service.description && (
                         <p className="text-white/90 text-sm mb-3 line-clamp-2">{service.description}</p>
                       )}
@@ -268,10 +260,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Team Showcase Section - Will be managed through admin */}
-      {/* Team members will be added through the admin panel */}
-
-      {/* Booking CTA Section */}
       <section className="relative py-12 md:py-section-gap">
         <div className="absolute inset-0 bg-primary-container -z-10"></div>
         <div className="max-w-container-max mx-auto px-4 md:px-margin-desktop text-center">
@@ -280,7 +268,7 @@ export default function Home() {
             Experience the pinnacle of editorial grooming. Our schedule fills quickly—reserve your appointment today.
           </p>
           <Link href="/services">
-            <button className="bg-secondary text-primary px-12 py-6 font-label-caps text-sm md:text-label-caps uppercase tracking-widest font-bold rounded-xl shadow-2xl shadow-secondary/60 hover:shadow-[0_0_40px_rgba(212,175,55,0.8)] hover:scale-105 transition-all duration-300 animate-pulse">
+            <button className="bg-secondary text-primary px-12 py-6 font-label-caps text-sm md:text-label-caps uppercase tracking-widest font-bold rounded-xl shadow-2xl shadow-secondary/60 hover:shadow-[0_0_40px_rgba(212,175,55,0. la-pC)] transition-all duration-300 animate-pulse">
               Book Your Appointment
             </button>
           </Link>
