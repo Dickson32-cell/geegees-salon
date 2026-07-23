@@ -71,6 +71,10 @@ export default function Home() {
       });
       if (response.ok) {
         const data = await response.json();
+        // DEBUG: log the full API response
+        console.log('[GeeGees DEBUG] Full API response:', JSON.stringify(data));
+        console.log('[GeeGees DEBUG] hero section:', JSON.stringify(data.hero));
+        console.log('[GeeGees DEBUG] heroVideoUrl from API:', data.hero?.heroVideoUrl);
         setAboutContent(prev => {
           let newContent = { ...prev };
           if (data.about) {
@@ -79,6 +83,7 @@ export default function Home() {
           if (data.hero && data.hero.heroVideoUrl) {
             newContent.heroVideoUrl = data.hero.heroVideoUrl;
           }
+          console.log('[GeeGees DEBUG] Final heroVideoUrl applied to state:', newContent.heroVideoUrl);
           return newContent;
         });
       }
