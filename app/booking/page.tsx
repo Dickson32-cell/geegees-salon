@@ -139,10 +139,53 @@ export default function BookingPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Booking submitted:", formData);
-    alert("Your appointment has been successfully booked! We'll send you a confirmation email shortly.");
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          service: formData.service,
+          stylist: formData.stylist,
+          appointmentDate: formData.date,
+          appointmentTime: formData.time,
+          customerName: formData.name,
+          customerEmail: formData.email,
+          customerPhone: formData.phone,
+          notes: formData.notes,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || 'Failed to book appointment');
+      }
+
+      alert("Your appointment has been successfully booked! We'll send you a confirmation email shortly.");
+      // Reset form or redirect
+      setCurrentStep(1);
+      setFormData({
+        service: "",
+        stylist: "",
+        date: "",
+        time: "",
+        name: "",
+        email: "",
+        phone: "",
+        notes: "",
+      });
+    } catch (err: any) {
+      console.error("Booking error:", err);
+      setError(err.message || "An error occurred while booking your appointment. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -256,11 +299,10 @@ export default function BookingPage() {
                             setCurrentStep(2);
                           }, 400);
                         }}
-                        className={`flex items-center justify-between p-6 rounded-lg cursor-pointer transition-all ${
-                          formData.service === service.name
+                        className={`flex items-center justify-between p-6 rounded-lg cursor-pointer transition-all ${formData.service === service.name
                             ? "bg-white border-2 border-secondary ring-2 ring-secondary/20"
                             : "bg-surface-container-low border border-transparent hover:border-secondary/30"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-stack-md">
                           <div className={`w-12 h-12 rounded flex items-center justify-center ${formData.service === service.name ? "bg-secondary-container/20" : "bg-white"}`}>
@@ -332,9 +374,8 @@ export default function BookingPage() {
                             setCurrentStep(3);
                           }, 400);
                         }}
-                        className={`cursor-pointer rounded-lg overflow-hidden transition-all ${
-                          formData.stylist === stylist.name ? "ring-2 ring-secondary" : ""
-                        }`}
+                        className={`cursor-pointer rounded-lg overflow-hidden transition-all ${formData.stylist === stylist.name ? "ring-2 ring-secondary" : ""
+                          }`}
                       >
                         <div className="aspect-[3/4] overflow-hidden bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
                           <span className="text-white text-5xl font-bold">
@@ -382,11 +423,10 @@ export default function BookingPage() {
                           key={slot}
                           type="button"
                           onClick={() => setFormData({ ...formData, time: slot })}
-                          className={`py-3 px-4 rounded-lg font-label-caps text-label-caps transition-all ${
-                            formData.time === slot
+                          className={`py-3 px-4 rounded-lg font-label-caps text-label-caps transition-all ${formData.time === slot
                               ? "bg-primary text-white"
                               : "bg-surface-container-low hover:bg-surface-container-high"
-                          }`}
+                            }`}
                         >
                           {slot}
                         </button>
