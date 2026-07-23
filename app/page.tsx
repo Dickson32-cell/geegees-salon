@@ -208,7 +208,7 @@ export default function Home() {
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                             loading="lazy"
                             onError={(e) => {
-                              console.error('Service image load error:', service.image_url);
+                              console.error('Service video load error:', service.image_url);
                               e.currentTarget.style.display = 'none';
                             }}
                           />
@@ -259,7 +259,7 @@ export default function Home() {
 
       <section className="relative py-12 md:py-section-gap">
         <div className="absolute inset-0 bg-primary-container -z-10"></div>
-        <div className="max-w-container-max mx-auto px-4 md:px-margin-desktop text-center">
+        <div className="max-scontainer-max mx-auto px-4 md:px-margin-desktop text-center">
           <h2 className="font-display-lg text-3xl md:text-display-lg text-white mb-4">Secure Your Moment</h2>
           <p className="font-body-lg text-sm md:text-base text-on-primary-container max-w-lg mx-auto mb-6 md:mb-8">
             Experience the pinnacle of editorial grooming. Our schedule fills quickly—reserve your appointment today.
