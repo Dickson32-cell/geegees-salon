@@ -75,8 +75,8 @@ export async function POST(request: Request) {
     console.log('[API] Appointment data:', { service, stylist, appointmentDate, appointmentTime });
 
     // Validation
-    if (!service || !stylist || !appointmentDate || !appointmentTime || !customerName || !customerPhone) {
-      console.error('[API] Missing required fields:', { service, stylist, appointmentDate, appointmentTime, customerName, customerPhone });
+    if (!service || !appointmentDate || !appointmentTime || !customerName || !customerPhone) {
+      console.error('[API] Missing required fields:', { service, appointmentDate, appointmentTime, customerName, customerPhone });
       return NextResponse.json(
         {
           error: 'Missing required fields',
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
     // Prepare appointment data - ensure email is never null
     const appointmentData = {
       service,
-      stylist,
+      stylist: stylist || 'Pending Assignment',
       appointment_date: new Date(appointmentDate).toISOString(),
       appointment_time: appointmentTime,
       customer_name: customerName,

@@ -25,13 +25,10 @@ interface TeamMember {
 export default function BookingPage() {
   const [currentStep, setCurrentStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
-  const [stylists, setStylists] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingStylists, setLoadingStylists] = useState(true);
   const [error, setError] = useState<string>("");
   const [formData, setFormData] = useState({
     service: "",
-    stylist: "",
     date: "",
     time: "",
     name: "",
@@ -42,7 +39,6 @@ export default function BookingPage() {
 
   useEffect(() => {
     fetchServices();
-    fetchStylists();
   }, []);
 
   const fetchServices = async () => {
@@ -63,27 +59,7 @@ export default function BookingPage() {
     }
   };
 
-  const fetchStylists = async () => {
-    try {
-      const response = await fetch('/api/team');
-      if (!response.ok) {
-        throw new Error('Failed to fetch team members');
-      }
-      const data = await response.json();
-      // Only show active team members who are stylists (not receptionists, managers, etc.)
-      // If role is not set (legacy data), assume stylist for backwards compatibility
-      const activeStylists = data.filter((member: TeamMember) =>
-        member.active && (!member.role || member.role === 'stylist')
-      );
-      setStylists(activeStylists);
-    } catch (error) {
-      console.error('Error fetching stylists:', error);
-      // Set empty array on error so booking can still work
-      setStylists([]);
-    } finally {
-      setLoadingStylists(false);
-    }
-  };
+
 
   const validateStep = () => {
     setError("");
@@ -96,12 +72,6 @@ export default function BookingPage() {
         }
         break;
       case 2:
-        if (!formData.stylist) {
-          setError("Please select a stylist to continue");
-          return false;
-        }
-        break;
-      case 3:
         if (!formData.date) {
           setError("Please select a date");
           return false;
@@ -111,7 +81,7 @@ export default function BookingPage() {
           return false;
         }
         break;
-      case 4:
+      case 3:
         if (!formData.name || !formData.email || !formData.phone) {
           setError("Please fill in all required fields");
           return false;
@@ -129,7 +99,7 @@ export default function BookingPage() {
 
   const handleNextStep = () => {
     if (validateStep()) {
-      setCurrentStep(Math.min(4, currentStep + 1));
+      setCurrentStep(Math.min(3, currentStep + 1));
     }
   };
 
@@ -152,7 +122,6 @@ export default function BookingPage() {
         },
         body: JSON.stringify({
           service: formData.service,
-          stylist: formData.stylist,
           appointmentDate: formData.date,
           appointmentTime: formData.time,
           customerName: formData.name,
@@ -216,17 +185,11 @@ export default function BookingPage() {
                 <span className={`w-8 h-8 rounded-full ${currentStep >= 2 ? "border-2 border-secondary bg-secondary/10" : "border border-outline-variant"} flex items-center justify-center text-xs`}>
                   02
                 </span>
-                <span className="font-label-caps">Expert Stylist</span>
+                <span className="font-label-caps">Date & Time</span>
               </li>
               <li className={`flex items-center gap-3 ${currentStep >= 3 ? "text-secondary font-bold" : "text-on-surface-variant/40"}`}>
                 <span className={`w-8 h-8 rounded-full ${currentStep >= 3 ? "border-2 border-secondary bg-secondary/10" : "border border-outline-variant"} flex items-center justify-center text-xs`}>
                   03
-                </span>
-                <span className="font-label-caps">Date & Time</span>
-              </li>
-              <li className={`flex items-center gap-3 ${currentStep >= 4 ? "text-secondary font-bold" : "text-on-surface-variant/40"}`}>
-                <span className={`w-8 h-8 rounded-full ${currentStep >= 4 ? "border-2 border-secondary bg-secondary/10" : "border border-outline-variant"} flex items-center justify-center text-xs`}>
-                  04
                 </span>
                 <span className="font-label-caps">Confirmation</span>
               </li>
@@ -250,7 +213,7 @@ export default function BookingPage() {
         <div className="lg:col-span-9 bg-white border border-secondary/10 rounded-lg shadow-sm min-h-[600px] flex flex-col">
           {/* Progress Bar (Mobile/Internal) */}
           <div className="w-full h-1 bg-surface-container">
-            <div className="h-full bg-secondary-container transition-all duration-500" style={{ width: `${(currentStep / 4) * 100}%` }}></div>
+            <div className="h-full bg-secondary-container transition-all duration-500" style={{ width: `${(currentStep / 3) * 100}%` }}></div>
           </div>
 
           {/* Error Message */}
@@ -273,7 +236,7 @@ export default function BookingPage() {
               <div className="step-content">
                 <div className="flex flex-col md:flex-row justify-between items-baseline mb-stack-lg border-b border-secondary/10 pb-4">
                   <h2 className="font-headline-md text-headline-md text-primary">Service Selection</h2>
-                  <span className="font-label-caps text-on-surface-variant italic">1 of 4: What can we do for you?</span>
+                  <span className="font-label-caps text-on-surface-variant italic">1 of 3: What can we do for you?</span>
                 </div>
 
                 <div className="space-y-4">
@@ -300,8 +263,8 @@ export default function BookingPage() {
                           }, 400);
                         }}
                         className={`flex items-center justify-between p-6 rounded-lg cursor-pointer transition-all ${formData.service === service.name
-                            ? "bg-white border-2 border-secondary ring-2 ring-secondary/20"
-                            : "bg-surface-container-low border border-transparent hover:border-secondary/30"
+                          ? "bg-white border-2 border-secondary ring-2 ring-secondary/20"
+                          : "bg-surface-container-low border border-transparent hover:border-secondary/30"
                           }`}
                       >
                         <div className="flex items-center gap-stack-md">
@@ -341,64 +304,14 @@ export default function BookingPage() {
               </div>
             )}
 
-            {/* Step 2: Stylist Selection */}
+
+
+            {/* Step 2: Date & Time */}
             {currentStep === 2 && (
               <div className="step-content">
                 <div className="flex flex-col md:flex-row justify-between items-baseline mb-stack-lg border-b border-secondary/10 pb-4">
-                  <h2 className="font-headline-md text-headline-md text-primary">Choose Your Expert</h2>
-                  <span className="font-label-caps text-on-surface-variant italic">2 of 4: Select your stylist</span>
-                </div>
-
-                {loadingStylists ? (
-                  <div className="text-center py-12">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                    <p className="mt-4 text-on-surface-variant">Loading our expert stylists...</p>
-                  </div>
-                ) : stylists.length === 0 ? (
-                  <div className="text-center py-12 bg-surface-container-low rounded-lg">
-                    <svg className="w-16 h-16 text-on-surface-variant/40 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    <h3 className="font-headline-sm text-primary mb-2">No Stylists Available</h3>
-                    <p className="text-on-surface-variant">Our team is currently being updated. Please check back soon!</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {stylists.map((stylist) => (
-                      <div
-                        key={stylist.id}
-                        onClick={() => {
-                          setFormData({ ...formData, stylist: stylist.name });
-                          // Auto-advance to next step after brief delay for visual feedback
-                          setTimeout(() => {
-                            setCurrentStep(3);
-                          }, 400);
-                        }}
-                        className={`cursor-pointer rounded-lg overflow-hidden transition-all ${formData.stylist === stylist.name ? "ring-2 ring-secondary" : ""
-                          }`}
-                      >
-                        <div className="aspect-[3/4] overflow-hidden bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                          <span className="text-white text-5xl font-bold">
-                            {stylist.name.split(' ').map(n => n[0]).join('')}
-                          </span>
-                        </div>
-                        <div className={`p-4 ${formData.stylist === stylist.name ? "bg-secondary-container/20" : "bg-white"}`}>
-                          <h4 className="font-headline-sm text-headline-sm mb-1">{stylist.name}</h4>
-                          <span className="font-label-caps text-label-caps text-secondary uppercase tracking-widest">{stylist.title}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Step 3: Date & Time */}
-            {currentStep === 3 && (
-              <div className="step-content">
-                <div className="flex flex-col md:flex-row justify-between items-baseline mb-stack-lg border-b border-secondary/10 pb-4">
                   <h2 className="font-headline-md text-headline-md text-primary">Select Date & Time</h2>
-                  <span className="font-label-caps text-on-surface-variant italic">3 of 4: Choose your slot</span>
+                  <span className="font-label-caps text-on-surface-variant italic">2 of 3: Choose your slot</span>
                 </div>
 
                 <div className="space-y-6">
@@ -424,8 +337,8 @@ export default function BookingPage() {
                           type="button"
                           onClick={() => setFormData({ ...formData, time: slot })}
                           className={`py-3 px-4 rounded-lg font-label-caps text-label-caps transition-all ${formData.time === slot
-                              ? "bg-primary text-white"
-                              : "bg-surface-container-low hover:bg-surface-container-high"
+                            ? "bg-primary text-white"
+                            : "bg-surface-container-low hover:bg-surface-container-high"
                             }`}
                         >
                           {slot}
@@ -437,12 +350,12 @@ export default function BookingPage() {
               </div>
             )}
 
-            {/* Step 4: Contact Information */}
-            {currentStep === 4 && (
+            {/* Step 3: Contact Information */}
+            {currentStep === 3 && (
               <div className="step-content">
                 <div className="flex flex-col md:flex-row justify-between items-baseline mb-stack-lg border-b border-secondary/10 pb-4">
                   <h2 className="font-headline-md text-headline-md text-primary">Your Details</h2>
-                  <span className="font-label-caps text-on-surface-variant italic">4 of 4: Almost there!</span>
+                  <span className="font-label-caps text-on-surface-variant italic">3 of 3: Almost there!</span>
                 </div>
 
                 <div className="space-y-6">
@@ -513,9 +426,9 @@ export default function BookingPage() {
             </button>
             <div className="flex items-center gap-stack-md">
               <div className="hidden md:block text-right mr-4">
-                <p className="font-label-caps text-on-surface-variant">STEP {currentStep} OF 4</p>
+                <p className="font-label-caps text-on-surface-variant">STEP {currentStep} OF 3</p>
               </div>
-              {currentStep < 4 ? (
+              {currentStep < 3 ? (
                 <button
                   type="button"
                   onClick={handleNextStep}
