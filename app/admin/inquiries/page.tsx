@@ -1,29 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { mockInquiries } from "@/lib/data/mockData";
 
 export default function Inquiries() {
-  const [inquiries, setInquiries] = useState(mockInquiries);
+  const [inquiries, setInquiries] = useState<any[]>([]);
   const [filter, setFilter] = useState("all");
   const [selectedInquiry, setSelectedInquiry] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchInquiries();
+  }, []);
+
+  const fetchInquiries = async () => {
+    try {
+      const res = await fetch('/api/inquiries');
+      if (res.ok) {
+        const data = await res.json();
+        setInquiries(data);
+      }
+    } catch (error) {
+      console.error("Error fetching inquiries:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredInquiries = inquiries.filter((inq) =>
     filter === "all" || inq.status === filter
   );
 
-  const markAsRead = (id: number) => {
-    setInquiries(
-      inquiries.map((inq) =>
-        inq.id === id ? { ...inq, status: "read" } : inq
-      )
-    );
+  const markAsRead = async (id: number) => {
+    try {
+      const res = await fetch('/api/inquiries', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: 'read' }),
+      });
+      if (res.ok) {
+        setInquiries(inquiries.map((inq) => inq.id === id ? { ...inq, status: "read" } : inq));
+      }
+    } catch (error) {
+      console.error("Error marking as read:", error);
+    }
   };
 
-  const deleteInquiry = (id: number) => {
+  const deleteInquiry = async (id: number) => {
     if (confirm("Are you sure you want to delete this inquiry?")) {
-      setInquiries(inquiries.filter((inq) => inq.id !== id));
-      setSelectedInquiry(null);
+      try {
+        const res = await fetch(`/api/inquiries?id=${id}`, { method: 'DELETE' });
+        if (res.ok) {
+          setInquiries(inquiries.filter((inq) => inq.id !== id));
+          setSelectedInquiry(null);
+        }
+      } catch (error) {
+        console.error("Error deleting inquiry:", error);
+      }
     }
   };
 
@@ -39,31 +72,28 @@ export default function Inquiries() {
         <div className="flex space-x-4">
           <button
             onClick={() => setFilter("all")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === "all"
-                ? "bg-primary-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === "all"
+              ? "bg-primary-600 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
           >
             All ({inquiries.length})
           </button>
           <button
             onClick={() => setFilter("unread")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === "unread"
-                ? "bg-primary-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === "unread"
+              ? "bg-primary-600 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
           >
             Unread ({inquiries.filter(i => i.status === "unread").length})
           </button>
           <button
             onClick={() => setFilter("read")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              filter === "read"
-                ? "bg-primary-600 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === "read"
+              ? "bg-primary-600 text-white"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
           >
             Read ({inquiries.filter(i => i.status === "read").length})
           </button>
@@ -82,9 +112,8 @@ export default function Inquiries() {
                   markAsRead(inquiry.id);
                 }
               }}
-              className={`bg-white rounded-xl shadow-lg p-4 cursor-pointer hover:shadow-xl transition-all ${
-                selectedInquiry?.id === inquiry.id ? "ring-2 ring-primary-500" : ""
-              }`}
+              className={`bg-white rounded-xl shadow-lg p-4 cursor-pointer hover:shadow-xl transition-all ${selectedInquiry?.id === inquiry.id ? "ring-2 ring-primary-500" : ""
+                }`}
             >
               <div className="flex justify-between items-start mb-2">
                 <h3 className="font-bold text-gray-900">{inquiry.name}</h3>
@@ -121,11 +150,10 @@ export default function Inquiries() {
                     <span>{selectedInquiry.date}</span>
                   </div>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                  selectedInquiry.status === "unread"
-                    ? "bg-blue-100 text-blue-700"
-                    : "bg-gray-100 text-gray-700"
-                }`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${selectedInquiry.status === "unread"
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-gray-100 text-gray-700"
+                  }`}>
                   {selectedInquiry.status.charAt(0).toUpperCase() + selectedInquiry.status.slice(1)}
                 </span>
               </div>

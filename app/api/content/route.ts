@@ -90,6 +90,7 @@ const defaultContent = {
     social: {
       id: 'footer-social',
       type: 'social',
+      activeSocialHandle: 'all',
       instagramUrl: '#',
       snapchatUrl: '#',
       youtubeUrl: '#',

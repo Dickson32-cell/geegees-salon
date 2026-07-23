@@ -319,6 +319,22 @@ export default function ContentManagement() {
                 </button>
               </div>
               <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Visible Social Handle</label>
+                  <select
+                    value={(pageContent.social as any)?.activeSocialHandle || 'all'}
+                    onChange={(e) => updateSection('social', 'activeSocialHandle', e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="all">Show All</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="snapchat">Snapchat</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="tiktok">TikTok</option>
+                    <option value="whatsapp">WhatsApp</option>
+                  </select>
+                  <p className="text-xs text-gray-500">Choose which social handle to show on the main web page footer.</p>
+                </div>
                 {['instagramUrl', 'snapchatUrl', 'youtubeUrl', 'tiktokUrl', 'whatsappUrl'].map((field) => (
                   <div key={field} className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700 capitalize">{field.replace('Url', '')}</label>
