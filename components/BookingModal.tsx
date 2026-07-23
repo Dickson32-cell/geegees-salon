@@ -26,10 +26,8 @@ interface BookingModalProps {
 export default function BookingModal({ isOpen, onClose, preselectedServiceId }: BookingModalProps) {
   const [step, setStep] = useState(1);
   const [services, setServices] = useState<Service[]>([]);
-  const [stylists, setStylists] = useState<string[]>(['Any Available']);
   const [formData, setFormData] = useState({
     service: '',
-    stylist: '',
     appointmentDate: '',
     appointmentTime: '',
     customerName: '',
@@ -49,7 +47,6 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
       setStep(1);
       setFormData({
         service: '',
-        stylist: '',
         appointmentDate: '',
         appointmentTime: '',
         customerName: '',
@@ -71,7 +68,6 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
   useEffect(() => {
     if (isOpen) {
       fetchServices();
-      fetchStylists();
     }
   }, [isOpen]);
 
@@ -95,7 +91,6 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
         console.log('[BookingModal] Service preselected - Setting step to 2');
         setFormData({
           service: preselectedServiceId!,
-          stylist: '',
           appointmentDate: '',
           appointmentTime: '',
           customerName: '',
@@ -109,7 +104,6 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
         console.log('[BookingModal] No service preselected - Setting step to 1');
         setFormData({
           service: '',
-          stylist: '',
           appointmentDate: '',
           appointmentTime: '',
           customerName: '',
@@ -134,25 +128,7 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
     }
   };
 
-  const fetchStylists = async () => {
-    try {
-      const response = await fetch('/api/team');
-      if (response.ok) {
-        const data: TeamMember[] = await response.json();
-        // Only show active team members
-        const activeStylists = data
-          .filter((member: TeamMember) => member.active)
-          .map((member: TeamMember) => member.name);
 
-        // Add "Any Available" as first option, then team members
-        setStylists(['Any Available', ...activeStylists]);
-      }
-    } catch (error) {
-      console.error('Error fetching stylists:', error);
-      // Keep default "Any Available" on error
-      setStylists(['Any Available']);
-    }
-  };
 
   const handleNext = () => {
     // Validation for each step
@@ -160,15 +136,11 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
       setError('Please select a service');
       return;
     }
-    if (step === 2 && !formData.stylist) {
-      setError('Please select a stylist');
-      return;
-    }
-    if (step === 3 && (!formData.appointmentDate || !formData.appointmentTime)) {
+    if (step === 2 && (!formData.appointmentDate || !formData.appointmentTime)) {
       setError('Please select date and time');
       return;
     }
-    if (step === 4 && (!formData.customerName || !formData.customerPhone)) {
+    if (step === 3 && (!formData.customerName || !formData.customerPhone)) {
       setError('Please provide your name and phone number');
       return;
     }
@@ -199,7 +171,7 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
       if (response.ok) {
         const data = await response.json();
         setBookingId(data.id);
-        setStep(6); // Move to receipt step
+        setStep(5); // Move to receipt step
       } else {
         const data = await response.json();
         setError(data.error || 'Failed to submit booking');
@@ -215,7 +187,6 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
     setStep(1);
     setFormData({
       service: '',
-      stylist: '',
       appointmentDate: '',
       appointmentTime: '',
       customerName: '',
@@ -389,17 +360,15 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
 
           {/* Progress Bar */}
           <div className="mt-6 flex items-center justify-between">
-            {[1, 2, 3, 4, 5].map((num) => (
+            {[1, 2, 3, 4].map((num) => (
               <div key={num} className="flex items-center flex-1">
-                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold ${
-                  step >= num ? 'bg-secondary text-black' : 'bg-white/20 text-white/60'
-                }`}>
-                  {step === 6 && num === 5 ? '✓' : num}
+                <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold ${step >= num ? 'bg-secondary text-black' : 'bg-white/20 text-white/60'
+                  }`}>
+                  {step === 5 && num === 4 ? '✓' : num}
                 </div>
-                {num < 5 && (
-                  <div className={`flex-1 h-1 mx-1 sm:mx-2 ${
-                    step > num ? 'bg-secondary' : 'bg-white/20'
-                  }`} />
+                {num < 4 && (
+                  <div className={`flex-1 h-1 mx-1 sm:mx-2 ${step > num ? 'bg-secondary' : 'bg-white/20'
+                    }`} />
                 )}
               </div>
             ))}
@@ -407,11 +376,10 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
 
           <div className="mt-3 text-xs sm:text-sm text-white/80 text-center">
             {step === 1 && 'Select Service'}
-            {step === 2 && 'Choose Stylist'}
-            {step === 3 && 'Pick Date & Time'}
-            {step === 4 && 'Your Information'}
-            {step === 5 && 'Review & Confirm'}
-            {step === 6 && 'Booking Confirmed'}
+            {step === 2 && 'Pick Date & Time'}
+            {step === 3 && 'Your Information'}
+            {step === 4 && 'Review & Confirm'}
+            {step === 5 && 'Booking Confirmed'}
           </div>
         </div>
 
@@ -431,11 +399,10 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
                 {services.map((service) => (
                   <label
                     key={service.id}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                      formData.service === service.id.toString()
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${formData.service === service.id.toString()
                         ? 'border-secondary bg-secondary/5'
                         : 'border-gray-200 hover:border-secondary/50'
-                    }`}
+                      }`}
                   >
                     <input
                       type="radio"
@@ -461,37 +428,10 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
             </div>
           )}
 
-          {/* Step 2: Choose Stylist */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-4">Choose Your Stylist</h3>
-              <div className="grid gap-3">
-                {stylists.map((stylist) => (
-                  <label
-                    key={stylist}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                      formData.stylist === stylist
-                        ? 'border-secondary bg-secondary/5'
-                        : 'border-gray-200 hover:border-secondary/50'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="stylist"
-                      value={stylist}
-                      checked={formData.stylist === stylist}
-                      onChange={(e) => setFormData({ ...formData, stylist: e.target.value })}
-                      className="sr-only"
-                    />
-                    <div className="font-medium text-gray-900">{stylist}</div>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
 
-          {/* Step 3: Date & Time */}
-          {step === 3 && (
+
+          {/* Step 2: Date & Time */}
+          {step === 2 && (
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Select Date</label>
@@ -512,11 +452,10 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
                       key={time}
                       type="button"
                       onClick={() => setFormData({ ...formData, appointmentTime: time })}
-                      className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                        formData.appointmentTime === time
+                      className={`px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${formData.appointmentTime === time
                           ? 'bg-secondary text-white'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                        }`}
                     >
                       {time}
                     </button>
@@ -526,8 +465,8 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
             </div>
           )}
 
-          {/* Step 4: Contact Information */}
-          {step === 4 && (
+          {/* Step 3: Contact Information */}
+          {step === 3 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold mb-4">Your Information</h3>
 
@@ -577,8 +516,8 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
             </div>
           )}
 
-          {/* Step 5: Review & Confirm */}
-          {step === 5 && (
+          {/* Step 4: Review & Confirm */}
+          {step === 4 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold mb-4">Review Your Booking</h3>
 
@@ -595,10 +534,7 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
                   <span className="text-gray-600">Duration:</span>
                   <span className="font-semibold">{selectedService?.duration}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Stylist:</span>
-                  <span className="font-semibold">{formData.stylist}</span>
-                </div>
+
                 <div className="flex justify-between">
                   <span className="text-gray-600">Date:</span>
                   <span className="font-semibold">{new Date(formData.appointmentDate).toLocaleDateString()}</span>
@@ -636,8 +572,8 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
             </div>
           )}
 
-          {/* Step 6: Booking Receipt/Confirmation */}
-          {step === 6 && (
+          {/* Step 5: Booking Receipt/Confirmation */}
+          {step === 5 && (
             <div className="space-y-6" ref={receiptRef}>
               {/* Success Icon */}
               <div className="text-center">
@@ -668,10 +604,7 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
                     <span className="text-gray-600">Service:</span>
                     <span className="font-semibold text-gray-900">{selectedService?.name}</span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Stylist:</span>
-                    <span className="font-semibold text-gray-900">{formData.stylist}</span>
-                  </div>
+
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Date:</span>
                     <span className="font-semibold text-gray-900">{new Date(formData.appointmentDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
@@ -744,7 +677,7 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
         </div>
 
         {/* Footer */}
-        {step !== 6 && (
+        {step !== 5 && (
           <div className="p-4 sm:p-6 bg-gray-50 rounded-b-xl sm:rounded-b-2xl flex justify-between gap-3">
             {step > 1 && (
               <button
@@ -755,7 +688,7 @@ export default function BookingModal({ isOpen, onClose, preselectedServiceId }: 
               </button>
             )}
 
-            {step < 5 ? (
+            {step < 4 ? (
               <button
                 onClick={handleNext}
                 className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-secondary text-black rounded-lg font-medium text-sm sm:text-base hover:bg-secondary/90 transition-colors ml-auto"
