@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { SERVICE_CATEGORIES, getSubcategoriesForCategory, getCategoryDisplayName } from "@/lib/serviceCategories";
+import { SERVICE_CATEGORIES, getSubcategoriesForCategory, getCategoryDisplayName, getAllCategories } from "@/lib/serviceCategories";
 
 interface Service {
   id: number;
@@ -322,14 +322,9 @@ export default function ServicesManagement() {
               onChange={(e) => setFormData({ ...formData, category: e.target.value, subcategory: "" })}
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary"
             >
-              <option value="Hair">Hair Cuts</option>
-              <option value="Styling">Hair Styling</option>
-              <option value="Treatments">Hair Treatments</option>
-              <option value="Spa">Spa</option>
-              <option value="Makeup">Makeup</option>
-              <option value="Skincare">Skincare</option>
-              <option value="Nails">Nails</option>
-              <option value="Braids">Braids</option>
+              {getAllCategories().map(cat => (
+                <option key={cat} value={cat}>{getCategoryDisplayName(cat)}</option>
+              ))}
             </select>
             <select
               value={formData.subcategory}
@@ -426,84 +421,83 @@ export default function ServicesManagement() {
 
       {/* Services Grid */}
       {!loading && (
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        {services.map((service) => (
-          <div key={service.id} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all hover:border-blue-300">
-            {/* Service Image */}
-            {service.imageUrl && (
-              <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
-                <img
-                  src={service.imageUrl}
-                  alt={service.name}
-                  className="absolute inset-0 w-full h-full object-cover object-center"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              </div>
-            )}
-
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">{service.name}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold uppercase">
-                      {getCategoryDisplayName(service.category)}
-                    </span>
-                    {service.subcategory && (
-                      <span className="inline-block px-2.5 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-semibold">
-                        {service.subcategory}
-                      </span>
-                    )}
-                    <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-semibold uppercase ${
-                      service.status === 'published' ? 'bg-green-100 text-green-700' :
-                      service.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-gray-100 text-gray-700'
-                    }`}>
-                      {service.status}
-                    </span>
-                  </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {services.map((service) => (
+            <div key={service.id} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all hover:border-blue-300">
+              {/* Service Image */}
+              {service.imageUrl && (
+                <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
+                  <img
+                    src={service.imageUrl}
+                    alt={service.name}
+                    className="absolute inset-0 w-full h-full object-cover object-center"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                 </div>
-              </div>
-
-              {service.description && (
-                <p className="text-slate-600 text-sm mb-4 line-clamp-2">{service.description}</p>
               )}
 
-            <div className="space-y-2 mb-5 pb-5 border-b border-slate-100">
-              <div className="flex items-center text-slate-700">
-                <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="font-semibold text-sm">{service.price}</span>
-              </div>
-              <div className="flex items-center text-slate-700">
-                <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span className="text-sm">{service.duration}</span>
-              </div>
-            </div>
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">{service.name}</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-block px-2.5 py-1 bg-blue-100 text-blue-700 rounded-md text-xs font-semibold uppercase">
+                        {getCategoryDisplayName(service.category)}
+                      </span>
+                      {service.subcategory && (
+                        <span className="inline-block px-2.5 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-semibold">
+                          {service.subcategory}
+                        </span>
+                      )}
+                      <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-semibold uppercase ${service.status === 'published' ? 'bg-green-100 text-green-700' :
+                          service.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                        }`}>
+                        {service.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => startEdit(service)}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(service.id)}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-              >
-                Delete
-              </button>
+                {service.description && (
+                  <p className="text-slate-600 text-sm mb-4 line-clamp-2">{service.description}</p>
+                )}
+
+                <div className="space-y-2 mb-5 pb-5 border-b border-slate-100">
+                  <div className="flex items-center text-slate-700">
+                    <svg className="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-semibold text-sm">{service.price}</span>
+                  </div>
+                  <div className="flex items-center text-slate-700">
+                    <svg className="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm">{service.duration}</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => startEdit(service)}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(service.id)}
+                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
             </div>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
       )}
 
       {!loading && services.length === 0 && !error && (

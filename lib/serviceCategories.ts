@@ -8,6 +8,7 @@ export const SERVICE_CATEGORIES = {
   Skincare: ['Facials', 'Treatments', 'Waxing'],
   Nails: ['Manicure', 'Pedicure', 'Nail Art', 'Acrylic/Gel'],
   Braids: ['Box Braids', 'Cornrows', 'Twists', 'Weaves'],
+  Locs: ['Starter Locs', 'Retwist', 'Loc Styling', 'Loc Repair', 'Faux Locs'],
 } as const;
 
 export type ServiceCategory = keyof typeof SERVICE_CATEGORIES;
@@ -15,7 +16,7 @@ export type ServiceSubcategory = typeof SERVICE_CATEGORIES[ServiceCategory][numb
 
 // Get subcategories for a specific category
 export const getSubcategoriesForCategory = (category: string): string[] => {
-  return SERVICE_CATEGORIES[category as ServiceCategory] || [];
+  return [...(SERVICE_CATEGORIES[category as ServiceCategory] || [])] as string[];
 };
 
 // Get all categories
@@ -39,6 +40,7 @@ export const CATEGORY_DISPLAY = {
   Skincare: { name: 'Skincare', icon: '✨' },
   Nails: { name: 'Nail Services', icon: '💅' },
   Braids: { name: 'Braids & Weaves', icon: '🎀' },
+  Locs: { name: 'Locs & Dreads', icon: '🌿' },
 };
 
 // Helper to get display name for category
