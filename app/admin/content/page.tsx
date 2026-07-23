@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 
 interface ContentSection {
@@ -94,8 +96,8 @@ export default function ContentManagement() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {pages.map((page) => {
             const isActive = selectedPage === page;
-            const className = "px-6 py-3 rounded-lg font-semibold uppercase transition-colors " + 
-                              (isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200');
+            const className = "px-6 py-3 rounded-lg font-semibold uppercase transition-colors " +
+              (isActive ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200');
             return (
               <button
                 key={page}
@@ -206,7 +208,7 @@ export default function ContentManagement() {
             </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
