@@ -71,6 +71,10 @@ export async function PATCH(
       updateData.service_id = body.serviceId;
     }
 
+    if (body.stylist !== undefined) {
+      updateData.stylist = body.stylist;
+    }
+
     const { data: appointment, error } = await supabase
       .from('appointments')
       .update(updateData)
