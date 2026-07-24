@@ -53,7 +53,7 @@ export async function GET(request: Request) {
     return NextResponse.json(services, {
       headers: {
         'X-Cache': 'MISS',
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        'Cache-Control': 'no-store',
       },
     });
   } catch (error) {

@@ -237,20 +237,31 @@ export default function ServicesPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-gutter">
                       {categoryServices.map((service) => (
                         <div key={service.id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow border-t-2 border-secondary overflow-hidden flex flex-col">
-                          {/* Service Image */}
+                          {/* Service Media */}
                           <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-primary to-primary-container overflow-hidden">
                             {service.image_url ? (
-                              <img
-                                src={service.image_url}
-                                alt={service.name}
-                                className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 hover:scale-110"
-                                loading="lazy"
-                                onError={(e) => {
-                                  console.error('Service image load error:', service.image_url);
-                                  // Replace with gradient background on error
-                                  e.currentTarget.style.display = 'none';
-                                }}
-                              />
+                              isVideoUrl(service.image_url) ? (
+                                <video
+                                  src={service.image_url}
+                                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
+                                  autoPlay
+                                  loop
+                                  muted
+                                  playsInline
+                                />
+                              ) : (
+                                <img
+                                  src={service.image_url}
+                                  alt={service.name}
+                                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 hover:scale-110"
+                                  loading="lazy"
+                                  onError={(e) => {
+                                    console.error('Service image load error:', service.image_url);
+                                    // Replace with gradient background on error
+                                    e.currentTarget.style.display = 'none';
+                                  }}
+                                />
+                              )
                             ) : (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-white/40 text-4xl md:text-5xl font-light italic">GG</span>

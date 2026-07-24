@@ -365,22 +365,31 @@ export default function ServicesManagement() {
               </label>
               <input
                 type="file"
-                accept="image/*"
+                accept="image/*,video/*"
                 onChange={handleFileSelect}
                 className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               />
               <p className="text-xs text-slate-500 mt-1">
-                Supported: JPG, PNG, WEBP. Image will be displayed on service cards.
+                Supported: JPG, PNG, WEBP, MP4, WEBM. Media will be displayed on service cards.
               </p>
               {previewUrl && (
                 <div className="mt-4">
                   <p className="text-sm font-medium text-slate-700 mb-2">Preview:</p>
                   <div className="relative w-full max-w-sm aspect-[4/3] rounded-lg border-2 border-gray-300 overflow-hidden bg-gray-50">
-                    <img
-                      src={previewUrl}
-                      alt="Preview"
-                      className="absolute inset-0 w-full h-full object-cover object-center"
-                    />
+                    {selectedFile?.type.startsWith('video/') || previewUrl.match(/\.(mp4|webm|ogg)$/i) ? (
+                      <video
+                        src={previewUrl}
+                        className="absolute inset-0 w-full h-full object-cover object-center"
+                        controls
+                        muted
+                      />
+                    ) : (
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
+                        className="absolute inset-0 w-full h-full object-cover object-center"
+                      />
+                    )}
                   </div>
                 </div>
               )}
@@ -424,17 +433,28 @@ export default function ServicesManagement() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {services.map((service) => (
             <div key={service.id} className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden hover:shadow-md transition-all hover:border-blue-300">
-              {/* Service Image */}
+              {/* Service Media */}
               {service.imageUrl && (
                 <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
-                  <img
-                    src={service.imageUrl}
-                    alt={service.name}
-                    className="absolute inset-0 w-full h-full object-cover object-center"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+                  {service.imageUrl.match(/\.(mp4|webm|ogg)$/i) ? (
+                    <video
+                      src={service.imageUrl}
+                      className="absolute inset-0 w-full h-full object-cover object-center"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                    />
+                  ) : (
+                    <img
+                      src={service.imageUrl}
+                      alt={service.name}
+                      className="absolute inset-0 w-full h-full object-cover object-center"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
                 </div>
               )}
 
@@ -452,8 +472,8 @@ export default function ServicesManagement() {
                         </span>
                       )}
                       <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-semibold uppercase ${service.status === 'published' ? 'bg-green-100 text-green-700' :
-                          service.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-gray-100 text-gray-700'
+                        service.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                          'bg-gray-100 text-gray-700'
                         }`}>
                         {service.status}
                       </span>

@@ -1,0 +1,110 @@
+{
+  "Treatments": [
+    "Gold Hair Color",
+    "Vibrant Hair Color",
+    "Hair Washing (Permed)",
+    "Color Treatment",
+    "Balayage Highlights",
+    "Keratin Treatment",
+    "Editorial Color Experience",
+    "Luxury Deep Treatment",
+    "Steaming Treatment",
+    "Hair Washing (Natural)",
+    "Retouching"
+  ],
+  "Hair": [
+    "Haircut with Black Dye",
+    "Kids Haircut with Black Dye",
+    "Kids Normal Haircut",
+    "Kids Haircut with Curls",
+    "Signature Cut & Style",
+    "Normal Haircut",
+    "Waves Haircut",
+    "Premium Haircut & Styling"
+  ],
+  "Locs": [
+    "Permanent Locs",
+    "Faux/Butterfly Locs",
+    "Relocking Maintenance",
+    "Mini/Kinky Twist",
+    "Sew-in Weave"
+  ],
+  "Styling": [
+    "Bridal Hair Design",
+    "Tonging Mastercraft",
+    "Finger Waves",
+    "Smooth Premium Pixie"
+  ],
+  "Spa": [
+    "Spa Facial Treatment",
+    "Hot Stone Massage",
+    "Deep Tissue Massage",
+    "Pedicure & Spa"
+  ],
+  "Braids": [
+    "Signature Box Braids",
+    "Knotless Braids",
+    "Natural Twist",
+    "Cornrow Pony/Rasta",
+    "Premium Curl Braids",
+    "Normal Cornrows",
+    "Box Braids"
+  ],
+  "Makeup": [
+    "Editorial Makeup",
+    "Bridal Makeup Package",
+    "Bridal Makeup"
+  ],
+  "Nails": [
+    "Acrylic Nails (Short)",
+    "Luxury Manicure & Pedicure",
+    "Gel Polish (Short)",
+    "Gel Polish (Medium)",
+    "Gel Polish (Long)",
+    "Poly Gel (Short)",
+    "Poly Gel (Long)",
+    "Acrylic Nails (Medium)",
+    "Acrylic Nails (Long)",
+    "Nail Overlay",
+    "Acrylic Refill",
+    "Toe Nails (Regular)",
+    "Toe Nails (Premium)",
+    "Nail Polishing",
+    "Nail Trimming",
+    "Gel Manicure"
+  ],
+  "Skincare": [
+    "Advanced Skincare Consultation",
+    "Facial Treatment"
+  ],
+  "Pedicure": [
+    "Classic Pedicure",
+    "Jelly Pedicure",
+    "Milky Pedicure",
+    "Fruity Pedicure"
+  ],
+  "Lashes": [
+    "Full Signature Cluster Lashes",
+    "Regular Classic Lashes",
+    "Cat Eye Classic Lashes",
+    "Regular Hybrid Lashes",
+    "Cat Eye Hybrid Lashes",
+    "Cat Eye Wispy Hybrid Lashes",
+    "Regular Volume Lashes",
+    "Cat Eye Volume Lashes",
+    "Cat Eye Wispy Premium Volume"
+  ],
+  "Facials": [
+    "Classic Facial Treatment",
+    "Deep Cleansing Facial"
+  ],
+  "Teeth Whitening": [
+    "2 Teeth Whitening Sessions",
+    "3 Teeth Whitening Sessions",
+    "4 Teeth Whitening Sessions"
+  ],
+  "Braces": [
+    "O-Ring Braces Placement",
+    "Power Chain Braces Alignment"
+  ]
+}
