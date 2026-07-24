@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 interface Appointment {
@@ -26,11 +26,64 @@ export default function ReportsPage() {
     const [loading, setLoading] = useState(true);
     const [dateFilter, setDateFilter] = useState("all_time");
 
+    const reportRef = useRef<HTMLDivElement>(null);
+    const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+
     useEffect(() => {
         Promise.all([fetchAppointments(), fetchTeam()]).finally(() => {
             setLoading(false);
         });
     }, []);
+
+    const downloadPDF = async () => {
+        if (!reportRef.current) return;
+        setIsGeneratingPDF(true);
+
+        try {
+            const html2canvas = (await import('html2canvas')).default;
+            const { jsPDF } = await import('jspdf');
+
+            const canvas = await html2canvas(reportRef.current, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff'
+            });
+
+            const imgWidth = 210; // A4 width in mm
+            const pageHeight = 297; // A4 height in mm
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgData = canvas.toDataURL('image/png');
+
+            pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+            const filename = `GeeGees-Stylist-Report-${new Date().toISOString().split('T')[0]}.pdf`;
+
+            // For mobile browsers, use blob approach
+            const pdfBlob = pdf.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+
+            const link = document.createElement('a');
+            link.href = blobUrl;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+
+            // Cleanup
+            setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(blobUrl);
+            }, 100);
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Unable to generate PDF. Please try again or contact support.');
+        } finally {
+            setIsGeneratingPDF(false);
+        }
+    };
 
     const fetchAppointments = async () => {
         try {
@@ -109,65 +162,88 @@ export default function ReportsPage() {
                     <h1 className="text-3xl font-bold text-gray-900">Stylist Reports</h1>
                     <p className="text-gray-600 mt-2">Track stylist assignments, completed work, and revenue generated.</p>
                 </div>
+                <button
+                    onClick={downloadPDF}
+                    disabled={isGeneratingPDF || loading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                >
+                    {isGeneratingPDF ? (
+                        <>
+                            <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Generating...
+                        </>
+                    ) : (
+                        <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Download PDF
+                        </>
+                    )}
+                </button>
             </div>
 
-            {/* Filters */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <div className="max-w-xs">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
-                    <select
-                        value={dateFilter}
-                        onChange={(e) => setDateFilter(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                        <option value="today">Today</option>
-                        <option value="this_week">This Week</option>
-                        <option value="this_month">This Month</option>
-                        <option value="all_time">All Time</option>
-                    </select>
+            <div ref={reportRef} className="space-y-6 bg-gray-50 p-4 rounded-xl">
+                {/* Filters */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="max-w-xs">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Date Range</label>
+                        <select
+                            value={dateFilter}
+                            onChange={(e) => setDateFilter(e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="today">Today</option>
+                            <option value="this_week">This Week</option>
+                            <option value="this_month">This Month</option>
+                            <option value="all_time">All Time</option>
+                        </select>
+                    </div>
                 </div>
+
+                {/* Reports Grid */}
+                {loading ? (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                        <p className="text-gray-500">Loading reports...</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {teamMembers.map(member => {
+                            const stats = getStylistStats(member.name);
+                            return (
+                                <div key={member.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                                    <div className="flex items-center gap-4 mb-6">
+                                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-xl">
+                                            {member.name.charAt(0)}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-lg font-bold text-gray-900">{member.name}</h3>
+                                            <p className="text-sm text-gray-500">Stylist</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                                            <span className="text-gray-600">Assigned Work</span>
+                                            <span className="font-semibold text-gray-900">{stats.totalAssigned}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                                            <span className="text-gray-600">Completed Work</span>
+                                            <span className="font-semibold text-green-600">{stats.totalCompleted}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center pt-2">
+                                            <span className="text-gray-600 font-medium">Revenue Generated</span>
+                                            <span className="font-bold text-xl text-blue-600">GH₵{stats.totalRevenue.toFixed(2)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
             </div>
-
-            {/* Reports Grid */}
-            {loading ? (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-                    <p className="text-gray-500">Loading reports...</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {teamMembers.map(member => {
-                        const stats = getStylistStats(member.name);
-                        return (
-                            <div key={member.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                                <div className="flex items-center gap-4 mb-6">
-                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-xl">
-                                        {member.name.charAt(0)}
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-bold text-gray-900">{member.name}</h3>
-                                        <p className="text-sm text-gray-500">Stylist</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                                        <span className="text-gray-600">Assigned Work</span>
-                                        <span className="font-semibold text-gray-900">{stats.totalAssigned}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center pb-3 border-b border-gray-100">
-                                        <span className="text-gray-600">Completed Work</span>
-                                        <span className="font-semibold text-green-600">{stats.totalCompleted}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center pt-2">
-                                        <span className="text-gray-600 font-medium">Revenue Generated</span>
-                                        <span className="font-bold text-xl text-blue-600">GH₵{stats.totalRevenue.toFixed(2)}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
         </div>
     );
 }
