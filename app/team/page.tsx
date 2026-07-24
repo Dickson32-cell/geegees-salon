@@ -10,6 +10,7 @@ interface TeamMember {
   bio: string | null;
   specialties: string[];
   active: boolean;
+  photo_url?: string;
 }
 
 export default function TeamPage() {
@@ -66,12 +67,7 @@ export default function TeamPage() {
               </svg>
             </div>
             <h3 className="font-headline-md text-2xl md:text-headline-md text-primary mb-4">Our Team is Growing</h3>
-            <p className="text-on-surface-variant text-lg mb-6">
-              We're building an exceptional team of professionals.
-            </p>
-            <p className="text-on-surface-variant text-sm mb-8">
-              Team members will appear here once added through the admin panel.
-            </p>
+            <p className="text-on-surface-variant text-lg mb-8">We're building an exceptional team of professionals.</p>
             <Link href="/booking">
               <button className="bg-primary text-white px-8 py-3 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-colors">
                 Book an Appointment
@@ -85,18 +81,32 @@ export default function TeamPage() {
                 key={member.id}
                 className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group border-t-2 border-secondary"
               >
-                {/* Initials Display */}
-                <div className="relative h-64 bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  <span className="text-white text-5xl font-bold">
-                    {member.name.split(' ').map(n => n[0]).join('')}
-                  </span>
+                {/* Photo / Initials */}
+                <div className="relative h-72 bg-gradient-to-br from-primary to-secondary overflow-hidden">
+                  {member.photo_url ? (
+                    <img
+                      src={member.photo_url}
+                      alt={member.name}
+                      className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-white text-6xl font-bold">
+                        {member.name.split(' ').map(n => n[0]).join('')}
+                      </span>
+                    </div>
+                  )}
+                  {/* Gradient overlay at bottom */}
+                  <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-4 left-4">
+                    <p className="text-white font-bold text-lg leading-tight">{member.name}</p>
+                    <p className="text-white/80 text-xs uppercase tracking-widest">{member.title}</p>
+                  </div>
                 </div>
 
                 {/* Content */}
                 <div className="p-6">
-                  <h3 className="font-headline-sm text-xl md:text-headline-sm text-primary mb-1">{member.name}</h3>
-                  <p className="text-secondary font-semibold mb-3 uppercase tracking-wide text-xs">{member.title}</p>
-
                   {member.specialties && member.specialties.length > 0 && (
                     <div className="mb-4">
                       <div className="flex flex-wrap gap-2">
@@ -113,7 +123,7 @@ export default function TeamPage() {
                   )}
 
                   {member.bio && (
-                    <p className="text-on-surface-variant text-sm leading-relaxed">{member.bio}</p>
+                    <p className="text-on-surface-variant text-sm leading-relaxed line-clamp-3">{member.bio}</p>
                   )}
                 </div>
               </div>

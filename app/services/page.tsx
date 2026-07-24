@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { ServiceGridSkeleton } from "@/components/LoadingSkeleton";
 import { useBooking } from "@/contexts/BookingContext";
 import GiftModal from "@/components/GiftModal";
+import MediaLightbox from "@/components/MediaLightbox";
 import { isVideoUrl } from "@/lib/media";
 import { getCategoryDisplayName } from "@/lib/serviceCategories";
 
@@ -121,6 +122,7 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [isGiftModalOpen, setIsGiftModalOpen] = useState(false);
+  const [lightbox, setLightbox] = useState<{ url: string; alt: string } | null>(null);
   const { openBookingModal } = useBooking();
 
   useEffect(() => {
@@ -238,12 +240,16 @@ export default function ServicesPage() {
                       {categoryServices.map((service) => (
                         <div key={service.id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow border-t-2 border-secondary overflow-hidden flex flex-col">
                           {/* Service Media */}
-                          <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-primary to-primary-container overflow-hidden">
+                          <div
+                            className={`relative w-full aspect-[4/3] bg-gradient-to-br from-primary to-primary-container overflow-hidden ${service.image_url ? 'cursor-pointer group' : ''}`}
+                            onClick={() => service.image_url && setLightbox({ url: service.image_url, alt: service.name })}
+                            title={service.image_url ? 'Click to view' : undefined}
+                          >
                             {service.image_url ? (
                               isVideoUrl(service.image_url) ? (
                                 <video
                                   src={service.image_url}
-                                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105"
+                                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
                                   autoPlay
                                   loop
                                   muted
@@ -253,11 +259,9 @@ export default function ServicesPage() {
                                 <img
                                   src={service.image_url}
                                   alt={service.name}
-                                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 hover:scale-110"
+                                  className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
                                   loading="lazy"
                                   onError={(e) => {
-                                    console.error('Service image load error:', service.image_url);
-                                    // Replace with gradient background on error
                                     e.currentTarget.style.display = 'none';
                                   }}
                                 />
@@ -265,6 +269,16 @@ export default function ServicesPage() {
                             ) : (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-white/40 text-4xl md:text-5xl font-light italic">GG</span>
+                              </div>
+                            )}
+                            {/* Click-to-expand icon overlay */}
+                            {service.image_url && (
+                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
+                                <div className="bg-white/90 rounded-full p-2">
+                                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                                  </svg>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -325,7 +339,7 @@ export default function ServicesPage() {
           </p>
           <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-stack-md">
             <button
-              onClick={openBookingModal}
+              onClick={() => openBookingModal()}
               className="bg-primary text-white px-10 py-4 rounded-lg font-label-caps text-label-caps hover:bg-primary/90 transition-all active:scale-95 shadow-lg"
             >
               Schedule Appointment
@@ -341,6 +355,15 @@ export default function ServicesPage() {
       </section>
 
       <GiftModal isOpen={isGiftModalOpen} onClose={() => setIsGiftModalOpen(false)} />
+
+      {/* Media Lightbox */}
+      {lightbox && (
+        <MediaLightbox
+          url={lightbox.url}
+          alt={lightbox.alt}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </main>
   );
 }

@@ -79,6 +79,7 @@ export async function POST(request: Request) {
         role: body.role || 'stylist',
         active: body.active !== undefined ? body.active : true,
         display_order: body.displayOrder,
+        photo_url: body.photoUrl || null,
         created_at: now,
         updated_at: now,
       }])
@@ -127,6 +128,7 @@ export async function PUT(request: Request) {
     if (updates.specialties !== undefined) dbUpdates.specialties = updates.specialties;
     if (updates.role !== undefined) dbUpdates.role = updates.role;
     if (updates.active !== undefined) dbUpdates.active = updates.active;
+    if (updates.photoUrl !== undefined) dbUpdates.photo_url = updates.photoUrl;
 
     const { data: updatedMember, error } = await supabase
       .from('team_members')
