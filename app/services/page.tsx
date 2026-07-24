@@ -127,6 +127,9 @@ export default function ServicesPage() {
 
   useEffect(() => {
     fetchServices();
+    // Auto-refresh every 30 seconds so admin updates appear without manual reload
+    const interval = setInterval(fetchServices, 30_000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchServices = async () => {

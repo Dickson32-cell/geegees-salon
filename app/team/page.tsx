@@ -19,6 +19,9 @@ export default function TeamPage() {
 
   useEffect(() => {
     fetchTeam();
+    // Auto-refresh every 30 seconds so admin updates appear without manual reload
+    const interval = setInterval(fetchTeam, 30_000);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchTeam = async () => {
