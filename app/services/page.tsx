@@ -241,7 +241,7 @@ export default function ServicesPage() {
                         <div key={service.id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow border-t-2 border-secondary overflow-hidden flex flex-col">
                           {/* Service Media */}
                           <div
-                            className={`relative w-full aspect-[4/3] bg-gradient-to-br from-primary to-primary-container overflow-hidden ${service.image_url ? 'cursor-pointer group' : ''}`}
+                            className={`relative w-full h-52 bg-gradient-to-br from-primary to-primary-container overflow-hidden ${service.image_url ? 'cursor-pointer group' : ''}`}
                             onClick={() => service.image_url && setLightbox({ url: service.image_url, alt: service.name })}
                             title={service.image_url ? 'Click to view' : undefined}
                           >
@@ -260,7 +260,6 @@ export default function ServicesPage() {
                                   src={service.image_url}
                                   alt={service.name}
                                   className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                                  loading="lazy"
                                   onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                   }}
