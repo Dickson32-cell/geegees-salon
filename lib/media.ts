@@ -3,7 +3,7 @@
  */
 export const isVideoUrl = (url: string | null | undefined): boolean => {
   if (!url) return false;
-  
+
   // Remove query parameters
   const urlWithoutParams = url.split('?')[0].toLowerCase();
 
@@ -14,7 +14,5 @@ export const isVideoUrl = (url: string | null | undefined): boolean => {
   ];
 
   return mediaExtensions.some(ext => urlWithoutParams.endsWith(ext)) ||
-         urlWithoutParams.includes('video') ||
-         urlWithoutParams.includes('/videos/') ||
-         urlWithoutParams.includes('/storage/v1/object/public/'); // Common for Supabase storage objects that might be videos
+    urlWithoutParams.includes('/videos/');
 };

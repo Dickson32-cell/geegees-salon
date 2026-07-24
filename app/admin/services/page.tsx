@@ -358,10 +358,10 @@ export default function ServicesManagement() {
               rows={3}
             />
 
-            {/* Image Upload Field */}
+            {/* Media Upload Field */}
             <div className="md:col-span-3">
               <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Service Image (Optional)
+                Service Media (Image or Video)
               </label>
               <input
                 type="file"
