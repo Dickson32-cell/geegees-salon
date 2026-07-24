@@ -12,7 +12,8 @@ interface Service {
   price: string;
   duration: string;
   description?: string;
-  imageUrl?: string; // Optional service image
+  imageUrl?: string;   // normalised from DB's image_url
+  image_url?: string;  // raw DB field (keep for mapping)
   status: 'draft' | 'published' | 'inactive';
 }
 
@@ -54,8 +55,12 @@ export default function ServicesManagement() {
         throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const data = await response.json();
-      setServices(Array.isArray(data) ? data : []);
+      const raw = await response.json();
+      // Normalise snake_case image_url → camelCase imageUrl
+      const data = Array.isArray(raw)
+        ? raw.map((s: any) => ({ ...s, imageUrl: s.image_url || s.imageUrl || '' }))
+        : [];
+      setServices(data);
     } catch (error: any) {
       console.error('Error fetching services:', error);
       setError(`Failed to load services: ${error.message}`);
@@ -122,7 +127,8 @@ export default function ServicesManagement() {
         throw new Error(errorData.error || 'Failed to add service');
       }
 
-      const newService = await response.json();
+      const raw = await response.json();
+      const newService = { ...raw, imageUrl: raw.image_url || raw.imageUrl || '' };
       setServices([...services, newService]);
       setSuccessMessage(`Service "${formData.name}" added successfully!`);
       resetForm();
@@ -164,7 +170,8 @@ export default function ServicesManagement() {
         throw new Error(errorData.error || 'Failed to update service');
       }
 
-      const updatedService = await response.json();
+      const raw = await response.json();
+      const updatedService = { ...raw, imageUrl: raw.image_url || raw.imageUrl || '' };
       setServices(services.map(s => s.id === updatedService.id ? updatedService : s));
       setSuccessMessage(`Service "${formData.name}" updated successfully!`);
       resetForm();
