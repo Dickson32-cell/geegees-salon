@@ -85,6 +85,12 @@ export default function Navbar() {
             >
               Gallery
             </Link>
+            <Link
+              href="/team"
+              className="font-label-caps text-label-caps text-on-surface-variant hover:text-secondary transition-colors uppercase tracking-widest"
+            >
+              Team
+            </Link>
 
             <Link
               href="/services"
@@ -154,6 +160,13 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Gallery
+            </Link>
+            <Link
+              href="/team"
+              className="font-body-lg text-on-surface-variant hover:text-secondary transition-colors py-3"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Team
             </Link>
 
             <Link
