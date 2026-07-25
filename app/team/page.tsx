@@ -216,13 +216,6 @@ export default function TeamPage() {
                 </div>
               )}
 
-              <div className="mt-auto pt-8">
-                <Link href="/booking" onClick={() => setSelectedMember(null)}>
-                  <button className="w-full bg-primary text-white px-8 py-4 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-colors shadow-md">
-                    Book with {selectedMember.name.split(' ')[0]}
-                  </button>
-                </Link>
-              </div>
             </div>
           </div>
         </div>
