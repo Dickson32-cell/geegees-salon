@@ -41,9 +41,11 @@ export default function DashboardPage() {
     topServices: []
   });
   const [loading, setLoading] = useState(true);
+  const [services, setServices] = useState<any[]>([]);
 
   useEffect(() => {
     fetchData();
+    fetchServices();
   }, []);
 
   const fetchData = async () => {
@@ -59,6 +61,27 @@ export default function DashboardPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch('/api/services');
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data);
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    }
+  };
+
+  const getServiceName = (serviceValue: string) => {
+    if (!serviceValue) return 'Unknown Service';
+    if (!isNaN(Number(serviceValue))) {
+      const service = services.find(s => s.id === Number(serviceValue));
+      return service ? service.name : serviceValue;
+    }
+    return serviceValue;
   };
 
   const calculateAnalytics = (data: Appointment[]) => {
@@ -86,8 +109,8 @@ export default function DashboardPage() {
     const monthlyRevenue = data.filter(apt => {
       const aptDate = new Date(apt.appointmentDate);
       return apt.status === 'completed' &&
-             apt.revenue &&
-             aptDate >= thisMonth;
+        apt.revenue &&
+        aptDate >= thisMonth;
     }).reduce((sum, apt) => sum + (Number(apt.revenue) || 0), 0);
 
     // Total revenue (all time)
@@ -277,7 +300,7 @@ export default function DashboardPage() {
                         <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 font-bold">
                           {idx + 1}
                         </div>
-                        <span className="font-medium text-gray-900">{service.name}</span>
+                        <span className="font-medium text-gray-900">{getServiceName(service.name)}</span>
                       </div>
                       <span className="text-2xl font-bold text-blue-600">{service.count}</span>
                     </div>
@@ -318,7 +341,7 @@ export default function DashboardPage() {
                             <p className="text-sm text-gray-500">{appointment.customerEmail}</p>
                           </div>
                         </td>
-                        <td className="py-4 px-4 text-gray-700">{appointment.service}</td>
+                        <td className="py-4 px-4 text-gray-700">{getServiceName(appointment.service)}</td>
                         <td className="py-4 px-4">
                           <div>
                             <p className="text-gray-900">{new Date(appointment.appointmentDate).toLocaleDateString()}</p>
@@ -326,17 +349,16 @@ export default function DashboardPage() {
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            appointment.status === "completed"
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${appointment.status === "completed"
                               ? "bg-green-100 text-green-700"
                               : appointment.status === "confirmed"
-                              ? "bg-purple-100 text-purple-700"
-                              : appointment.status === "accepted"
-                              ? "bg-blue-100 text-blue-700"
-                              : appointment.status === "pending"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : "bg-gray-100 text-gray-700"
-                          }`}>
+                                ? "bg-purple-100 text-purple-700"
+                                : appointment.status === "accepted"
+                                  ? "bg-blue-100 text-blue-700"
+                                  : appointment.status === "pending"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-gray-100 text-gray-700"
+                            }`}>
                             {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
                           </span>
                         </td>

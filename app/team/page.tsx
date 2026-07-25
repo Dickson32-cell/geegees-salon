@@ -18,6 +18,17 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
 
+  // Review Modal State
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    stylistName: '',
+    clientName: '',
+    rating: 5,
+    comment: ''
+  });
+
   useEffect(() => {
     fetchTeam();
     // Auto-refresh every 30 seconds so admin updates appear without manual reload
@@ -36,6 +47,32 @@ export default function TeamPage() {
       console.error('Error fetching team:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingReview(true);
+
+    try {
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reviewForm)
+      });
+
+      if (response.ok) {
+        setReviewSuccess(true);
+        setReviewForm({ stylistName: '', clientName: '', rating: 5, comment: '' });
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to submit review: ${errorData.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('An error occurred while submitting your review.');
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -141,12 +178,20 @@ export default function TeamPage() {
       <section className="py-12 md:py-16 bg-primary-container/10">
         <div className="max-w-container-max mx-auto px-4 text-center">
           <h2 className="font-display-lg text-3xl md:text-4xl text-primary mb-4">Ready to Experience Our Expertise?</h2>
-          <p className="text-lg text-on-surface-variant mb-8">Book your appointment with one of our talented professionals</p>
-          <Link href="/booking">
-            <button className="bg-primary text-white px-10 py-4 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-all shadow-lg">
-              Book an Appointment
+          <p className="text-lg text-on-surface-variant mb-8">Book your appointment with one of our talented professionals or leave a review for your stylist.</p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link href="/booking">
+              <button className="w-full sm:w-auto bg-primary text-white px-10 py-4 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-all shadow-lg">
+                Book an Appointment
+              </button>
+            </Link>
+            <button
+              onClick={() => setShowReviewModal(true)}
+              className="w-full sm:w-auto bg-white text-primary border-2 border-primary px-10 py-4 rounded-lg font-label-caps text-label-caps hover:bg-primary hover:text-white transition-all shadow-lg"
+            >
+              Leave a Review
             </button>
-          </Link>
+          </div>
         </div>
       </section>
 
@@ -217,6 +262,118 @@ export default function TeamPage() {
               )}
 
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {showReviewModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          onClick={() => setShowReviewModal(false)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl max-w-lg w-full p-8 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowReviewModal(false)}
+              className="absolute top-4 right-4 w-10 h-10 bg-black/5 hover:bg-black/10 rounded-full flex items-center justify-center transition-colors"
+            >
+              <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <h2 className="font-display-lg text-2xl text-primary mb-6">Leave a Review</h2>
+
+            {reviewSuccess ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Thank You!</h3>
+                <p className="text-gray-600">Your review has been submitted successfully.</p>
+                <button
+                  onClick={() => {
+                    setShowReviewModal(false);
+                    setReviewSuccess(false);
+                  }}
+                  className="mt-6 px-6 py-2 bg-primary text-white rounded-lg hover:bg-secondary transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleReviewSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Stylist</label>
+                  <select
+                    value={reviewForm.stylistName}
+                    onChange={(e) => setReviewForm({ ...reviewForm, stylistName: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    required
+                  >
+                    <option value="">Select a Stylist</option>
+                    {team.map(member => (
+                      <option key={member.id} value={member.name}>{member.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                  <input
+                    type="text"
+                    value={reviewForm.clientName}
+                    onChange={(e) => setReviewForm({ ...reviewForm, clientName: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                        className="focus:outline-none"
+                      >
+                        <svg
+                          className={`w-8 h-8 ${star <= reviewForm.rating ? 'text-yellow-400 fill-current' : 'text-gray-300 fill-current hover:text-yellow-200'}`}
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Comment (Optional)</label>
+                  <textarea
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                    rows={4}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingReview}
+                  className="w-full bg-primary text-white px-6 py-3 rounded-lg font-label-caps text-label-caps hover:bg-secondary transition-colors disabled:opacity-50"
+                >
+                  {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       )}

@@ -31,11 +31,13 @@ export default function AppointmentsPage() {
   const [revenueAmount, setRevenueAmount] = useState("");
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
 
   useEffect(() => {
     fetchAppointments();
     fetchSettings();
     fetchTeam();
+    fetchServices();
 
     // Auto-refresh appointments every 30 seconds
     const interval = setInterval(() => {
@@ -94,6 +96,28 @@ export default function AppointmentsPage() {
     } catch (error) {
       console.error('Error fetching team:', error);
     }
+  };
+
+  const fetchServices = async () => {
+    try {
+      const response = await fetch('/api/services');
+      if (response.ok) {
+        const data = await response.json();
+        setServices(data);
+      }
+    } catch (error) {
+      console.error('Error fetching services:', error);
+    }
+  };
+
+  const getServiceName = (serviceValue: string) => {
+    if (!serviceValue) return 'Unknown Service';
+    // Check if it's a number (ID)
+    if (!isNaN(Number(serviceValue))) {
+      const service = services.find(s => s.id === Number(serviceValue));
+      return service ? service.name : serviceValue;
+    }
+    return serviceValue;
   };
 
   const updateStatus = async (id: number, newStatus: string, revenue?: number) => {
@@ -168,7 +192,7 @@ export default function AppointmentsPage() {
       return '';
     }
 
-    const message = `New Booking Alert!\n\nCustomer: ${appointment.customerName}\nPhone: ${appointment.customerPhone}\nService: ${appointment.service}\nStylist: ${appointment.stylist}\nDate: ${new Date(appointment.appointmentDate).toLocaleDateString()}\nTime: ${appointment.appointmentTime}\n${appointment.notes ? `Notes: ${appointment.notes}` : ''}`;
+    const message = `New Booking Alert!\n\nCustomer: ${appointment.customerName}\nPhone: ${appointment.customerPhone}\nService: ${getServiceName(appointment.service)}\nStylist: ${appointment.stylist}\nDate: ${new Date(appointment.appointmentDate).toLocaleDateString()}\nTime: ${appointment.appointmentTime}\n${appointment.notes ? `Notes: ${appointment.notes}` : ''}`;
 
     const encodedMessage = encodeURIComponent(message);
     return `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
@@ -211,7 +235,7 @@ export default function AppointmentsPage() {
     const matchesSearch =
       (apt.customerName || '').toLowerCase().includes(searchLower) ||
       (apt.customerEmail || '').toLowerCase().includes(searchLower) ||
-      (apt.service || '').toLowerCase().includes(searchLower) ||
+      (getServiceName(apt.service) || '').toLowerCase().includes(searchLower) ||
       (apt.customerPhone || '').toLowerCase().includes(searchLower);
     return matchesFilter && matchesSearch;
   });
@@ -319,7 +343,7 @@ export default function AppointmentsPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wide">Service</p>
-                  <p className="font-medium text-gray-900">{appointment.service}</p>
+                  <p className="font-medium text-gray-900">{getServiceName(appointment.service)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 uppercase tracking-wide">Stylist</p>
