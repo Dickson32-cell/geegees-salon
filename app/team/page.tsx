@@ -261,6 +261,18 @@ export default function TeamPage() {
                 </div>
               )}
 
+              <div className="mt-auto pt-8">
+                <button
+                  onClick={() => {
+                    setReviewForm({ ...reviewForm, stylistName: selectedMember.name });
+                    setShowReviewModal(true);
+                    setSelectedMember(null);
+                  }}
+                  className="w-full bg-white text-primary border-2 border-primary px-8 py-4 rounded-lg font-label-caps text-label-caps hover:bg-primary hover:text-white transition-colors shadow-md"
+                >
+                  Leave a Review for {selectedMember.name.split(' ')[0]}
+                </button>
+              </div>
             </div>
           </div>
         </div>
