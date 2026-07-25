@@ -34,6 +34,25 @@ export default function ReviewsPage() {
         }
     };
 
+    const deleteReview = async (id: number) => {
+        if (!window.confirm("Are you sure you want to delete this review?")) return;
+
+        try {
+            const response = await fetch(`/api/reviews?id=${id}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                setReviews(reviews.filter(review => review.id !== id));
+            } else {
+                alert("Failed to delete review");
+            }
+        } catch (error) {
+            console.error("Error deleting review:", error);
+            alert("An error occurred while deleting the review");
+        }
+    };
+
     const handlePrint = () => {
         window.print();
     };
@@ -89,6 +108,7 @@ export default function ReviewsPage() {
                                 <th className="py-4 px-6 font-semibold text-gray-700">Client</th>
                                 <th className="py-4 px-6 font-semibold text-gray-700">Rating</th>
                                 <th className="py-4 px-6 font-semibold text-gray-700">Comment</th>
+                                <th className="py-4 px-6 font-semibold text-gray-700 print:hidden">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 print:divide-gray-400">
@@ -118,6 +138,17 @@ export default function ReviewsPage() {
                                     </td>
                                     <td className="py-4 px-6 text-sm text-gray-600 max-w-md">
                                         {review.comment || <span className="text-gray-400 italic">No comment provided</span>}
+                                    </td>
+                                    <td className="py-4 px-6 print:hidden">
+                                        <button
+                                            onClick={() => deleteReview(review.id)}
+                                            className="text-red-600 hover:text-red-800 transition-colors p-2 rounded-full hover:bg-red-50"
+                                            title="Delete Review"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
