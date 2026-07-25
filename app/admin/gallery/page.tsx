@@ -201,6 +201,10 @@ export default function AdminGallery() {
     setEditingImage(null);
     setSelectedFile(null);
     setPreviewUrl("");
+
+    // Clear the file input if it exists
+    const fileInput = document.getElementById('media-upload-input') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   };
 
   // Group images by category
@@ -221,13 +225,16 @@ export default function AdminGallery() {
             <p className="text-slate-600">Upload and manage images for hero sections and gallery</p>
           </div>
           <button
-            onClick={() => setIsAdding(true)}
+            onClick={() => {
+              resetForm();
+              setIsAdding(true);
+            }}
             className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 shadow-sm font-medium"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            <span>Upload Image</span>
+            <span>Upload Media</span>
           </button>
         </div>
       </div>
@@ -270,8 +277,11 @@ export default function AdminGallery() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* File Upload */}
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Image or Video File</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Image or Video File {!editingImage && <span className="text-red-500">*</span>}
+              </label>
               <input
+                id="media-upload-input"
                 type="file"
                 accept="image/*,video/*"
                 onChange={handleFileSelect}
