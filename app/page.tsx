@@ -7,6 +7,7 @@ import HeroVideo from "@/components/HeroVideo";
 import VideoSlideshow from "@/components/VideoSlideshow";
 import { isVideoUrl } from "@/lib/media";
 import { getCategoryDisplayName } from "@/lib/serviceCategories";
+import { isInAppBrowserCached } from "@/lib/inAppBrowser";
 
 interface Service {
   id: number;
@@ -44,8 +45,10 @@ export default function Home() {
     buttonLink: '/gallery'
   });
   const [heroVideoUrls, setHeroVideoUrls] = useState<string[]>([]);
+  const [inAppBrowser, setInAppBrowser] = useState(false);
 
   useEffect(() => {
+    setInAppBrowser(isInAppBrowserCached());
     fetchServices();
     fetchAboutContent();
   }, []);
@@ -159,16 +162,17 @@ export default function Home() {
       </section>
 
       <section className="relative py-12 md:py-section-gap px-4 md:px-margin-desktop overflow-hidden bg-primary">
-        <video
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-        >
-          <source src="https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-services/be4p0vs2t1f_1782596442744.mp4" />
-        </video>
+        {!inAppBrowser && (
+          <video
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+            loop
+            muted
+            playsInline
+            preload="metadata"
+          >
+            <source src="https://jqxpqrjykxmrzgtgfxpi.supabase.co/storage/v1/object/public/salon-images/hero-services/be4p0vs2t1f_1782596442744.mp4" />
+          </video>
+        )}
         <div className="absolute inset-0 bg-primary/80"></div>
         <div className="max-w-container-max mx-auto relative z-10">
           <div className="text-center mb-8 md:mb-16">
@@ -206,10 +210,10 @@ export default function Home() {
                           <video
                             src={service.image_url}
                             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            autoPlay
                             loop
                             muted
                             playsInline
+                            preload={inAppBrowser ? "none" : "auto"}
                             onError={(e) => {
                               console.error('Service video load error:', service.image_url);
                               e.currentTarget.style.display = 'none';

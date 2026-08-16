@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { isVideoUrl } from '@/lib/media';
+import { useState, useEffect, useRef } from "react";
+import { isVideoUrl } from "@/lib/media";
+import { isInAppBrowserCached } from "@/lib/inAppBrowser";
 
 interface HeroSlideshowProps {
   category: 'hero-home' | 'hero-services';
@@ -23,15 +24,22 @@ export default function HeroSlideshow({ category, children, className = "" }: He
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [fadeClass, setFadeClass] = useState('opacity-100');
+  const [inAppBrowser, setInAppBrowser] = useState(false);
+  const [userStartedPlayback, setUserStartedPlayback] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    setInAppBrowser(isInAppBrowserCached());
+  }, []);
 
   useEffect(() => {
     fetchImages();
   }, [category]);
 
-  // Simple slideshow - change media every 5 seconds
+  // Simple slideshow - change media every 5 seconds (disabled in in-app until user starts)
   useEffect(() => {
     if (images.length <= 1) return;
+    if (inAppBrowser && !userStartedPlayback) return;
 
     const interval = setInterval(() => {
       setFadeClass('opacity-0');
@@ -42,96 +50,61 @@ export default function HeroSlideshow({ category, children, className = "" }: He
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [images.length, inAppBrowser, userStartedPlayback]);
 
-  // Aggressive video autoplay - works with ALL formats including Supabase videos
+  // Video autoplay — only in normal browser, or after user taps in in-app browser
   useEffect(() => {
+    if (inAppBrowser && !userStartedPlayback) return;
+
     const video = videoRef.current;
     if (!video) return;
 
-    console.log('🎬 Setting up video playback...');
+    video.muted = true;
+    video.volume = 0;
 
-    const playVideo = () => {
-      console.log('▶️ Attempting to play video...');
-      video.muted = true;
-      video.volume = 0;
+    video.play().catch(() => {
+      // Autoplay was blocked — in normal browser, retry on user interaction
+      if (inAppBrowser) return;
 
-      // Multiple play attempts
-      const tryPlay = () => {
-        video.play()
-          .then(() => {
-            console.log('✅ SUCCESS! Video is playing!');
-          })
-          .catch((error) => {
-            console.log('⚠️ Autoplay blocked:', error.message);
-            console.log('💡 Click anywhere on the page to start video');
-
-            // Retry on any user interaction
-            const userInteraction = () => {
-              video.play()
-                .then(() => console.log('✅ Playing after user interaction'))
-                .catch(() => {});
-              document.removeEventListener('click', userInteraction);
-              document.removeEventListener('touchstart', userInteraction);
-            };
-
-            document.addEventListener('click', userInteraction, { once: true });
-            document.addEventListener('touchstart', userInteraction, { once: true });
-          });
+      const userInteraction = () => {
+        video.play().catch(() => {});
+        document.removeEventListener('click', userInteraction);
+        document.removeEventListener('touchstart', userInteraction);
       };
 
-      tryPlay();
-      setTimeout(tryPlay, 100);
-      setTimeout(tryPlay, 300);
-      setTimeout(tryPlay, 500);
-    };
+      document.addEventListener('click', userInteraction, { once: true });
+      document.addEventListener('touchstart', userInteraction, { once: true });
+    });
+  }, [currentIndex, inAppBrowser, userStartedPlayback]);
 
-    // Wait for video to be ready
-    if (video.readyState >= 3) {
-      playVideo();
-    } else {
-      video.addEventListener('loadeddata', playVideo);
-      video.addEventListener('canplay', playVideo);
+  const handleStartPlayback = () => {
+    setUserStartedPlayback(true);
+    const video = videoRef.current;
+    if (video) {
+      video.muted = true;
+      video.volume = 0;
+      video.play().catch(() => {});
     }
-
-    return () => {
-      video.removeEventListener('loadeddata', playVideo);
-      video.removeEventListener('canplay', playVideo);
-    };
-  }, [currentIndex]);
+  };
 
   const fetchImages = async () => {
     try {
-      console.log('🔄 Fetching gallery images for category:', category);
       const response = await fetch('/api/gallery');
 
       if (!response.ok) {
-        console.error('❌ API response not OK:', response.status, response.statusText);
         throw new Error(`Failed to fetch images: ${response.status}`);
       }
 
       const data: GalleryImage[] = await response.json();
-      console.log('📦 Total images received from API:', data.length);
 
       // Filter by category and sort by display_order
       const categoryImages = data
         .filter(img => img.category === category)
         .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
 
-      console.log('✅ Images for category "' + category + '":', categoryImages.length);
-      if (categoryImages.length > 0) {
-        console.log('📋 Image URLs:');
-        categoryImages.forEach((img, index) => {
-          console.log(`   ${index + 1}. ${img.image_url}`);
-        });
-      } else {
-        console.warn('⚠️ No images found for category:', category);
-        console.log('💡 Using default fallback image');
-      }
-
       setImages(categoryImages);
     } catch (error) {
-      console.error('❌ Error fetching hero images:', error);
+      console.error('Error fetching hero images:', error);
       setImages([]);
     } finally {
       setLoading(false);
@@ -146,17 +119,6 @@ export default function HeroSlideshow({ category, children, className = "" }: He
   const currentMedia = images.length > 0 ? images[currentIndex].image_url : defaultImage;
   const isCurrentMediaVideo = isVideoUrl(currentMedia);
 
-  console.log('==========================================');
-  console.log('🖼️  HERO SLIDESHOW STATUS');
-  console.log('==========================================');
-  console.log('Category:', category);
-  console.log('Total images loaded:', images.length);
-  console.log('Current index:', currentIndex);
-  console.log('Current media URL:', currentMedia);
-  console.log('Is video?', isCurrentMediaVideo);
-  console.log('Using fallback?', images.length === 0);
-  console.log('==========================================');
-
   return (
     <div className={`relative overflow-hidden ${className}`}>
       {/* Loading indicator */}
@@ -168,53 +130,45 @@ export default function HeroSlideshow({ category, children, className = "" }: He
 
       {/* Background Media (Video or Image) with Fade Transition */}
       {isCurrentMediaVideo ? (
-        // Video Background - Supports ALL video formats including Supabase MP4 files
         <video
           ref={videoRef}
           key={currentMedia}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 z-0 ${fadeClass}`}
-          autoPlay
           loop
           muted
           playsInline
-          preload="auto"
+          preload={inAppBrowser ? "metadata" : "auto"}
           onError={(e) => {
             const videoElement = e.currentTarget;
-            console.error('❌ VIDEO ERROR:');
-            console.error('   URL:', currentMedia);
-            console.error('   Error code:', videoElement.error?.code);
-            console.error('   Error message:', videoElement.error?.message);
-            console.error('   Network state:', videoElement.networkState);
-            console.error('   Ready state:', videoElement.readyState);
-          }}
-          onLoadedMetadata={() => {
-            console.log('📹 Video metadata loaded');
-            console.log('   Duration:', videoRef.current?.duration, 'seconds');
-            console.log('   Dimensions:', videoRef.current?.videoWidth, 'x', videoRef.current?.videoHeight);
-          }}
-          onLoadedData={() => {
-            console.log('✅ Video data loaded successfully');
-            console.log('   URL:', currentMedia);
-          }}
-          onPlaying={() => {
-            console.log('🎥 Video is now PLAYING!');
-          }}
-          onPause={() => {
-            console.log('⏸️ Video paused - attempting to resume...');
-            videoRef.current?.play().catch(() => {});
+            console.error('VIDEO ERROR:', videoElement.error?.code, videoElement.error?.message);
           }}
         >
           <source src={currentMedia} />
           Your browser does not support the video tag.
         </video>
       ) : (
-        // Image Background
         <div
           className={`absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 z-0 ${fadeClass}`}
           style={{
             backgroundImage: `url('${currentMedia}')`,
           }}
         />
+      )}
+
+      {/* Tap-to-play overlay (in-app browser only) */}
+      {inAppBrowser && !userStartedPlayback && isCurrentMediaVideo && (
+        <button
+          onClick={handleStartPlayback}
+          className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-primary/40 cursor-pointer"
+          aria-label="Tap to play video"
+        >
+          <div className="w-16 h-16 rounded-full bg-secondary/90 flex items-center justify-center mb-3 shadow-lg">
+            <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+          <span className="text-white text-sm font-label-caps uppercase tracking-widest">Tap to Play</span>
+        </button>
       )}
 
       {/* Overlay */}

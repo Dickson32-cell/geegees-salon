@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { isVideoUrl } from '@/lib/media';
+import { useState, useEffect, useRef } from "react";
+import { isVideoUrl } from "@/lib/media";
+import { isInAppBrowserCached } from "@/lib/inAppBrowser";
 
 interface GalleryVideo {
   id: number;
@@ -21,7 +22,13 @@ export default function VideoSlideshow({
   const [videos, setVideos] = useState<GalleryVideo[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [inAppBrowser, setInAppBrowser] = useState(false);
+  const [userStartedPlayback, setUserStartedPlayback] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  useEffect(() => {
+    setInAppBrowser(isInAppBrowserCached());
+  }, []);
 
   useEffect(() => {
     fetchVideos();
@@ -47,9 +54,10 @@ export default function VideoSlideshow({
     }
   };
 
-  // Auto-advance to next video
+  // Auto-advance to next video (disabled in in-app browser until user starts)
   useEffect(() => {
     if (videos.length === 0) return;
+    if (inAppBrowser && !userStartedPlayback) return;
 
     const timer = setInterval(() => {
       setIsTransitioning(true);
@@ -61,17 +69,27 @@ export default function VideoSlideshow({
     }, interval);
 
     return () => clearInterval(timer);
-  }, [videos.length, interval]);
+  }, [videos.length, interval, inAppBrowser, userStartedPlayback]);
 
-  // Auto-play current video
+  // Auto-play current video (only in normal browser, or after user starts in in-app)
   useEffect(() => {
+    if (inAppBrowser && !userStartedPlayback) return;
+
     const currentVideo = videoRefs.current[currentIndex];
     if (currentVideo) {
       currentVideo.play().catch(() => {
         console.log('Video autoplay failed');
       });
     }
-  }, [currentIndex]);
+  }, [currentIndex, inAppBrowser, userStartedPlayback]);
+
+  const handleStartPlayback = () => {
+    setUserStartedPlayback(true);
+    const currentVideo = videoRefs.current[currentIndex];
+    if (currentVideo) {
+      currentVideo.play().catch(() => {});
+    }
+  };
 
   if (videos.length === 0) {
     // Fallback to elegant gradient when no videos are available
@@ -96,19 +114,33 @@ export default function VideoSlideshow({
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
             index === currentIndex && !isTransitioning ? 'opacity-100' : 'opacity-0'
           }`}
-          autoPlay
           loop
           muted
           playsInline
-          preload="auto"
+          preload={inAppBrowser ? "metadata" : "auto"}
           onLoadedData={(e) => {
-            // Video is ready
             console.log('Video loaded:', video.image_url);
           }}
         >
           <source src={video.image_url} />
         </video>
       ))}
+
+      {/* Tap-to-play overlay (in-app browser only) */}
+      {inAppBrowser && !userStartedPlayback && (
+        <button
+          onClick={handleStartPlayback}
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-primary/50 cursor-pointer"
+          aria-label="Tap to play video"
+        >
+          <div className="w-14 h-14 rounded-full bg-secondary/90 flex items-center justify-center mb-2 shadow-lg">
+            <svg className="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+          <span className="text-white text-xs font-label-caps uppercase tracking-widest">Tap to Play</span>
+        </button>
+      )}
 
       {/* Video counter indicator */}
       <div className="absolute bottom-4 right-4 bg-black/50 text-white px-3 py-1 rounded-full text-xs font-bold z-10">

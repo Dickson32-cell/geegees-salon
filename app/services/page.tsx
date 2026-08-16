@@ -8,6 +8,7 @@ import GiftModal from "@/components/GiftModal";
 import MediaLightbox from "@/components/MediaLightbox";
 import { isVideoUrl } from "@/lib/media";
 import { getCategoryDisplayName } from "@/lib/serviceCategories";
+import { isInAppBrowserCached } from "@/lib/inAppBrowser";
 
 interface Service {
   id: number;
@@ -31,7 +32,13 @@ function GalleryVideoBackground() {
   const [videos, setVideos] = useState<GalleryVideo[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [inAppBrowser, setInAppBrowser] = useState(false);
+  const [userStartedPlayback, setUserStartedPlayback] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  useEffect(() => {
+    setInAppBrowser(isInAppBrowserCached());
+  }, []);
 
   useEffect(() => {
     fetchVideos();
@@ -56,9 +63,10 @@ function GalleryVideoBackground() {
     }
   };
 
-  // Auto-advance to next video every 8 seconds
+  // Auto-advance to next video every 8 seconds (disabled in in-app until user starts)
   useEffect(() => {
     if (videos.length === 0) return;
+    if (inAppBrowser && !userStartedPlayback) return;
 
     const timer = setInterval(() => {
       setIsTransitioning(true);
@@ -70,17 +78,27 @@ function GalleryVideoBackground() {
     }, 8000); // 8 seconds per video
 
     return () => clearInterval(timer);
-  }, [videos.length]);
+  }, [videos.length, inAppBrowser, userStartedPlayback]);
 
-  // Auto-play current video
+  // Auto-play current video (only in normal browser, or after user starts in in-app)
   useEffect(() => {
+    if (inAppBrowser && !userStartedPlayback) return;
+
     const currentVideo = videoRefs.current[currentIndex];
     if (currentVideo) {
       currentVideo.play().catch(() => {
         console.log('Video autoplay failed');
       });
     }
-  }, [currentIndex]);
+  }, [currentIndex, inAppBrowser, userStartedPlayback]);
+
+  const handleStartPlayback = () => {
+    setUserStartedPlayback(true);
+    const currentVideo = videoRefs.current[currentIndex];
+    if (currentVideo) {
+      currentVideo.play().catch(() => {});
+    }
+  };
 
   if (videos.length === 0) {
     // Fallback gradient if no videos
@@ -97,15 +115,30 @@ function GalleryVideoBackground() {
           ref={(el) => { videoRefs.current[index] = el; }}
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${index === currentIndex && !isTransitioning ? 'opacity-100' : 'opacity-0'
             }`}
-          autoPlay
           loop
           muted
           playsInline
-          preload="auto"
+          preload={inAppBrowser ? "metadata" : "auto"}
         >
           <source src={video.image_url} />
         </video>
       ))}
+
+      {/* Tap-to-play overlay (in-app browser only) */}
+      {inAppBrowser && !userStartedPlayback && (
+        <button
+          onClick={handleStartPlayback}
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-primary/40 cursor-pointer"
+          aria-label="Tap to play video"
+        >
+          <div className="w-14 h-14 rounded-full bg-secondary/90 flex items-center justify-center mb-2 shadow-lg">
+            <svg className="w-7 h-7 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+          <span className="text-white text-xs font-label-caps uppercase tracking-widest">Tap to Play</span>
+        </button>
+      )}
 
       {/* Video counter indicator */}
       {videos.length > 1 && (
@@ -253,10 +286,10 @@ export default function ServicesPage() {
                                 <video
                                   src={service.image_url}
                                   className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                                  autoPlay
                                   loop
                                   muted
                                   playsInline
+                                  preload="metadata"
                                 />
                               ) : (
                                 <img

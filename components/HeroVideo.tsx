@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
+import { isInAppBrowserCached } from "@/lib/inAppBrowser";
 
 interface HeroVideoProps {
   videoUrls: string[];
@@ -13,9 +14,16 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState<number | null>(null);
   const [transitioning, setTransitioning] = useState(false);
+  const [inAppBrowser, setInAppBrowser] = useState(false);
+  const [userStartedPlayback, setUserStartedPlayback] = useState(false);
 
   const currentRef = useRef<HTMLVideoElement>(null);
   const nextRef = useRef<HTMLVideoElement>(null);
+
+  // Detect in-app browser on mount
+  useEffect(() => {
+    setInAppBrowser(isInAppBrowserCached());
+  }, []);
 
   // Play/load a video element
   const playVideo = (el: HTMLVideoElement | null) => {
@@ -23,6 +31,12 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
     el.muted = true;
     el.volume = 0;
     el.load();
+
+    // In in-app browser: only play if user has tapped to start
+    if (inAppBrowser && !userStartedPlayback) {
+      return;
+    }
+
     el.play().catch(() => { });
   };
 
@@ -39,11 +53,13 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
       playVideo(currentRef.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex, videoUrls[currentIndex]]);
+  }, [currentIndex, videoUrls[currentIndex], userStartedPlayback, inAppBrowser]);
 
-  // Auto-cycle to next video
+  // Auto-cycle to next video (only in normal browser, or if user has started playback)
   useEffect(() => {
     if (videoUrls.length <= 1) return;
+    if (inAppBrowser && !userStartedPlayback) return; // Don't auto-cycle until user starts
+
     const timer = setInterval(() => {
       const next = (currentIndex + 1) % videoUrls.length;
       setNextIndex(next);
@@ -58,7 +74,7 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
     }, CYCLE_INTERVAL_MS);
 
     return () => clearInterval(timer);
-  }, [currentIndex, videoUrls.length]);
+  }, [currentIndex, videoUrls.length, inAppBrowser, userStartedPlayback]);
 
   // Pre-load next video as soon as it's assigned
   useEffect(() => {
@@ -66,6 +82,18 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
       playVideo(nextRef.current);
     }
   }, [nextIndex]);
+
+  // Handle user tap to start playback (in-app browser mode)
+  const handleStartPlayback = () => {
+    setUserStartedPlayback(true);
+    // Immediately play current video
+    const el = currentRef.current;
+    if (el) {
+      el.muted = true;
+      el.volume = 0;
+      el.play().catch(() => { });
+    }
+  };
 
   return (
     <div className="relative rounded-lg overflow-hidden shadow-2xl w-full bg-primary h-[60vh] min-h-[400px] sm:h-[65vh] sm:min-h-[500px]">
@@ -77,11 +105,10 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
           ref={currentRef}
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
           style={{ opacity: transitioning ? 0 : 1, objectFit: 'cover', objectPosition: 'center' }}
-          autoPlay
           loop
           muted
           playsInline
-          preload="auto"
+          preload={inAppBrowser ? "metadata" : "auto"}
         >
           <source src={videoUrls[currentIndex]} />
         </video>
@@ -94,7 +121,6 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
           ref={nextRef}
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
           style={{ opacity: transitioning ? 1 : 0, objectFit: 'cover', objectPosition: 'center' }}
-          autoPlay
           loop
           muted
           playsInline
@@ -106,6 +132,22 @@ export default function HeroVideo({ videoUrls, children }: HeroVideoProps) {
 
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/60 to-primary/30" />
+
+      {/* Tap-to-play overlay (in-app browser only, before user starts) */}
+      {inAppBrowser && !userStartedPlayback && videoUrls.length > 0 && (
+        <button
+          onClick={handleStartPlayback}
+          className="absolute inset-0 z-40 flex flex-col items-center justify-center bg-primary/60 cursor-pointer"
+          aria-label="Tap to play video"
+        >
+          <div className="w-16 h-16 rounded-full bg-secondary/90 flex items-center justify-center mb-3 shadow-lg">
+            <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+          <span className="text-white text-sm font-label-caps uppercase tracking-widest">Tap to Play</span>
+        </button>
+      )}
 
       {/* Dot indicators (only if multiple videos) */}
       {videoUrls.length > 1 && (

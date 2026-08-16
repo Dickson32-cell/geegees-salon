@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { isVideoUrl } from "@/lib/media";
+import { isInAppBrowserCached } from "@/lib/inAppBrowser";
 
 interface GalleryImage {
   id: number;
@@ -18,8 +19,10 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
+  const [inAppBrowser, setInAppBrowser] = useState(false);
 
   useEffect(() => {
+    setInAppBrowser(isInAppBrowserCached());
     fetchGallery();
   }, []);
 
@@ -160,9 +163,9 @@ export default function GalleryPage() {
                     style={{ minHeight: '280px' }}
                     muted
                     playsInline
-                    preload="metadata"
+                    preload={inAppBrowser ? "none" : "metadata"}
                     loop
-                    autoPlay
+                    autoPlay={!inAppBrowser}
                     onError={(e) => {
                       console.error('Video load error:', item.image_url);
                       e.currentTarget.style.display = 'none';
