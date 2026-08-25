@@ -62,7 +62,14 @@ async function saveInquiries(items: any[]) {
 export async function GET() {
     try {
         const items = await getInquiries();
-        return NextResponse.json(items, {
+        // Return only non-sensitive fields for public access
+        const safeItems = items.map((item: any) => ({
+            id: item.id,
+            subject: item.subject,
+            date: item.date,
+            status: item.status,
+        }));
+        return NextResponse.json(safeItems, {
             headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0' }
         });
     } catch (error) {
