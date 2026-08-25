@@ -83,9 +83,9 @@ const defaultContent = {
     contact: {
       id: 'footer-contact',
       type: 'contact',
-      address: '123 Editorial Way,\nFashion District, NY',
-      phone: '+1 (555) 987-6543',
-      email: 'concierge@geegees.com',
+      address: 'VH-0080-9786, Koforidua, Eastern Region, Ghana',
+      phone: '+233 53 964 9949',
+      email: 'geegeessalon@gmail.com',
     },
     social: {
       id: 'footer-social',

@@ -214,8 +214,8 @@ export default function TermsOfServicePage() {
             </p>
             <div className="bg-primary/5 p-6 rounded-lg border-l-4 border-secondary">
               <p className="text-on-surface-variant mb-2"><strong>GeeGees Unisex Salon</strong></p>
-              <p className="text-on-surface-variant mb-2">Email: concierge@geegees.com</p>
-              <p className="text-on-surface-variant mb-2">Phone: +1 (555) 987-6543</p>
+              <p className="text-on-surface-variant mb-2">Email: geegeessalon@gmail.com</p>
+              <p className="text-on-surface-variant mb-2">Phone: +233 53 964 9949</p>
               <p className="text-on-surface-variant">
                 Location: <a
                   href="https://www.google.com/maps/search/?api=1&query=VH-0080-9786"
