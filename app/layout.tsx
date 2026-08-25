@@ -84,6 +84,7 @@ export const metadata: Metadata = {
     "geo.position": "6.0833;-0.2667",
     "ICBM": "6.0833, -0.2667",
   },
+  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {

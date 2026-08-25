@@ -1,4 +1,35 @@
 /** @type {import('next').NextConfig} */
+const withPWA = require("next-pwa")({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === "development",
+  runtimeCaching: [
+    {
+      urlPattern: /^https?.*/,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "pages",
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 86400,
+        },
+      },
+    },
+    {
+      urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "images",
+        expiration: {
+          maxEntries: 100,
+          maxAgeSeconds: 604800,
+        },
+      },
+    },
+  ],
+});
+
 const nextConfig = {
   images: {
     remotePatterns: [
@@ -14,7 +45,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Security headers
   async headers() {
     return [
       {
@@ -30,8 +60,7 @@ const nextConfig = {
       },
     ];
   },
-  // Remove x-powered-by header
   poweredByHeader: false,
 };
 
-export default nextConfig;
+module.exports = withPWA(nextConfig);
