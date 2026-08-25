@@ -88,8 +88,8 @@ export default function Contact() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-lg mb-1">Address</h3>
-                    <p className="text-gray-600">123 Beauty Street</p>
-                    <p className="text-gray-600">VH-0080-9786, Koforidua, Eastern Region, Ghana</p>
+                    <p className="text-gray-600">Opposite Trafalga Main Gate</p>
+                    <p className="text-gray-600">Ho, Volta Region, Ghana</p>
                   </div>
                 </div>
 
@@ -254,7 +254,7 @@ export default function Contact() {
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="section-title">Find Us</h2>
-          <p className="section-subtitle">Visit our salon in Koforidua, Eastern Region, Ghana</p>
+          <p className="section-subtitle">Visit our salon in Ho, Volta Region, Ghana</p>
 
           {/* Embedded Map Placeholder */}
           <div className="mt-12 rounded-2xl overflow-hidden shadow-2xl">
@@ -265,7 +265,7 @@ export default function Contact() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 <p className="text-gray-600">
-                  VH-0080-9786, Koforidua, Eastern Region, Ghana
+                  Opposite Trafalga Main Gate, Ho, Volta Region, Ghana
                 </p>
                 <p className="text-gray-500 text-sm mt-2">
                   Map integration: Add your Google Maps embed code here

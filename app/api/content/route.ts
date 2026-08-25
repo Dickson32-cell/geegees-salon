@@ -83,7 +83,7 @@ const defaultContent = {
     contact: {
       id: 'footer-contact',
       type: 'contact',
-      address: 'VH-0080-9786, Koforidua, Eastern Region, Ghana',
+      address: 'Opposite Trafalga Main Gate, Ho, Volta Region, Ghana',
       phone: '+233 53 964 9949',
       email: 'geegeessalon@gmail.com',
     },

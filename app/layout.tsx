@@ -20,21 +20,21 @@ const siteUrl = "https://geegeessalon.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "GeeGees Luxury Salon - Opulence & Grace | Koforidua, Ghana",
+    default: "GeeGees Luxury Salon - Opulence & Grace | Ho, Volta Region, Ghana",
     template: "%s | GeeGees Luxury Salon",
   },
   description:
-    "GeeGees Luxury Salon — premium unisex salon in Koforidua, Ghana since 2009. Expert hair styling, color treatments, nails, lashes, braids, locs, facials, spa, makeup, teeth whitening & braces. Book your appointment today.",
+    "GeeGees Luxury Salon — premium unisex salon in Ho, Volta Region, Ghana since 2009. Expert hair styling, color treatments, nails, lashes, braids, locs, facials, spa, makeup, teeth whitening & braces. Book your appointment today.",
   keywords: [
-    "salon Koforidua",
+    "salon Ho",
     "luxury salon Ghana",
-    "unisex salon Koforidua",
-    "hair salon Ghana",
-    "nail salon Koforidua",
+    "unisex salon Ho",
+    "hair salon Volta Region",
+    "nail salon Ho",
     "lashes Ghana",
-    "braids Koforidua",
+    "braids Ho",
     "spa Ghana",
-    "makeup artist Koforidua",
+    "makeup artist Ho",
     "GeeGees salon",
   ],
   authors: [{ name: "GeeGees Luxury Salon" }],
@@ -58,31 +58,31 @@ export const metadata: Metadata = {
     locale: "en_GH",
     url: siteUrl,
     siteName: "GeeGees Luxury Salon",
-    title: "GeeGees Luxury Salon - Opulence & Grace | Koforidua, Ghana",
+    title: "GeeGees Luxury Salon - Opulence & Grace | Ho, Volta Region, Ghana",
     description:
-      "Premium unisex salon in Koforidua since 2009. Hair, nails, lashes, braids, locs, spa, makeup & more. Book your appointment today.",
+      "Premium unisex salon in Ho, Volta Region since 2009. Hair, nails, lashes, braids, locs, spa, makeup & more. Book your appointment today.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "GeeGees Luxury Salon - Koforidua, Ghana",
+        alt: "GeeGees Luxury Salon - Ho, Volta Region, Ghana",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "GeeGees Luxury Salon - Koforidua, Ghana",
+    title: "GeeGees Luxury Salon - Ho, Volta Region, Ghana",
     description:
-      "Premium unisex salon in Koforidua since 2009. Hair, nails, lashes, braids, spa, makeup & more. Book your appointment today.",
+      "Premium unisex salon in Ho, Volta Region since 2009. Hair, nails, lashes, braids, spa, makeup & more. Book your appointment today.",
     images: ["/og-image.jpg"],
   },
   category: "Beauty Salon",
   other: {
-    "geo.region": "GH-EP",
-    "geo.placename": "Koforidua, Eastern Region, Ghana",
-    "geo.position": "6.0833;-0.2667",
-    "ICBM": "6.0833, -0.2667",
+    "geo.region": "GH-VP",
+    "geo.placename": "Ho, Volta Region, Ghana",
+    "geo.position": "6.6000;0.4667",
+    "ICBM": "6.6000, 0.4667",
   },
   manifest: "/manifest.json",
 };
@@ -110,19 +110,19 @@ export default function RootLayout({
               "@type": "HairSalon",
               name: "GeeGees Luxury Salon",
               description:
-                "Premium unisex salon in Koforidua, Ghana since 2009. Expert hair styling, color treatments, nails, lashes, braids, locs, facials, spa, makeup, teeth whitening & braces.",
+                "Premium unisex salon in Ho, Volta Region, Ghana since 2009. Expert hair styling, color treatments, nails, lashes, braids, locs, facials, spa, makeup, teeth whitening & braces.",
               url: siteUrl,
               telephone: "+233-53-964-9949",
               address: {
                 "@type": "PostalAddress",
-                addressLocality: "Koforidua",
-                addressRegion: "Eastern Region",
+                addressLocality: "Ho",
+                addressRegion: "Volta Region",
                 addressCountry: "GH",
               },
               geo: {
                 "@type": "GeoCoordinates",
-                latitude: 6.0833,
-                longitude: -0.2667,
+                latitude: 6.6000,
+                longitude: 0.4667,
               },
               openingHours: [
                 {

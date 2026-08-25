@@ -170,12 +170,12 @@ export default function PrivacyPolicyPage() {
               <p className="text-on-surface-variant mb-2">Phone: +233 53 964 9949</p>
               <p className="text-on-surface-variant">
                 Location: <a
-                  href="https://www.google.com/maps/search/?api=1&query=VH-0080-9786"
+                  href="https://www.google.com/maps/search/?api=1&query=Opposite+Trafalga+Main+Gate+Ho+Volta+Region+Ghana"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-secondary hover:underline"
                 >
-                  VH-0080-9786 (View on Map)
+                  Opposite Trafalga Main Gate, Ho (View on Map)
                 </a>
               </p>
             </div>
